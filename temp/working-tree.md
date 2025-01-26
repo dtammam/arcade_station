@@ -1,39 +1,47 @@
 arcade-station/
-├── src/
-│   ├── arcade_station/            # Primary Python package
-│   │   ├── __init__.py
-│   │   ├── core/                  # Core Python logic
-│   │   ├── installer/             # Installer logic
-│   │   ├── listeners/             # Event listeners
-│   │   └── __main__.py            # Entry point
-│   ├── pegasus_fe/                # Pegasus FE binary and configurations
-│   │   ├── pegasus-fe             # Compiled Pegasus FE binary
-│   │   ├── config/                # Configuration files for Pegasus FE
-│   │   │   ├── settings.conf      # Example config file for Pegasus FE
-│   │   │   ├── game_library.conf  # Game library paths
-│   │   │   └── README.md          # Documentation on configs
-│   │   ├── themes/                # Pegasus FE themes (symlink or copy of `pegasus-themes`)
-│   │   │   ├── micro/             # Example theme
-│   │   │   │   ├── .meta/         # Metadata for the theme
-│   │   │   │   ├── assets/        # Theme-specific assets
-│   │   │   │   │   └── logos/
-│   │   │   │   └── theme_config.toml
-│   │   │   └── alternate_theme/
-│   │   └── README.md              # Explains Pegasus FE usage in the project
-├── pegasus-themes/                # Pegasus FE themes (for external reference/customization)
-│   └── micro/
-│       ├── .meta/                 # Metadata for the theme
-│       ├── assets/                # Theme assets
-│       └── theme_config.toml
-├── assets/                        # General project assets
-│   └── images/
-├── config/                        # Project configuration files
-│   ├── default_config.toml        # Default project-wide config
-│   └── metadata.json              # Metadata for the project
-├── games/                         # Game-related files
-├── tests/                         # Unit and integration tests
-├── scripts/                       # Utility and maintenance scripts
-├── temp/                          # Centralized temp directory for cache/logs
-├── LICENSE                        # License file
-├── README.md                      # Project documentation
-└── setup.py                       # Installation script
+├── src/                            # Python source code
+│   ├── arcade_station/             # Primary Python package
+│   │   ├── __init__.py             # Package initializer
+│   │   ├── core/                   # Core application logic
+│   │   ├── installer/              # Installer-related utilities
+│   │   ├── listeners/              # Event listeners for the application
+│   │   └── __main__.py             # Entry point for running the project
+├── pegasus-fe/                     # Everything Pegasus FE needs (self-contained)
+│   ├── pegasus-fe                  # Compiled Pegasus FE binary (main executable)
+│   ├── config/                     # Configuration files for Pegasus FE
+│   │   ├── settings.conf           # Primary settings configuration
+│   │   ├── game_library.conf       # Game library configuration paths
+│   │   └── README.md               # Documentation for configuration files
+│   ├── themes/                     # Pegasus FE themes
+│   │   ├── micro/                  # Example theme: "micro"
+│   │   │   ├── .meta/              # Metadata for the theme (e.g., credits, descriptions)
+│   │   │   ├── assets/             # Theme-specific assets (images, logos, etc.)
+│   │   │   │   └── logos/          # Logos used by the theme
+│   │   │   └── theme_config.toml   # Theme configuration file
+│   │   └── alternate_theme/        # Placeholder for another custom theme
+│   └── README.md                   # Explains how Pegasus FE is used within the project
+├── pegasus-themes/                 # Optional: Reference or external themes for customization
+│   └── micro/                      # External version of the "micro" theme
+│       ├── .meta/                  # Metadata for the external theme
+│       ├── assets/                 # Assets for the external theme
+│       └── theme_config.toml       # Configuration file for the external theme
+├── config/                         # Project-wide configuration files (not Pegasus-specific)
+│   ├── default_config.toml         # Default configuration for the arcade-station project
+│   └── metadata.json               # General project metadata
+├── assets/                         # General assets for the project
+│   └── images/                     # Example: Placeholder for general images
+├── tests/                          # Unit and integration tests for the project
+│   ├── test_installer.py           # Tests for the installer logic
+│   ├── test_core.py                # Tests for the core application logic
+│   └── ...
+├── scripts/                        # Utility and maintenance scripts
+│   ├── update_pegasus.sh           # Example script: Automates Pegasus updates
+│   ├── setup_environment.py        # Example script: Sets up the project environment
+│   └── ...
+├── temp/                           # Temporary files and logs (ignored by version control)
+│   ├── cache/                      # Cache files generated by the project
+│   ├── logs/                       # Log files generated during runtime
+│   └── ...
+├── LICENSE                         # License file for the project
+├── README.md                       # Main project documentation
+└── setup.py                        # Python installation script (for packaging/distribution)
