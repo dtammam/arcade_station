@@ -8,10 +8,6 @@ __pycache__/
 # Logs
 *.log
 
-# IDE-specific files
-.vscode/
-.idea/
-
 # Test cache
 .pytest_cache/
 
