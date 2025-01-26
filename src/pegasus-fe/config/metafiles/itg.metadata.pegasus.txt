@@ -1,0 +1,50 @@
+collection: a_In The Groove
+shortname: ITG
+
+game: ITGMania
+file: C:\pegasus\games\stepmania\StartITGmania.exe
+sortBy: a
+launch: {file.path}
+assets.box_front: assets/simplylove.png
+
+game: Not ITG
+file: C:\pegasus\games\stepmania\StartNotITG.exe
+sortBy: b
+launch: {file.path}
+assets.box_front: assets/notitg.png
+
+game: StepMania 3.9
+file: C:\pegasus\games\stepmania\StartStepMania3.exe
+sortBy: c
+launch: {file.path}
+assets.box_front: assets/stepmania3.png
+
+game: In The Groove 3
+file: C:\pegasus\games\stepmania\StartInTheGroove3.exe
+sortBy: d
+launch: {file.path}
+assets.box_front: assets/itg3.png
+
+game: In The Groove 2
+file: C:\pegasus\games\stepmania\StartInTheGroove2.exe
+sortBy: e
+launch: {file.path}
+assets.box_front: assets/itg2.png
+
+game: In The Groove
+file: C:\pegasus\games\stepmania\StartInTheGroove1.exe
+sortBy: f
+launch: {file.path}
+assets.box_front: assets/itg1.png
+
+game: Mungyodance 3
+file: C:\pegasus\games\stepmania\StartMungyodance3.exe
+sortBy: g
+launch: {file.path}
+assets.box_front: assets/mungyodance3.png
+
+game: STARLiGHT TWOpointZERO
+file: C:\pegasus\games\stepmania\StartStarlight.exe
+sortBy: g
+launch: {file.path}
+assets.box_front: assets/starlight.png
