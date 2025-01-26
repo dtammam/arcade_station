@@ -1,7 +1,7 @@
 # Plan
 
-## arcade-station Overview
-arcade-station is a front-end interface for managing and interacting with the games you love.
+## arcade_station Overview
+arcade_station is a front-end interface for managing and interacting with the games you love.
 ![Demo Collage](assets/images/readme/demo-collage.jpg)
 
 ### Motivation
@@ -51,7 +51,7 @@ This phase is complete when all functionality with all dependencies are solved f
 
 ### Phase 3: User installer creation
 - Create an installer
-This phase is complete when a user can take the installer, run it on their Windows/Linux/Mac machine and have a functional arcade-station setup.
+This phase is complete when a user can take the installer, run it on their Windows/Linux/Mac machine and have a functional arcade_station setup.
 
 ### Phase 4: Ongoing optionality
 - Create additional support for flexible options (File sync clients, multiple versions of the game, extended options for streaming, etc.)

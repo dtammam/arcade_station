@@ -1,5 +1,5 @@
-# arcade-station
-arcade-station is a front-end interface for managing and interacting with the games you love.
+# arcade_station
+arcade_station is a front-end interface for managing and interacting with the games you love.
 ![Demo Collage](assets/images/readme/demo-collage.jpg)
 
 ## Motivation

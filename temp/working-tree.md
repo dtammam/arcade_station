@@ -1,4 +1,4 @@
-arcade-station/
+arcade_station/
 ├── src/                            # Python source code
 │   ├── arcade_station/             # Primary Python package
 │   │   ├── __init__.py             # Package initializer
@@ -26,7 +26,7 @@ arcade-station/
 │       ├── assets/                 # Assets for the external theme
 │       └── theme_config.toml       # Configuration file for the external theme
 ├── config/                         # Project-wide configuration files (not Pegasus-specific)
-│   ├── default_config.toml         # Default configuration for the arcade-station project
+│   ├── default_config.toml         # Default configuration for the arcade_station project
 │   └── metadata.json               # General project metadata
 ├── assets/                         # General assets for the project
 │   └── images/                     # Example: Placeholder for general images
