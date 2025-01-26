@@ -60,16 +60,22 @@ This phase is complete when a user can take the installer, run it on their Windo
 *To be determined*
 
 ## Thorough Testing and Validation
-*To be determined*
+- Windows will be tested on my personal cabinet along with beta testers in the community.
+- Linux will betested on virtual machines. I will start with [TJ's ITG System Image](https://docs.google.com/document/d/1_lO2ddaYogve08u7CsjC6OojXy36ZfGgo7VCRVkLJhU/edit?tab=t.0#heading=h.f4jo4mmoacz4)
 
 ## Code Maintenance and Documentation
-*To be determined*
+- Code will be created in alignment with Python best practices.
+- Code will be modular and functionalized.
+- Code will be created only when needed. If an existing library exists, it will be preferred.
+- Inputs will be fed by configuration files to allow easy, code-agnostic value population.
+- Docstrings will be meaningful and will have meaningful examples.
+- Contributions will be allowed and encouraged after the project is beyond Phase
 
 ## Reflect on the Process
-*To be determined*
+*To be done as the project progresses*
 
 ## Stakeholder Communication
-*To be determined*
+Updates will be shared with the [DDR + ITG Players](https://www.facebook.com/groups/565890830137096/) and [Private Dance Games Arcade Owner (ITG, DDR, PIU, TechnoMotion)](https://www.facebook.com/groups/180601838781725) Facebook groups as the project progresses.
 
 ## Manage Risks and Setbacks
 *To be determined*
