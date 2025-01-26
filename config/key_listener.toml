@@ -1,3 +1,4 @@
 [key_mappings]
 "ctrl+alt+a" = "C:/windows/system32/notepad.exe"
 "ctrl+alt+b" = "C:/windows/system32/cmd.exe"
+"ctrl+space" = "kill_processes"
