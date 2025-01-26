@@ -16,7 +16,7 @@ The motivation behind this project is a desire to recreate the [ddr-picker](http
 - If any lower-level interactions are needed, I will sparingly opt for the built-in OS' scripting language (PowerShell and Bash).
 
 ### Analyze Existing Code
-Application Dependencies:
+#### Application Dependencies:
 | Application                                   | Purpose                                                                       | Windows | Linux | Mac |
 |-----------------------------------------------|-------------------------------------------------------------------------------|---------|-------|-----|
 | pegasus-fe                                    | Frontend interface for displaying the games                                   | 🪟      | 🐧    | 🍏  |
@@ -29,32 +29,32 @@ Application Dependencies:
 | Litboard (`mame2lit.exe`, `LightsTest.exe`)   | Enables clean resetting of litboard lights                                    | 🪟      | 🐧    | ❌  |
 | iCloud                                        | Apple sync client for photo uploads (considering alternative cloud solutions) | 🪟      | ❌    | 🍏  |
 
-File Dependencies:
+#### File Dependencies:
 - assets: Locally stored .png files for game icons.
 - Grid Micro theme for Pegasus: Specific theme supporting the optimized frontend's design.
 
-System Dependencies:
+#### System Dependencies:
 - (To be validated) Local administrative privileges
 - Ability to auto-logon
 - User interface in exclusive mode
 
 ### Plan the Transition Strategy
-    ### Phase 1: Core logic and scaffolding in Python
-        - Migrate and refactor the `CoreFunctions.psm1` module. Really knock out the base library that will be used by this project
-        - Recreate all base PowerShell scripts in Python for the core functionality (killing Pegasus, launching games, taking pics)
-        - Recreate the listener AutoIt scripts in Python and add to startup (reference the `keyboard` library)
-        This phase is complete when all initial functionality with all Windows dependencies working with a full Python codebase.
+### Phase 1: Core logic and scaffolding in Python
+- Migrate and refactor the `CoreFunctions.psm1` module. Really knock out the base library that will be used by this project
+- Recreate all base PowerShell scripts in Python for the core functionality (killing Pegasus, launching games, taking pics)
+- Recreate the listener AutoIt scripts in Python and add to startup (reference the `keyboard` library)
+This phase is complete when all initial functionality with all Windows dependencies working with a full Python codebase.
 
-    ### Phase 2: Novel cross-platform solution implementations
-        - Implement cross-platform solutions for elements without native cross-platform support
-        This phase is complete when all functionality with all dependencies are solved for and functionality has been proven on Windows, Linux and Mac.
+### Phase 2: Novel cross-platform solution implementations
+- Implement cross-platform solutions for elements without native cross-platform support
+This phase is complete when all functionality with all dependencies are solved for and functionality has been proven on Windows, Linux and Mac.
 
-    ### Phase 3: User installer creation
-        5. Create an installer
-        This phase is complete when a user can take the installer, run it on their Windows/Linux/Mac machine and have a functional arcade-station setup.
+### Phase 3: User installer creation
+- Create an installer
+This phase is complete when a user can take the installer, run it on their Windows/Linux/Mac machine and have a functional arcade-station setup.
 
-    ### Phase 4: Ongoing optionality
-        6. Create additional support for flexible options (File sync clients, multiple versions of the game, extended options for streaming, etc.)
+### Phase 4: Ongoing optionality
+- Create additional support for flexible options (File sync clients, multiple versions of the game, extended options for streaming, etc.)
 
 ### Implement Translation
 | Function Needed      | Proposed Solution                                                | Reasoning                                                                                                    |
