@@ -1,4 +1,5 @@
 [key_mappings]
-"ctrl+alt+a" = "C:/windows/system32/notepad.exe"
-"ctrl+alt+b" = "C:/windows/system32/cmd.exe"
+"ctrl+f5" = "C:/Users/dean/AppData/Local/Programs/cursor/Cursor.exe"
+"ctrl+f6" = "C:/Windows/explorer.exe"
+"ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
 "ctrl+space" = "C:/Repositories/arcade-station/src/arcade_station/kill_all_and_reset_pegasus.py" # Will be populated by installer eventually
