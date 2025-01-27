@@ -1,0 +1,24 @@
+[processes]
+names = [
+    "cmd",
+    "explorer",
+    "gslauncher",
+    "In The Groove",
+    "ITGmania",
+    "i_view64",
+    "mame",
+    "mame2lit",
+    "mmc",
+    "notepad",
+    "notepad++",
+    "NotITG-v4.2.0",
+    "OpenITG",
+    "OpenITG-PC",
+    "outfox",
+    "pegasus-fe_windows",
+    "regedit",
+    "spice",
+    "StepMania",
+    "Taskmgr",
+    "timeout"
+] 
