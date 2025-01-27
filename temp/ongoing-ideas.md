@@ -2,6 +2,7 @@
 - To-do:
     - Seemingly must manually change theme for Pegasus to Pegasus Grid Micro: `2025-01-26T13:08:33 [i] Theme set to `Pegasus Grid Micro` (`C:/Repositories/arcade_station/src/pegasus-fe/themes/micro/`)`
     - Headers for games are initially found here: `C:\Repositories\arcade_station\src\pegasus-fe\themes\micro\assets\logos`
+    - In `C:\Repositories\arcade-station\src\pegasus-fe\config\settings.txt` we must rewrite and pass in theme post-install -> `general.theme: c:/Repositories/arcade-station/src/pegasus-fe/themes/micro/`
 
 - Open questions:
     - What is `rb`: with open(config_path, 'rb') as file:
