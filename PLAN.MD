@@ -40,7 +40,7 @@ The motivation behind this project is a desire to recreate the [ddr-picker](http
 
 ### Plan the Transition Strategy
 ### Phase 1: Core logic and scaffolding in Python
-- Migrate and refactor the `CoreFunctions.psm1` module. Really knock out the base library that will be used by this project
+- Migrate and refactor the `core_functions.psm1` module. Really knock out the base library that will be used by this project
 - Recreate all base PowerShell scripts in Python for the core functionality (killing Pegasus, launching games, taking pics)
 - Recreate the listener AutoIt scripts in Python and add to startup (reference the `keyboard` library)
 This phase is complete when all initial functionality with all Windows dependencies working with a full Python codebase.
