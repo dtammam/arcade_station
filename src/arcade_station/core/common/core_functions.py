@@ -155,7 +155,7 @@ def load_installed_games():
     """
     Load installed games configuration from a TOML file.
     """
-    return load_toml_config('installed_games.toml')
+    return load_toml_config('pegasus_binaries.toml')
 
 def get_pegasus_binary(installed_games):
     """
