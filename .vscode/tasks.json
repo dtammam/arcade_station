@@ -4,15 +4,12 @@
     {
       "label": "Activate .venv",
       "type": "shell",
-      "command": "${workspaceFolder}/.venv/bin/activate", // For Linux/Mac
-      "windows": {
-        "command": "${workspaceFolder}\\.venv\\Scripts\\activate" // For Windows
-      },
+      "command": "cd C:\\Repositories\\arcade_station && .venv\\Scripts\\activate",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
       },
-      "detail": "Activates the project's virtual environment"
+      "detail": "Switches to the project directory and activates the virtual environment"
     }
   ]
 }
