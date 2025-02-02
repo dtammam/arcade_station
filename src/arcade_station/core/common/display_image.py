@@ -45,5 +45,12 @@ def main(image_path, background_color='black'):
     window.show()
     sys.exit(app.exec_())
 
-if __name__ == "__main__":
-    main("C:/Repositories/arcade_station/assets/images/banners/2014.png", "black")
+
+def display_image(image_path, background_color='black'):
+    """
+    Function to create and display an ImageWindow.
+    """
+    app = QApplication(sys.argv)
+    window = ImageWindow(image_path, background_color)
+    window.show()
+    sys.exit(app.exec_())
