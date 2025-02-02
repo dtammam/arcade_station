@@ -1,8 +1,8 @@
 import sys
 import os
-# Add the parent directory to the Python path to allow relative module imports
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+# Add the parent directory of 'arcade_station' to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from core.core_functions import *
+from arcade_station.core.common.core_functions import *
 
 start_listening_to_keybinds_from_toml('key_listener.toml') 

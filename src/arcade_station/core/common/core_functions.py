@@ -59,8 +59,9 @@ def load_toml_config(file_name):
     # Determine the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Calculate the base path relative to the script's directory as 'config' is always at the root of the project
-    base_path = os.path.abspath(os.path.join(script_dir, '..', '..', '..', 'config'))
+    # Calculate the base path relative to the script's directory
+    # Adjust the number of '..' based on the new location of the script
+    base_path = os.path.abspath(os.path.join(script_dir, '..', '..', '..', '..', 'config'))
     config_path = os.path.join(base_path, file_name)
     
     with open(config_path, 'rb') as file:
@@ -100,11 +101,15 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
 
     # Register hotkeys based on the mappings
     for hotkey, action in key_mappings.items():
+        # Resolve the action path relative to the base directory
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        action_path = os.path.abspath(os.path.join(base_dir, action))
+        
         if action == "kill_processes":
             script_path = os.path.join(os.path.dirname(__file__), '../kill_all_and_reset_pegasus.py')
             keyboard.add_hotkey(hotkey, lambda: subprocess.Popen(['python', script_path]))
         else:
-            keyboard.add_hotkey(hotkey, lambda action=action: start_app(action))
+            keyboard.add_hotkey(hotkey, lambda action_path=action_path: start_app(action_path))
 
     print("Listener started. Press Ctrl+C to stop.")
     try:
@@ -158,7 +163,7 @@ def get_pegasus_binary(installed_games):
     """
     config = load_toml_config('default_config.toml')
     # Adjust the base path to point directly to the pegasus-fe directory
-    pegasus_base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../pegasus-fe'))
+    pegasus_base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../pegasus-fe'))
     
     os_type = platform.system()
     if os_type == "Windows":
@@ -168,7 +173,7 @@ def get_pegasus_binary(installed_games):
     else:
         binary_path = os.path.join(pegasus_base_path, installed_games['pegasus']['linux_binary'])
     
-    print(f"Constructed binary path: {binary_path}")  # Debug print
+    print(f"Constructed binary path: {binary_path}")
     return binary_path
 
 def start_pegasus():
@@ -197,13 +202,22 @@ def start_app(executable_path):
         os_type = determine_operating_system()
         print(f"Starting process [{executable_path}] on {os_type}...")
 
-        # Logic to handle different operating systems
-        if os_type == "Windows":
-            subprocess.Popen(f'start {executable_path}', shell=True)
-        elif os_type == "Darwin":
-            subprocess.Popen(['open', executable_path])
+        # Check if the file is a PowerShell script
+        if executable_path.endswith('.ps1'):
+            if os_type == "Windows":
+                # Use PowerShell to execute the script
+                subprocess.Popen(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', executable_path])
+            else:
+                print("PowerShell scripts are not supported on non-Windows systems.")
         else:
-            subprocess.Popen(['xdg-open', executable_path])
+            # Logic to handle different operating systems for other executables
+            if os_type == "Windows":
+                subprocess.Popen(f'start {executable_path}', shell=True)
+            elif os_type == "Darwin":
+                subprocess.Popen(['open', executable_path])
+            else:
+                subprocess.Popen(['xdg-open', executable_path])
+        
         print(f"Launched process [{executable_path}].")
     except Exception as e:
         print(f"Failed to start process: {e}")
