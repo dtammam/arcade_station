@@ -101,11 +101,15 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
 
     # Register hotkeys based on the mappings
     for hotkey, action in key_mappings.items():
+        # Resolve the action path relative to the base directory
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        action_path = os.path.abspath(os.path.join(base_dir, action))
+        
         if action == "kill_processes":
             script_path = os.path.join(os.path.dirname(__file__), '../kill_all_and_reset_pegasus.py')
             keyboard.add_hotkey(hotkey, lambda: subprocess.Popen(['python', script_path]))
         else:
-            keyboard.add_hotkey(hotkey, lambda action=action: start_app(action))
+            keyboard.add_hotkey(hotkey, lambda action_path=action_path: start_app(action_path))
 
     print("Listener started. Press Ctrl+C to stop.")
     try:
