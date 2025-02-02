@@ -1,4 +1,6 @@
 [key_mappings]
+"ctrl+f2" = "../core/windows/RegistryUpdateKioskToPC.ps1"
+"ctrl+f3" = "../core/windows/RegistryUpdatePCToKiosk.ps1"
 "ctrl+f5" = "C:/Users/dean/AppData/Local/Programs/cursor/Cursor.exe"
 "ctrl+f6" = "C:/Windows/explorer.exe"
 "ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
