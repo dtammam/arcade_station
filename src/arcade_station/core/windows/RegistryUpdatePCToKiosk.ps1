@@ -21,8 +21,8 @@ try {
     New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType String -Force
     Write-Information "Modified [$($name)] to [$($value)]."
 
-    Write-Information "Restarting computer now..."
-    Restart-ComputerSafely
+    # Write-Information "Restarting computer now..."
+    # Restart-ComputerSafely
     $script:exitCode = 0
 } catch {
     Write-Information "Script failed with the following exception: [$($_.Message)]"
