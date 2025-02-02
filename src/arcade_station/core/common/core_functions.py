@@ -173,7 +173,7 @@ def get_pegasus_binary(installed_games):
     else:
         binary_path = os.path.join(pegasus_base_path, installed_games['pegasus']['linux_binary'])
     
-    print(f"Constructed binary path: {binary_path}")  # Debug print
+    print(f"Constructed binary path: {binary_path}")
     return binary_path
 
 def start_pegasus():

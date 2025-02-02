@@ -13,16 +13,16 @@ Import-Module -Name $coreFunctionsModule -Force
 
 try {
     Write-Information "Creating variables."
-    $registryPath = "HKCU:\SOFTWARE\arcade_station"
+    $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
     $name = 'Shell'
-	$value = '"C:\pegasus\StartFrontendApps.exe"'
+	$value = '"C:\pegasus\StartFrontendApps.exe"' # Update with installer later
     
     Write-Information "Setting [$($name)] to [$($value)]..."
     New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType String -Force
     Write-Information "Modified [$($name)] to [$($value)]."
 
-    # Write-Information "Restarting computer now..."
-    # Restart-ComputerSafely
+    Write-Information "Restarting computer now..."
+    Restart-ComputerSafely
     $script:exitCode = 0
 } catch {
     Write-Information "Script failed with the following exception: [$($_.Message)]"

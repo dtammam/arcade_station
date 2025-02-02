@@ -1,7 +1,7 @@
 [key_mappings]
 "ctrl+f2" = "../arcade_station/core/windows/RegistryUpdateKioskToPC.ps1"
 "ctrl+f3" = "../arcade_station/core/windows/RegistryUpdatePCToKiosk.ps1"
-"ctrl+f5" = "C:/Users/dean/AppData/Local/Programs/cursor/Cursor.exe"
+"ctrl+f5" = "C:/Users/dean/AppData/Local/Programs/cursor/Cursor.exe" # Update with installer later
 "ctrl+f6" = "C:/Windows/explorer.exe"
-"ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
-"ctrl+space" = "../arcade_station/kill_all_and_reset_pegasus.py" # Will be populated by installer eventually
+"ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" # Update with installer later
+"ctrl+space" = "../arcade_station/kill_all_and_reset_pegasus.py" # Populate from installer
