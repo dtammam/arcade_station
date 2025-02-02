@@ -9,5 +9,6 @@ from PyQt5.QtWidgets import QApplication
 
 if __name__ == "__main__":
     # Example usage
-    display_image("C:/Repositories/arcade_station/assets/images/banners/2014.png", "transparent")
+    display_image("//CLEARBOOK/Games/ITGmania/Songs/In The Groove Redux/Birdie (Jasmine)/Birdie-bn.png", "transparent")
     
+# Place game launching logic here
