@@ -202,13 +202,22 @@ def start_app(executable_path):
         os_type = determine_operating_system()
         print(f"Starting process [{executable_path}] on {os_type}...")
 
-        # Logic to handle different operating systems
-        if os_type == "Windows":
-            subprocess.Popen(f'start {executable_path}', shell=True)
-        elif os_type == "Darwin":
-            subprocess.Popen(['open', executable_path])
+        # Check if the file is a PowerShell script
+        if executable_path.endswith('.ps1'):
+            if os_type == "Windows":
+                # Use PowerShell to execute the script
+                subprocess.Popen(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', executable_path])
+            else:
+                print("PowerShell scripts are not supported on non-Windows systems.")
         else:
-            subprocess.Popen(['xdg-open', executable_path])
+            # Logic to handle different operating systems for other executables
+            if os_type == "Windows":
+                subprocess.Popen(f'start {executable_path}', shell=True)
+            elif os_type == "Darwin":
+                subprocess.Popen(['open', executable_path])
+            else:
+                subprocess.Popen(['xdg-open', executable_path])
+        
         print(f"Launched process [{executable_path}].")
     except Exception as e:
         print(f"Failed to start process: {e}")
