@@ -9,9 +9,4 @@ from arcade_station.core.common.display_image import *
 from PyQt5.QtWidgets import QApplication
 
 if __name__ == "__main__":
-    # display_image("C:/Repositories/arcade_station/assets/images/banners/2013.png", "transparent")
-    # display_image("C:/Repositories/arcade_station/assets/images/banners/simply-love.png", "transparent")
-
-    display_image("C:/Repositories/arcade_station/assets/images/banners/itg2.png", "transparent")
-    # display_image("C:/Repositories/arcade_station/assets/images/banners/itg2.png", "black")   
-# Place game launching logic here
+    display_image_from_config()
