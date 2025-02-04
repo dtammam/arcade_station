@@ -1,4 +1,4 @@
 [display]
 image_path = "C:/Repositories/arcade_station/assets/images/banners/fnf.png"
 background_color = "transparent"
-monitor_index = 0  # Index of the monitor to use
+monitor_index = 1 # Index of the monitor to use

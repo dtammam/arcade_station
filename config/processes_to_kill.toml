@@ -20,5 +20,6 @@ names = [
     "spice",
     "StepMania",
     "Taskmgr",
-    "timeout"
+    "timeout",
+    "arcade_station-image"
 ] 

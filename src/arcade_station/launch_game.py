@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 # Image launch
-from arcade_station.core.common.display_image import *
+from core.common.display_image import *
 from PyQt5.QtWidgets import QApplication
 
 if __name__ == "__main__":
