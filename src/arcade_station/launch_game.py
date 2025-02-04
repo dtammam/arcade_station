@@ -1,3 +1,4 @@
+import time
 import sys
 import os
 # Add the parent directory to the Python path to allow relative module imports
@@ -8,7 +9,9 @@ from arcade_station.core.common.display_image import *
 from PyQt5.QtWidgets import QApplication
 
 if __name__ == "__main__":
-    # Example usage
-    display_image("//CLEARBOOK/Games/ITGmania/Songs/In The Groove Redux/Birdie (Jasmine)/Birdie-bn.png", "transparent")
-    
+    # display_image("C:/Repositories/arcade_station/assets/images/banners/2013.png", "transparent")
+    # display_image("C:/Repositories/arcade_station/assets/images/banners/simply-love.png", "transparent")
+
+    display_image("C:/Repositories/arcade_station/assets/images/banners/itg2.png", "transparent")
+    # display_image("C:/Repositories/arcade_station/assets/images/banners/itg2.png", "black")   
 # Place game launching logic here
