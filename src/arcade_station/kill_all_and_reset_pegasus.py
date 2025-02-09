@@ -12,8 +12,10 @@ from PyQt5.QtWidgets import QApplication
 
 kill_processes_from_toml('processes_to_kill.toml')
 kill_process_by_identifier("open_image")
+kill_process_by_identifier("start_pegasus")
 process = launch_script(
     r'C:/Repositories/arcade_station/src/arcade_station/open_image.py',
-    identifier="open_image"  # This will appear in the process command-line.
+    identifier="open_image"
 )
+print(f"Launched open_image.py with PID: {process.pid}")
 start_pegasus()
