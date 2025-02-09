@@ -10,6 +10,17 @@
         "panel": "shared"
       },
       "detail": "Switches to the project directory and activates the virtual environment"
+    },
+    {
+      "label": "Kill Python Processes",
+      "type": "shell",
+      "command": "taskkill -IM python.exe /F",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Force kills all running Python processes",
+      "problemMatcher": []
     }
   ]
 }
