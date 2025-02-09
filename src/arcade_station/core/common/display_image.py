@@ -77,23 +77,24 @@ def list_monitors():
     return monitor_info
 
 def run_app(image_path, background_color, screen_geometry, close_event):
+    # If no event is provided, create one that never gets set
+    if close_event is None:
+        close_event = threading.Event()
+
     app = QApplication(sys.argv)
     window = ImageWindow(image_path, background_color, screen_geometry)
     window.show()
 
-    # Check for the close event in a separate thread
     def check_close_event():
         while not close_event.is_set():
             app.processEvents()
         window.close()
 
-    # Start the close event checker in a separate thread
     close_thread = threading.Thread(target=check_close_event)
     close_thread.start()
 
     app.exec_()
 
-    # Clean up the PID file on exit
     if os.path.exists(PID_FILE):
         os.remove(PID_FILE)
 
