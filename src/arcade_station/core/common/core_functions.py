@@ -221,3 +221,14 @@ def start_app(executable_path):
         print(f"Launched process [{executable_path}].")
     except Exception as e:
         print(f"Failed to start process: {e}")
+
+def kill_process_by_identifier(identifier):
+    for proc in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
+        try:
+            cmdline = proc.info["cmdline"]
+            if cmdline and any(identifier in arg for arg in cmdline):
+                print(f"Terminating process {proc.pid} with cmdline: {cmdline}")
+                proc.terminate()
+                proc.wait(timeout=5)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
