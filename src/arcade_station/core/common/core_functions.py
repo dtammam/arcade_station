@@ -243,14 +243,13 @@ def kill_process_by_identifier(identifier):
             continue
 
 
-def launch_script(script_path, identifier=None):
+def launch_script(script_path, identifier=None, extra_args=None):
     """
     Launch a Python script from your virtual environment.
     
-    If an identifier is provided, it is appended as a command-line argument
+    If an identifier is provided, it is appended as a command-line argument 
     (e.g. '--identifier=open_image') so that external scripts can find this process.
-    
-    On Windows, the process is launched with no visible console window.
+    Any extra_args is a list of additional command-line arguments.
     """
     # Path to your venv's Python executable.
     # TODO: Make this dynamic.
@@ -258,6 +257,8 @@ def launch_script(script_path, identifier=None):
     
     # Build the command-line arguments.
     args = [python_executable, script_path]
+    if extra_args:
+        args.extend(extra_args)
     if identifier:
         args.append(f"--identifier={identifier}")
     

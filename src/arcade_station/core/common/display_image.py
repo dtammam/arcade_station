@@ -98,12 +98,16 @@ def run_app(image_path, background_color, screen_geometry, close_event):
     if os.path.exists(PID_FILE):
         os.remove(PID_FILE)
 
-def display_image_from_config(config_path='display_config.toml', close_event=None):
+def display_image_from_config(config_path='display_config.toml', close_event=None, use_default=False):
     """
     Display an image based on configuration from a TOML file.
+    If use_default is True then the default_image_path is used.
     """
     config = load_toml_config(config_path)
-    image_path = config['display']['image_path']
+    if use_default:
+        image_path = config['display'].get('default_image_path', config['display']['image_path'])
+    else:
+        image_path = config['display']['image_path']
     background_color = config['display']['background_color']
     monitor_index = config['display'].get('monitor_index', 0)
 
@@ -118,7 +122,11 @@ def display_image_from_config(config_path='display_config.toml', close_event=Non
         monitor_index = 0
 
     screen = screens[monitor_index]
-    process = multiprocessing.Process(target=run_app, args=(image_path, background_color, screen.geometry(), close_event), name="arcade_station-image")
+    process = multiprocessing.Process(
+        target=run_app,
+        args=(image_path, background_color, screen.geometry(), close_event),
+        name="arcade_station-image"
+    )
     process.start()
     return process
 
@@ -127,14 +135,14 @@ def close_image_window():
     Close the image window if it is open.
     """
     # This function will need to be adapted to communicate with the process
-    # For example, using a shared variable or a signal to indicate the window should close
+    # For example, using a shared variable or a signal to indicate the window should close.
+    pass
 
 def main(image_path, background_color='black'):
     app = QApplication(sys.argv)
     window = ImageWindow(image_path, background_color)
     window.show()
     sys.exit(app.exec_())
-
 
 def display_image(image_path, background_color='black'):
     """
