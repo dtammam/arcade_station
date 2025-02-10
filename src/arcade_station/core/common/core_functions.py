@@ -155,7 +155,7 @@ def load_installed_games():
     """
     Load installed games configuration from a TOML file.
     """
-    return load_toml_config('installed_games.toml')
+    return load_toml_config('pegasus_binaries.toml')
 
 def get_pegasus_binary(installed_games):
     """
@@ -221,3 +221,60 @@ def start_app(executable_path):
         print(f"Launched process [{executable_path}].")
     except Exception as e:
         print(f"Failed to start process: {e}")
+
+def kill_process_by_identifier(identifier):
+    print("Loading processes to kill...")
+    for proc in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
+        try:
+            cmdline = proc.info["cmdline"]
+            if cmdline and any(identifier in arg for arg in cmdline):
+                print(f"Found process {proc.pid} with cmdline: {cmdline}")
+                # First, kill any children of this process.
+                children = proc.children(recursive=True)
+                for child in children:
+                    print(f"Terminating child process {child.pid} with cmdline: {child.cmdline()}")
+                    child.kill()
+                # Now kill the process itself.
+                print(f"Terminating process {proc.pid} with cmdline: {cmdline}")
+                proc.kill()
+                proc.wait(timeout=5)
+        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+            print(f"Error processing process {proc.pid}: {e}")
+            continue
+
+
+def launch_script(script_path, identifier=None, extra_args=None):
+    """
+    Launch a Python script from your virtual environment.
+    
+    If an identifier is provided, it is appended as a command-line argument 
+    (e.g. '--identifier=open_image') so that external scripts can find this process.
+    Any extra_args is a list of additional command-line arguments.
+    """
+    # Path to your venv's Python executable.
+    # TODO: Make this dynamic.
+    python_executable = r"C:/Repositories/arcade_station/.venv/Scripts/python.exe"
+    
+    # Build the command-line arguments.
+    args = [python_executable, script_path]
+    if extra_args:
+        args.extend(extra_args)
+    if identifier:
+        args.append(f"--identifier={identifier}")
+    
+    # Windows-specific options: hide the console window.
+    if os.name == 'nt':
+        creationflags = subprocess.CREATE_NO_WINDOW
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 0  # 0 means SW_HIDE.
+    else:
+        creationflags = 0
+        startupinfo = None
+
+    process = subprocess.Popen(
+        args,
+        creationflags=creationflags,
+        startupinfo=startupinfo
+    )
+    return process
