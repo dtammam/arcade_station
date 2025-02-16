@@ -5,6 +5,8 @@ rules:
     linting:
       max_line_length: 79  # Per PEP 8 standard shown in arcade-station-rules.mdc
       docstring_style: "google"  # Based on Google style guide reference in PLAN.MD
+    notes:
+      - "Use tomllib for TOML parsing instead of toml library."
 
   - name: "QML Theme Files"
     pattern: "src/pegasus-fe/themes/**/*.qml"
