@@ -59,10 +59,10 @@ def take_screenshot(monitor_index=0, file_location='.', file_name=None, quality=
     print(f"Resolved sound file path: {sound_file}")
 
     # Play sound if specified and exists
-    if sound_file and os.path.exists(sound_file) and config['screenshot'].get('sound_file', ''):
+    if sound_file and os.path.exists(sound_file) and config['screenshot'].get('sound_file', '').strip():
         try:
             if sys.platform.startswith('win'):
-                subprocess.run(['ffplay', '-nodisp', '-autoexit', sound_file])
+                subprocess.run(['powershell', '-c', f'(New-Object Media.SoundPlayer "{sound_file}").PlaySync();'])
             elif sys.platform.startswith('darwin'):
                 subprocess.run(['afplay', sound_file])
             elif sys.platform.startswith('linux'):
@@ -70,7 +70,7 @@ def take_screenshot(monitor_index=0, file_location='.', file_name=None, quality=
         except Exception as e:
             print(f"Error playing sound: {e}")
     else:
-        print("No sound file specified or file does not exist.")
+        print("No sound file specified or file not found.")
 
     app.quit()
 
