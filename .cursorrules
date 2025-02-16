@@ -1,0 +1,45 @@
+rules:
+  - name: "Python Core Functions"
+    pattern: "src/arcade_station/core/common/core_functions.py"
+    language: "python"
+    linting:
+      max_line_length: 79  # Per PEP 8 standard shown in arcade-station-rules.mdc
+      docstring_style: "google"  # Based on Google style guide reference in PLAN.MD
+    notes:
+      - "Use tomllib for TOML parsing instead of toml library."
+
+  - name: "QML Theme Files"
+    pattern: "src/pegasus-fe/themes/**/*.qml"
+    language: "qml"
+    formatting:
+      indent_size: 4
+      quote_style: "double"
+
+  - name: "Configuration Files"
+    pattern: "config/**/*.toml"
+    language: "toml"
+    formatting:
+      indent_size: 2
+      array_trailing_comma: true
+
+  - name: "PowerShell Scripts"
+    pattern: "src/arcade_station/core/windows/*.ps1"
+    language: "powershell"
+    formatting:
+      indent_size: 4
+      newline_at_end_of_file: true
+
+  - name: "Metadata Files"
+    pattern: "src/pegasus-fe/config/metafiles/*.txt"
+    language: "plaintext"
+    formatting:
+      trim_trailing_whitespace: true
+      insert_final_newline: true
+
+ignore:
+  - ".venv/**"
+  - "__pycache__/**"
+  - "*.pyc"
+  - "temp/**"
+  - "build/**"
+  - "dist/**"

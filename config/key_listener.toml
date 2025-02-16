@@ -5,3 +5,4 @@
 "ctrl+f6" = "C:/Windows/explorer.exe"
 "ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" # Update with installer later
 "ctrl+space" = "../arcade_station/kill_all_and_reset_pegasus.py" # Populate from installer
+"+" = "../arcade_station/core/common/monitor_screenshot.py" # Populate from installer
