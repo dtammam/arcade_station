@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 
 # Image launch
 from core.common.display_image import *
+from core.common.core_functions import kill_pegasus
 
 # Load game configuration from TOML file
 def load_game_config():
@@ -36,8 +37,10 @@ if __name__ == "__main__":
 
     print(f"Resolved game path: {game_path}")  # Debugging line
 
-    if game_path and os.path.exists(game_path):
+    if game_path and os.path.exists(game_path):        
         # Launch the game
         subprocess.Popen(game_path)
+        # Function to kill Pegasus process
+        kill_pegasus()
     else:
         print(f"Game path for '{game_name}' not found or not specified.")
