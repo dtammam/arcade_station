@@ -7,7 +7,7 @@ sortBy: ds1
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ds_disneys_rave"
 assets.box_front: ../../../../assets/images/banners/disney.png
 
 game: True Kiss Destination
@@ -16,7 +16,7 @@ sortBy: ds2
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ds_true_kiss_destination"
 assets.box_front: ../../../../assets/images/banners/dstkd.png
 
 game: Dreams Come True
@@ -25,7 +25,7 @@ sortBy: ds3
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ds_dreams_come_true"
 assets.box_front: ../../../../assets/images/banners/dsdct.png
 
 game: Euromix 2
@@ -34,7 +34,7 @@ sortBy: ds4
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ds_euromix_2"
 assets.box_front: ../../../../assets/images/banners/euromix2.png
 
 game: Euromix
@@ -43,7 +43,7 @@ sortBy: ds5
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ds_euromix"
 assets.box_front: ../../../../assets/images/banners/euromix.png
 
 game: Dancing Stage
@@ -52,5 +52,5 @@ sortBy: ds6
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ds_1"
 assets.box_front: ../../../../assets/images/banners/dstage-ir.png

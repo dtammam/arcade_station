@@ -15,7 +15,8 @@ file: not\using\files\to\launch\games\2
 sortBy: b
 launch: 
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
-    "C:/Repositories/arcade_station/src/arcade_station/open_image.py"
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "not_itg"
 assets.box_front: ../../../../assets/images/banners/notitg.png
 
 game: StepMania 3.9
@@ -23,8 +24,8 @@ file: not\using\files\to\launch\games\3
 sortBy: c
 launch: 
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
-    "C:/Repositories/arcade_station/src/arcade_station/open_image2.py"
-    "--default"
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "stepmania_3.9"
 assets.box_front: ../../../../assets/images/banners/stepmania3.png
 
 game: In The Groove 3
@@ -33,7 +34,7 @@ sortBy: d
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "itg_3"
 assets.box_front: ../../../../assets/images/banners/itg3.png
 
 game: In The Groove 2
@@ -42,7 +43,7 @@ sortBy: e
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "itg_2"
 assets.box_front: ../../../../assets/images/banners/itg2.png
 
 game: In The Groove
@@ -51,7 +52,7 @@ sortBy: f
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "itg_1"
 assets.box_front: ../../../../assets/images/banners/itg1.png
 
 game: Mungyodance 3
@@ -60,7 +61,7 @@ sortBy: g
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "mungyodance_3"
 assets.box_front: ../../../../assets/images/banners/mungyodance3.png
 
 game: STARLiGHT TWOpointZERO
@@ -69,5 +70,5 @@ sortBy: g
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itgmania"
+    "ddr_starlight"
 assets.box_front: ../../../../assets/images/banners/starlight.png
