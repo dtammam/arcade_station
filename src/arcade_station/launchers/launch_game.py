@@ -7,4 +7,5 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from core.common.display_image import *
 
 if __name__ == "__main__":
+    
     display_image_from_config()

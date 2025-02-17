@@ -2,15 +2,16 @@ collection: a_In The Groove
 shortname: ITG
 
 game: ITGMania
-file: C:\pegasus\games\stepmania\StartITGmania.exe
+file: C:\pegasus\games\stepmania\StartITGmania1.exe
 sortBy: a
 launch: {file.path}
 assets.box_front: ../../../../assets/images/banners/simply-love.png
 
 game: Not ITG
-file: C:\pegasus\games\stepmania\StartNotITG.exe
+file: Stub\File\That\Does\Not\Exist.exe
 sortBy: b
-launch: {file.path}
+launch: "../../../../.venv/Scripts/pythonw.exe" c:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py
+
 assets.box_front: ../../../../assets/images/banners/notitg.png
 
 game: StepMania 3.9
@@ -22,7 +23,7 @@ assets.box_front: ../../../../assets/images/banners/stepmania3.png
 game: In The Groove 3
 file: C:\pegasus\games\stepmania\StartInTheGroove3.exe
 sortBy: d
-launch: {file.path}
+launch: "c:/Repositories/arcade_station/.venv/Scripts/python.exe" c:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py
 assets.box_front: ../../../../assets/images/banners/itg3.png
 
 game: In The Groove 2
