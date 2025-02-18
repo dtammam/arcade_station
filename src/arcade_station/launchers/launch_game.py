@@ -37,10 +37,16 @@ if __name__ == "__main__":
 
     print(f"Resolved game path: {game_path}")  # Debugging line
 
-    if game_path and os.path.exists(game_path):        
+    if game_path and os.path.exists(game_path):
+        # Change the working directory to the directory of the executable
+        game_dir = os.path.dirname(game_path)
+        os.chdir(game_dir)
+        print(f"Changed working directory to: {game_dir}")  # Debugging line
+        
         # Launch the game
         subprocess.Popen(game_path)
-        # Function to kill Pegasus process
+        
+        # Kill Pegasus after launching the game
         kill_pegasus()
     else:
         print(f"Game path for '{game_name}' not found or not specified.")
