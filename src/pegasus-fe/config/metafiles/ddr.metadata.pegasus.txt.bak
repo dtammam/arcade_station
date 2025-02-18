@@ -52,7 +52,7 @@ sortBy: f
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_max2"
+    "ddr_max_2"
 assets.box_front: ../../../../assets/images/banners/ddrmax2.png
 
 game: DDRMAX
@@ -61,7 +61,7 @@ sortBy: g
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_max"
+    "ddr_max_1"
 assets.box_front: ../../../../assets/images/banners/ddrmax.png
 
 game: 5thMix
@@ -70,7 +70,7 @@ sortBy: h
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_5thmix"
+    "ddr_5th_mix"
 assets.box_front: ../../../../assets/images/banners/5thmix.png
 
 game: 4thMix
@@ -79,7 +79,7 @@ sortBy: i
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_4thmix"
+    "ddr_4th_mix"
 assets.box_front: ../../../../assets/images/banners/4thmix.png
 
 game: 3rdMix
@@ -88,7 +88,7 @@ sortBy: j
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_3rdmix"
+    "ddr_3rd_mix"
 assets.box_front: ../../../../assets/images/banners/3rdmix.png
 
 game: 2ndMix
@@ -97,7 +97,7 @@ sortBy: k
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_2ndmix"
+    "ddr_2nd_mix"
 assets.box_front: ../../../../assets/images/banners/2ndmix.png
 
 game: DDR Internet Ranking

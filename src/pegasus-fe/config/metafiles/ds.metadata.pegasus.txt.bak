@@ -43,7 +43,7 @@ sortBy: ds5
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ds_euromix"
+    "ds_euromix_1"
 assets.box_front: ../../../../assets/images/banners/euromix.png
 
 game: Dancing Stage
