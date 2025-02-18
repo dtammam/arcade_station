@@ -14,7 +14,7 @@
     {
       "label": "Kill Python Processes",
       "type": "shell",
-      "command": "taskkill -IM python.exe /F",
+      "command": "taskkill -IM python.exe /F && taskkill -IM pythonw.exe /F",
       "presentation": {
         "reveal": "always",
         "panel": "shared"

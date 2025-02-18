@@ -5,8 +5,8 @@ import platform
 import subprocess
 import psutil
 import keyboard
+import sys
 
-# function Get-Screenshot
 # function Invoke-SetMarqueeFromFile
 # function Open-FullscreenImage
 # function Send-Keystrokes
@@ -278,3 +278,32 @@ def launch_script(script_path, identifier=None, extra_args=None):
         startupinfo=startupinfo
     )
     return process
+
+# Function to kill Pegasus process
+def kill_pegasus():
+    # Define the process names for Pegasus on different platforms
+    pegasus_process_names = {
+        'win32': ['pegasus-fe_windows', 'pegasus-fe_windows.exe'],
+        'darwin': ['pegasus-fe_mac'],
+        'linux': ['pegasus-fe_linux']
+    }
+
+    # Get the current platform
+    platform_name = sys.platform
+
+    # Determine the process names based on the platform
+    process_names = pegasus_process_names.get(platform_name, [])
+
+    if not process_names:
+        print(f"Unsupported platform: {platform_name}")
+        return
+
+    # Iterate over all running processes
+    for proc in psutil.process_iter(['name']):
+        try:
+            # Check if the process name matches any of the Pegasus names
+            if proc.info['name'].lower() in (name.lower() for name in process_names):
+                print(f"Killing process: {proc.info['name']}")
+                proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+            print(f"Error handling process {proc.info['name']}: {e}")
