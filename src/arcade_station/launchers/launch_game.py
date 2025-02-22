@@ -6,6 +6,7 @@ import subprocess
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from arcade_station.core.common.core_functions import load_game_config, load_mame_config, kill_pegasus
+from arcade_station.core.common.light_control import launch_mame_lights
 
 if __name__ == "__main__":
     # Check for command-line argument
@@ -36,6 +37,9 @@ if __name__ == "__main__":
             executable_path = mame_config['mame']['executable_path']
             executable = mame_config['mame']['executable']
             ini_path = mame_config['mame']['ini_path']
+            
+            # Launch MAME lights if configured
+            launch_mame_lights()
             
             # Pass parameters to PowerShell script
             subprocess.Popen([

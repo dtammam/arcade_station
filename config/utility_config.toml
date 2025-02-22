@@ -1,0 +1,4 @@
+[lights]
+light_reset_executable_path = "C:/Repositories/arcade_station/bin/windows/LightsTest.exe"
+light_mame_executable_path = "C:/Repositories/arcade_station/bin/windows/mame2lit.exe"
+lights_enabled = true
