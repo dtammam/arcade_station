@@ -1,7 +1,7 @@
 [games]
-itgmania = "C:/Games/ITGmania/Program/ITGmania.exe"
-not_itg = "C:/path/to/NotITG.exe"
-stepmania_3.9 = ""
+itgmania = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/simply-love.png" }
+not_itg = { path = "C:/path/to/NotITG.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/notitg.png" }
+stepmania_3.9 = "C:/Games/ITGmania/Program/ITGmania.exe"
 itg_3 = ""
 itg_2 = "C:/Games/In The Groove 2/Program/OpenITG.exe"
 itg_1 = ""
@@ -10,18 +10,18 @@ ddr_starlight = ""
 ddr_omnimix = ""
 ddr_a3 = ""
 ddr_a20 = ""
-ddr_extreme_proclarity = { rom = "ddrexproc", state = "o" }
-ddr_extreme = { rom = "ddrexproc", state = "p" }
-ddr_max_2 = { rom = "ddrmax2", state = "o" }
-ddr_max_1 = { rom = "ddrmax", state = "o" }
-ddr_5th_mix = { rom = "ddr5m", state = "o" }
-ddr_4th_mix = { rom = "ddr4mp", state = "o" }
-ddr_3rd_mix = { rom = "ddr3mj", state = "o" }
-ddr_2nd_mix = { rom = "ddr2m", state = "o" }
-ddr_1st_mix = { rom = "ddrj", state = "o" }
-ds_disneys_rave = { rom = "ddr2m", state = "o" }
-ds_true_kiss_destination = { rom = "ddr2m", state = "o" }
-ds_dreams_come_true = { rom = "ddr2m", state = "o" }
-ds_euromix_2 = { rom = "ddr2m", state = "o" }
-ds_euromix_1 = { rom = "ddr2m", state = "o" }
-ds_1 = { rom = "ddr2m", state = "o" }
+ddr_extreme_proclarity = { rom = "ddrexproc", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme-proclarity.png" }
+ddr_extreme = { rom = "ddrexproc", state = "p", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme.png" }
+ddr_max_2 = { rom = "ddrmax2", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/ddrmax2.png" }
+ddr_max_1 = { rom = "ddrmax", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/ddrmax.png" }
+ddr_5th_mix = { rom = "ddr5m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/5thmix.png" }
+ddr_4th_mix = { rom = "ddr4mp", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/4thmix.png" }
+ddr_3rd_mix = { rom = "ddr3mj", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/3rdmix.png" }
+ddr_2nd_mix = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/2ndmix.png" }
+ddr_1st_mix = { rom = "ddrj", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/ddrj.png" }
+ds_disneys_rave = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/disney.png" }
+ds_true_kiss_destination = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/dstkd.png" }
+ds_dreams_come_true = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/dsct.png" }
+ds_euromix_2 = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/euromix2.png" }
+ds_euromix_1 = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/euromix.png" }
+ds_1 = { rom = "ddr2m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/dstage-ir.png" }

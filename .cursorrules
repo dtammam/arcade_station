@@ -8,6 +8,7 @@ rules:
     notes:
       - "Use tomllib for TOML parsing instead of toml library."
       - "Create functions here unless they are truly specific to another file."
+      - "Always define new utility functions in this file to maintain consistency."
 
   - name: "QML Theme Files"
     pattern: "src/pegasus-fe/themes/**/*.qml"

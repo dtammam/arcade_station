@@ -5,6 +5,7 @@ import multiprocessing
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt
+import logging
 
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
@@ -154,11 +155,38 @@ def main(image_path, background_color='black'):
     window.show()
     sys.exit(app.exec_())
 
+def run_image_display(image_path, background_color, monitor_index):
+    app = QApplication(sys.argv)
+    screens = app.screens()
+    if not screens:
+        logging.error("No screens detected. Ensure you are running in a GUI-capable environment.")
+        return
+
+    # Ensure the monitor index is within range
+    if monitor_index >= len(screens):
+        logging.warning(f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.")
+        monitor_index = 0
+
+    screen_geometry = screens[monitor_index].geometry()
+
+    window = ImageWindow(image_path, background_color, screen_geometry)
+    window.show()
+
+    # Start the application event loop
+    logging.debug("Starting application event loop for image display.")
+    app.exec_()
+    logging.debug("Exited application event loop for image display.")
+
 def display_image(image_path, background_color='black'):
     """
-    Function to create and display an ImageWindow.
+    Function to create and display an ImageWindow in a separate process.
     """
-    app = QApplication(sys.argv)
-    window = ImageWindow(image_path, background_color)
-    window.show()
-    sys.exit(app.exec_())
+    logging.debug(f"Displaying image: {image_path} on monitor with background color: {background_color}")
+
+    # Load display configuration
+    display_config = load_toml_config('display_config.toml')
+    monitor_index = display_config['display'].get('monitor_index', 0)
+
+    # Start the image display in a separate process
+    process = multiprocessing.Process(target=run_image_display, args=(image_path, background_color, monitor_index))
+    process.start()
