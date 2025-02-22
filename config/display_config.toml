@@ -1,5 +1,5 @@
 [display]
-image_path = "C:/Repositories/arcade_station/assets/images/banners/fnf.png"
+image_path = "C:/Repositories/arcade_station/assets/images/banners/ddr-v.png"
 default_image_path = "C:/Repositories/arcade_station/assets/images/banners/supernova.png"
 background_color = "black"
 monitor_index = 1  # Index of the monitor to use
