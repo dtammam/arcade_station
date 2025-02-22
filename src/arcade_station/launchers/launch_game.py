@@ -43,6 +43,9 @@ if __name__ == "__main__":
                 '-ROM', rom, '-State', state,
                 '-ExecutablePath', executable_path, '-Executable', executable, '-IniPath', ini_path
             ])
+            
+            # Kill Pegasus after launching the game
+            kill_pegasus()
         else:
             # Binary game logic
             game_path = game_config
