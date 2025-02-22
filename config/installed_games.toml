@@ -10,18 +10,18 @@ ddr_starlight = ""
 ddr_omnimix = ""
 ddr_a3 = ""
 ddr_a20 = ""
-ddr_extreme_proclarity = ""
-ddr_extreme = ""
-ddr_max_2 = ""
-ddr_max_1 = ""
-ddr_5th_mix = ""
-ddr_4th_mix = ""
-ddr_3rd_mix = ""
-ddr_2nd_mix = ""
-ddr_1st_mix = ""
-ds_disneys_rave = ""
-ds_true_kiss_destination = ""
-ds_dreams_come_true = ""
-ds_euromix_2 = ""
-ds_euromix_1 = ""
-ds_1 = ""
+ddr_extreme_proclarity = { rom = "ddrexproc", state = "o" }
+ddr_extreme = { rom = "ddrexproc", state = "p" }
+ddr_max_2 = { rom = "ddrmax2", state = "o" }
+ddr_max_1 = { rom = "ddrmax", state = "o" }
+ddr_5th_mix = { rom = "ddr5m", state = "o" }
+ddr_4th_mix = { rom = "ddr4mp", state = "o" }
+ddr_3rd_mix = { rom = "ddr3mj", state = "o" }
+ddr_2nd_mix = { rom = "ddr2m", state = "o" }
+ddr_1st_mix = { rom = "ddrj", state = "o" }
+ds_disneys_rave = { rom = "ddr2m", state = "o" }
+ds_true_kiss_destination = { rom = "ddr2m", state = "o" }
+ds_dreams_come_true = { rom = "ddr2m", state = "o" }
+ds_euromix_2 = { rom = "ddr2m", state = "o" }
+ds_euromix_1 = { rom = "ddr2m", state = "o" }
+ds_1 = { rom = "ddr2m", state = "o" }

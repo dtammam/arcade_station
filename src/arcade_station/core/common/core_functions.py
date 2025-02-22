@@ -307,3 +307,47 @@ def kill_pegasus():
                 proc.kill()
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
             print(f"Error handling process {proc.info['name']}: {e}")
+
+def start_process(file_path):
+    """
+    Start a process based on the file path and the operating system.
+
+    Args:
+        file_path (str): The path to the executable or script to run.
+    """
+    os_type = sys.platform
+
+    try:
+        if os_type.startswith('win'):
+            # Windows: Use startfile or subprocess
+            if file_path.endswith('.exe'):
+                os.startfile(file_path)
+            else:
+                subprocess.Popen(['python', file_path], shell=True)
+        elif os_type.startswith('darwin'):
+            # macOS: Use open command
+            subprocess.Popen(['open', file_path])
+        elif os_type.startswith('linux'):
+            # Linux: Use xdg-open or execute directly
+            if os.access(file_path, os.X_OK):
+                subprocess.Popen([file_path])
+            else:
+                subprocess.Popen(['xdg-open', file_path])
+        else:
+            raise Exception(f"Unsupported platform: {os_type}")
+
+        print(f"Started process for: {file_path}")
+    except Exception as e:
+        print(f"Failed to start process for {file_path}: {e}")
+
+def load_game_config():
+    """
+    Load game configuration from the installed_games.toml file.
+    """
+    return load_toml_config('installed_games.toml')
+
+def load_mame_config():
+    """
+    Load MAME configuration from the mame_config.toml file.
+    """
+    return load_toml_config('mame_config.toml')
