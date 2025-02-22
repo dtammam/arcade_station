@@ -7,6 +7,7 @@ rules:
       docstring_style: "google"  # Based on Google style guide reference in PLAN.MD
     notes:
       - "Use tomllib for TOML parsing instead of toml library."
+      - "Create functions here unless they are truly specific to another file."
 
   - name: "QML Theme Files"
     pattern: "src/pegasus-fe/themes/**/*.qml"
@@ -35,6 +36,12 @@ rules:
     formatting:
       trim_trailing_whitespace: true
       insert_final_newline: true
+
+  - name: "Image Display Functions"
+    pattern: "src/arcade_station/core/common/display_image.py"
+    language: "python"
+    notes:
+      - "Update image-related elements in this file with functions."
 
 ignore:
   - ".venv/**"

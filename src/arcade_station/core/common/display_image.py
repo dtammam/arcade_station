@@ -22,34 +22,44 @@ class ImageWindow(QMainWindow):
         super().__init__()
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
-        # Set the background color or make it transparent
-        if background_color.lower() == 'transparent':
-            self.setAttribute(Qt.WA_TranslucentBackground, True)
-        else:
-            self.setStyleSheet(f"background-color: {background_color};")
+        # Set the background color for the entire window
+        self.setStyleSheet(f"background-color: {background_color};")
 
         # Load the image
         pixmap = QPixmap(image_path)
+
+        # Calculate the aspect ratio
+        aspect_ratio = pixmap.height() / pixmap.width()
+
+        # Determine the maximum size for the image to fit within the screen
+        screen_width = screen_geometry.width() if screen_geometry else QApplication.primaryScreen().size().width()
+        screen_height = screen_geometry.height() if screen_geometry else QApplication.primaryScreen().size().height()
+
+        # Calculate the maximum width and height while maintaining aspect ratio
+        max_width = screen_width
+        max_height = int(max_width * aspect_ratio)
+
+        if max_height > screen_height:
+            max_height = screen_height
+            max_width = int(max_height / aspect_ratio)
+
+        # Set the window size to the screen size to cover the entire screen
+        self.setFixedSize(screen_width, screen_height)
 
         # Create a label to display the image
         self.label = QLabel(self)
         self.label.setPixmap(pixmap)
         self.label.setScaledContents(True)
 
-        # Determine the screen width and set the window size accordingly
-        screen_width = screen_geometry.width() if screen_geometry else QApplication.primaryScreen().size().width()
-        aspect_ratio = pixmap.height() / pixmap.width()
-        window_height = int(screen_width * aspect_ratio)
+        # Calculate the position to center the image within the window
+        x_position = (screen_width - max_width) // 2
+        y_position = (screen_height - max_height) // 2
 
-        # Calculate the position to center the window
-        x_position = screen_geometry.x() + (screen_geometry.width() - screen_width) // 2
-        y_position = screen_geometry.y() + (screen_geometry.height() - window_height) // 2
+        # Set the label geometry to center the image
+        self.label.setGeometry(x_position, y_position, max_width, max_height)
 
-        # Set the window geometry
-        self.setGeometry(x_position, y_position, screen_width, window_height)
-
-        # Set the label to fill the window
-        self.label.setGeometry(self.rect())
+        # Set the window geometry to cover the entire screen
+        self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_width, screen_height)
 
     def update_image(self, image_path):
         # Method to update the image
