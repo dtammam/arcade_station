@@ -6,7 +6,13 @@ import logging
 # Add the parent directory of 'arcade_station' to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
-from arcade_station.core.common.core_functions import load_game_config, load_mame_config, kill_pegasus, load_toml_config
+from arcade_station.core.common.core_functions import (
+    load_game_config, 
+    load_mame_config, 
+    kill_pegasus, 
+    load_toml_config,
+    kill_process_by_identifier
+)
 from arcade_station.core.common.light_control import launch_mame_lights
 from arcade_station.core.common.display_image import display_image
 
@@ -26,6 +32,7 @@ def launch_game(game_name):
         banner_path = game_config['banner']
         if banner_path and os.path.exists(banner_path):
             logging.debug(f"Displaying banner: {banner_path}")
+            kill_process_by_identifier("open_image")  # Kill any existing image display
             display_image(banner_path, display_config['display']['background_color'])
     
     # Existing logic to launch the game...
@@ -101,6 +108,7 @@ if __name__ == "__main__":
     if dynamic_marquee_enabled and 'banner' in config['games'].get(game_name, {}):
         banner_path = config['games'][game_name]['banner']
         if banner_path and os.path.exists(banner_path):
+            kill_process_by_identifier("open_image")  # Kill any existing image display
             display_image(banner_path, display_config['display']['background_color'])
 
     if game_name in config['games']:
