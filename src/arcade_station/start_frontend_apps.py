@@ -9,7 +9,7 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Construct absolute paths to the relative scripts.
 listener_script = os.path.join(base_dir, "listeners", "key_listener.py")
-pegasus_script = os.path.join(base_dir, "start_pegasus.py")
+pegasus_script = os.path.join(base_dir, "core", "common", "start_pegasus.py")
 
 # Launch the key_listener.py script with the appropriate identifier.
 listener_process = launch_script(listener_script, identifier="key_listener")

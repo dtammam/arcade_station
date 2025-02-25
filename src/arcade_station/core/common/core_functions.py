@@ -106,7 +106,7 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
         action_path = os.path.abspath(os.path.join(base_dir, action))
         
         if action == "kill_processes":
-            script_path = os.path.join(os.path.dirname(__file__), '../kill_all_and_reset_pegasus.py')
+            script_path = os.path.join(os.path.dirname(__file__), 'kill_all_and_reset_pegasus.py')
             keyboard.add_hotkey(hotkey, lambda: subprocess.Popen(['python', script_path]))
         else:
             keyboard.add_hotkey(hotkey, lambda action_path=action_path: start_app(action_path))

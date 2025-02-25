@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 from arcade_station.core.common.core_functions import *
 from arcade_station.core.common.light_control import reset_lights
 from arcade_station.core.common.display_image import display_image_from_config
@@ -15,4 +15,4 @@ kill_process_by_identifier("start_pegasus")
 process = display_image_from_config(use_default=True)
 log_message("Started marquee image display process", "MENU")
 
-start_pegasus()
+start_pegasus() 
