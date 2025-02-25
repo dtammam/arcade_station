@@ -8,6 +8,7 @@ names = [
     "i_view64",
     "mame",
     "mame2lit",
+    "mame_lights",
     "mmc",
     "notepad",
     "notepad++",
@@ -21,5 +22,5 @@ names = [
     "StepMania",
     "Taskmgr",
     "timeout",
-    "arcade_station-image"
+    "marquee_image"
 ] 
