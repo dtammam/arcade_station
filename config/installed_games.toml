@@ -1,15 +1,15 @@
 [games]
 itgmania = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/simply-love.png" }
-not_itg = { path = "C:/path/to/NotITG.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/notitg.png" }
+not_itg = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/notitg.png" }
 stepmania_3 = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/stepmania3.png" }
-itg_3 = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "" }
-itg_2 = "C:/Games/In The Groove 2/Program/OpenITG.exe"
-itg_1 = ""
-mungyodance_3 = ""
-ddr_starlight = ""
-ddr_omnimix = ""
-ddr_a3 = ""
-ddr_a20 = ""
+itg_3 = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/itg3.png" }
+itg_2 = { path = "C:/Games/In The Groove 2/Program/OpenITG.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/itg2.png" }
+itg_1 = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/itg1.png" }
+mungyodance_3 = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/mungyodance3.png" }
+ddr_starlight = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/starlight.png" }
+ddr_omnimix = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/omni.png" }
+ddr_a3 = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/a3.png" }
+ddr_a20 = { path = "", banner = "C:/Repositories/arcade_station/assets/images/banners/ddr-a20.png" }
 ddr_extreme_proclarity = { rom = "ddrexproc", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme-proclarity.png" }
 ddr_extreme = { rom = "ddrexproc", state = "p", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme.png" }
 ddr_max_2 = { rom = "ddrmax2", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/ddrmax2.png" }

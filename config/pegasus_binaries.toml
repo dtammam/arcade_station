@@ -1,5 +1,4 @@
 [pegasus]
-
 windows_binary = "pegasus-fe_windows.exe"
 mac_binary = "pegasus-fe_mac"
 linux_binary = "pegasus-fe_linux"
