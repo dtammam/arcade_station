@@ -10,7 +10,7 @@ import logging
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
-from core.common.core_functions import load_toml_config
+from arcade_station.core.common.core_functions import load_toml_config, log_message
 
 # Global variable to hold the window instance
 window_instance = None
@@ -122,8 +122,8 @@ def display_image_from_config(config_path='display_config.toml', close_event=Non
     background_color = config['display']['background_color']
     monitor_index = config['display'].get('monitor_index', 0)
 
-    logging.debug(f"Display image from config: {'default image' if use_default else 'normal image'}")
-    logging.debug(f"Image path: {image_path}, Background color: {background_color}")
+    log_message(f"Display image from config: {'default image' if use_default else 'normal image'}", "BANNER")
+    log_message(f"Image path: {image_path}, Background color: {background_color}", "BANNER")
 
     # Use the display_image function which now uses the standardized approach with marquee_image identifier
     return display_image(image_path, background_color)
@@ -146,12 +146,12 @@ def run_image_display(image_path, background_color, monitor_index):
     app = QApplication(sys.argv)
     screens = app.screens()
     if not screens:
-        logging.error("No screens detected. Ensure you are running in a GUI-capable environment.")
+        log_message("No screens detected. Ensure you are running in a GUI-capable environment.", "BANNER")
         return
 
     # Ensure the monitor index is within range
     if monitor_index >= len(screens):
-        logging.warning(f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.")
+        log_message(f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.", "BANNER")
         monitor_index = 0
 
     screen_geometry = screens[monitor_index].geometry()
@@ -160,15 +160,15 @@ def run_image_display(image_path, background_color, monitor_index):
     window.show()
 
     # Start the application event loop
-    logging.debug("Starting application event loop for image display.")
+    log_message("Starting application event loop for image display.", "BANNER")
     app.exec_()
-    logging.debug("Exited application event loop for image display.")
+    log_message("Exited application event loop for image display.", "BANNER")
 
 def display_image(image_path, background_color='black'):
     """
     Function to create and display an ImageWindow in a separate process.
     """
-    logging.debug(f"Displaying image: {image_path} on monitor with background color: {background_color}")
+    log_message(f"Displaying image: {image_path} on monitor with background color: {background_color}", "BANNER")
 
     # Load display configuration
     display_config = load_toml_config('display_config.toml')

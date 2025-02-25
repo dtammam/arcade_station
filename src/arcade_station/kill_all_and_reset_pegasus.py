@@ -13,6 +13,6 @@ kill_process_by_identifier("start_pegasus")
 
 # Directly use display_image_from_config instead of launching open_image.py
 process = display_image_from_config(use_default=True)
-print(f"Started marquee image display process")
+log_message("Started marquee image display process", "MENU")
 
 start_pegasus()

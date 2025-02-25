@@ -1,6 +1,6 @@
 import subprocess
 import platform
-from arcade_station.core.common.core_functions import load_toml_config, launch_script
+from arcade_station.core.common.core_functions import load_toml_config, launch_script, log_message
 
 def reset_lights():
     """
@@ -13,13 +13,13 @@ def reset_lights():
 
     if enabled and executable_path and platform.system() == 'Windows':
         try:
-            print("Starting light test...")
+            log_message("Starting light test...", "LIGHTS")
             process = subprocess.Popen(executable_path, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             process.communicate(timeout=0.325)
             process.terminate()
-            print("Stopped light test.")
+            log_message("Stopped light test.", "LIGHTS")
         except Exception as e:
-            print(f"Failed to reset lights: {e}")
+            log_message(f"Failed to reset lights: {e}", "LIGHTS")
 
 def launch_mame_lights():
     """
@@ -32,8 +32,8 @@ def launch_mame_lights():
 
     if enabled and mame_executable_path and platform.system() == 'Windows':
         try:
-            print("Launching MAME lights...")
+            log_message("Launching MAME lights...", "LIGHTS")
             launch_script(mame_executable_path, identifier="mame_lights")
-            print("MAME lights launched.")
+            log_message("MAME lights launched.", "LIGHTS")
         except Exception as e:
-            print(f"Failed to launch MAME lights: {e}")
+            log_message(f"Failed to launch MAME lights: {e}", "LIGHTS")

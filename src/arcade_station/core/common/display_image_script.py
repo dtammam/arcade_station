@@ -1,17 +1,14 @@
 import sys
 import os
 import argparse
-import logging
 
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 
 from arcade_station.core.common.display_image import run_image_display
+from arcade_station.core.common.core_functions import log_message
 
 def main():
-    # Configure logging
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-    
     try:
         # Parse command line arguments
         parser = argparse.ArgumentParser(description='Display an image on a monitor')
@@ -24,16 +21,16 @@ def main():
         
         # Verify image file exists
         if not os.path.exists(args.image_path):
-            logging.error(f"Image file not found: {args.image_path}")
+            log_message(f"Image file not found: {args.image_path}", "BANNER")
             sys.exit(1)
             
-        logging.debug(f"Starting image display - Image: {args.image_path}, Color: {args.background_color}, Monitor: {args.monitor_index}")
+        log_message(f"Starting image display - Image: {args.image_path}, Color: {args.background_color}, Monitor: {args.monitor_index}", "BANNER")
         
         # Run the image display function
         run_image_display(args.image_path, args.background_color, args.monitor_index)
     
     except Exception as e:
-        logging.error(f"Error in image display script: {e}")
+        log_message(f"Error in image display script: {e}", "BANNER")
         sys.exit(1)
 
 if __name__ == "__main__":

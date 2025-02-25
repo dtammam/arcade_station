@@ -30,7 +30,7 @@ def open_header(script_name):
         script_name = "UnknownScript"
 
     # Log the invoking script
-    print(f"Script invoked: {script_name}")
+    log_message(f"Script invoked: {script_name}", "MENU")
 
     # Define other script-level variables
     global exit_code, log_file_path, log_tail_path
@@ -78,13 +78,13 @@ def load_key_mappings_from_toml(toml_file_path):
         dict: A dictionary of key-action mappings.
     """
     config = load_toml_config(toml_file_path)
-    print("Loaded key mappings config:", config)
+    log_message(f"Loaded key mappings config: {config}", "MENU")
 
     # Retrieve the key-action mappings
     key_mappings = config.get('key_mappings', {})
     
     if not key_mappings:
-        print("No key mappings found in the TOML file.")
+        log_message("No key mappings found in the TOML file.", "MENU")
     
     return key_mappings
 
@@ -97,7 +97,7 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
     """
     # Load key mappings from the TOML file
     key_mappings = load_key_mappings_from_toml(toml_file_path)
-    print("Loaded key mappings:", key_mappings)  # Debugging line to verify the loaded mappings
+    log_message(f"Loaded key mappings: {key_mappings}", "MENU")
 
     # Register hotkeys based on the mappings
     for hotkey, action in key_mappings.items():
@@ -111,12 +111,12 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
         else:
             keyboard.add_hotkey(hotkey, lambda action_path=action_path: start_app(action_path))
 
-    print("Listener started. Press Ctrl+C to stop.")
+    log_message("Listener started. Press Ctrl+C to stop.", "MENU")
     try:
         # Block forever, waiting for hotkeys
         keyboard.wait()
     except KeyboardInterrupt:
-        print("Listener stopped.")
+        log_message("Listener stopped.", "MENU")
 
 def kill_processes_from_toml(toml_file_path):
     """
@@ -126,13 +126,13 @@ def kill_processes_from_toml(toml_file_path):
         toml_file_path (str): Path to the TOML file containing processes to kill.
     """
 
-    print("Loading processes to kill...")
+    log_message("Loading processes to kill...", "MENU")
     config = load_toml_config(toml_file_path)
-    print("Loaded config:", config)
+    log_message(f"Loaded config: {config}", "MENU")
 
     processes_to_kill = config.get('processes', {}).get('names', [])
     if not processes_to_kill:
-        print("No processes found to kill in the TOML file.")
+        log_message("No processes found to kill in the TOML file.", "MENU")
         return
     
     # Make all process names case insensitive for comparison
@@ -146,10 +146,10 @@ def kill_processes_from_toml(toml_file_path):
         try:
             process_name = proc.info['name'].lower()
             if process_name in processes_to_kill:
-                print(f"Killing process: {proc.info['name']}")
+                log_message(f"Killing process: {proc.info['name']}", "MENU")
                 proc.kill()
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-            print(f"Error handling process {proc.info['name']}: {e}")
+            log_message(f"Error handling process {proc.info['name']}: {e}", "MENU")
 
 def load_installed_games():
     """
@@ -184,15 +184,15 @@ def start_pegasus():
     pegasus_binary = get_pegasus_binary(installed_games)
     
     if not os.path.exists(pegasus_binary):
-        print(f"Binary not found: {pegasus_binary}")
+        log_message(f"Binary not found: {pegasus_binary}", "GAME")
         return
 
     try:
-        print(f"Starting Pegasus with binary [{pegasus_binary}]...")
+        log_message(f"Starting Pegasus with binary [{pegasus_binary}]...", "GAME")
         subprocess.Popen(pegasus_binary, shell=True)
-        print("Pegasus launched.")
+        log_message("Pegasus launched.", "GAME")
     except Exception as e:
-        print(f"Failed to start Pegasus: {e}")
+        log_message(f"Failed to start Pegasus: {e}", "GAME")
 
 def start_app(executable_path):
     """
@@ -200,7 +200,7 @@ def start_app(executable_path):
     """
     try:
         os_type = determine_operating_system()
-        print(f"Starting process [{executable_path}] on {os_type}...")
+        log_message(f"Starting process [{executable_path}] on {os_type}...", "MENU")
 
         # Check if the file is a PowerShell script
         if executable_path.endswith('.ps1'):
@@ -208,19 +208,19 @@ def start_app(executable_path):
                 # Use PowerShell to execute the script
                 subprocess.Popen(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', executable_path])
             else:
-                print("PowerShell scripts are not supported on non-Windows systems.")
+                log_message("PowerShell scripts are not supported on non-Windows systems.", "MENU")
         else:
             # Logic to handle different operating systems for other executables
             if os_type == "Windows":
-                subprocess.Popen(f'start {executable_path}', shell=True)
+                subprocess.Popen(f'start "" "{executable_path}"', shell=True)
             elif os_type == "Darwin":
                 subprocess.Popen(['open', executable_path])
             else:
                 subprocess.Popen(['xdg-open', executable_path])
         
-        print(f"Launched process [{executable_path}].")
+        log_message(f"Launched process [{executable_path}].", "MENU")
     except Exception as e:
-        print(f"Failed to start process: {e}")
+        log_message(f"Failed to start process: {e}", "MENU")
 
 def kill_process_by_identifier(identifier):
     """
@@ -229,7 +229,7 @@ def kill_process_by_identifier(identifier):
     The identifier can be either a standard name (like 'marquee_image') or 
     any part of the command line used to start the process.
     """
-    print(f"Searching for processes with identifier: {identifier}")
+    log_message(f"Searching for processes with identifier: {identifier}", "MENU")
     killed = False
     
     # Map standard identifiers to specific command-line patterns
@@ -246,23 +246,23 @@ def kill_process_by_identifier(identifier):
         try:
             cmdline = proc.info["cmdline"]
             if cmdline and any(any(pattern in arg for arg in cmdline) for pattern in patterns):
-                print(f"Found process {proc.pid} with cmdline: {cmdline}")
+                log_message(f"Found process {proc.pid} with cmdline: {cmdline}", "MENU")
                 # First, kill any children of this process.
                 children = proc.children(recursive=True)
                 for child in children:
-                    print(f"Terminating child process {child.pid}")
+                    log_message(f"Terminating child process {child.pid}", "MENU")
                     child.kill()
                 # Now kill the process itself.
-                print(f"Terminating process {proc.pid}")
+                log_message(f"Terminating process {proc.pid}", "MENU")
                 proc.kill()
                 proc.wait(timeout=5)
                 killed = True
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-            print(f"Error processing process {proc.pid}: {e}")
+            log_message(f"Error processing process {proc.pid}: {e}", "MENU")
             continue
     
     if not killed:
-        print(f"No processes found with identifier: {identifier}")
+        log_message(f"No processes found with identifier: {identifier}", "MENU")
     
     return killed
 
@@ -318,7 +318,7 @@ def kill_pegasus():
     process_names = pegasus_process_names.get(platform_name, [])
 
     if not process_names:
-        print(f"Unsupported platform: {platform_name}")
+        log_message(f"Unsupported platform: {platform_name}", "GAME")
         return
 
     # Iterate over all running processes
@@ -326,10 +326,10 @@ def kill_pegasus():
         try:
             # Check if the process name matches any of the Pegasus names
             if proc.info['name'].lower() in (name.lower() for name in process_names):
-                print(f"Killing process: {proc.info['name']}")
+                log_message(f"Killing process: {proc.info['name']}", "GAME")
                 proc.kill()
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
-            print(f"Error handling process {proc.info['name']}: {e}")
+            log_message(f"Error handling process {proc.info['name']}: {e}", "GAME")
 
 def start_process(file_path):
     """
@@ -359,9 +359,9 @@ def start_process(file_path):
         else:
             raise Exception(f"Unsupported platform: {os_type}")
 
-        print(f"Started process for: {file_path}")
+        log_message(f"Started process for: {file_path}", "MENU")
     except Exception as e:
-        print(f"Failed to start process for {file_path}: {e}")
+        log_message(f"Failed to start process for {file_path}: {e}", "MENU")
 
 def load_game_config():
     """
@@ -374,3 +374,16 @@ def load_mame_config():
     Load MAME configuration from the mame_config.toml file.
     """
     return load_toml_config('mame_config.toml')
+
+def log_message(message, prefix=""):
+    """
+    Simple logging function that prints a message with an optional prefix.
+    
+    Args:
+        message (str): The message to log
+        prefix (str): Optional prefix to add to the message
+    """
+    if prefix:
+        print(f"[{prefix}] {message}")
+    else:
+        print(message)
