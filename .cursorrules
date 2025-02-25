@@ -10,6 +10,17 @@ rules:
       - "Create functions here unless they are truly specific to another file."
       - "Always define new utility functions in this file to maintain consistency."
 
+  - name: "Streaming Functions"
+    pattern: "src/arcade_station/core/common/start_streaming.py"
+    language: "python"
+    linting:
+      max_line_length: 79
+      docstring_style: "google"
+    notes:
+      - "Use core_functions.py's utilities for logging and configuration."
+      - "Ensure cross-platform compatibility (Windows/Linux/Mac)."
+      - "Handle process creation with appropriate flags for each OS."
+
   - name: "QML Theme Files"
     pattern: "src/pegasus-fe/themes/**/*.qml"
     language: "qml"

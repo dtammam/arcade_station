@@ -2,9 +2,10 @@
 "ctrl+~" = "../arcade_station/core/windows/RestartComputer.ps1"
 "ctrl+f2" = "../arcade_station/core/windows/RegistryUpdateKioskToPC.ps1"
 "ctrl+f3" = "../arcade_station/core/windows/RegistryUpdatePCToKiosk.ps1"
+"ctrl+f4" = "../arcade_station/core/common/start_streaming.py" # Optional for OBS
 "ctrl+f5" = "C:/Users/dean/AppData/Local/Programs/cursor/Cursor.exe" # Update with installer later
 "ctrl+f6" = "C:/Windows/explorer.exe"
 "ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" # Update with installer later
 "ctrl+space" = "../arcade_station/kill_all_and_reset_pegasus.py" # Populate from installer
 "+" = "../arcade_station/core/common/monitor_screenshot.py" # Populate from installer
-"/" = "../arcade_station/core/common/monitor_screenshot.py" # Populate from installer/
+"/" = "../arcade_station/core/common/monitor_screenshot.py" # Populate from installer

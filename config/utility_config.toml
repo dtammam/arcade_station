@@ -2,3 +2,9 @@
 light_reset_executable_path = "C:/Repositories/arcade_station/bin/windows/LightsTest.exe"
 light_mame_executable_path = "C:/Repositories/arcade_station/bin/windows/mame2lit.exe"
 lights_enabled = false
+
+[streaming]
+obs_executable = "C:/Program Files/obs-studio/bin/64bit/obs64.exe"
+obs_arguments = "--startstreaming --disable-shutdown-check"
+webcam_management_executable = "C:/Program Files/Logitech/LogiCapture/bin/LogiCapture.exe"
+launch_webcam_management = true
