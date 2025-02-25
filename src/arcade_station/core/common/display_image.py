@@ -1,7 +1,7 @@
 import sys
 import os
 import threading
-import multiprocessing
+import subprocess
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt
@@ -122,24 +122,11 @@ def display_image_from_config(config_path='display_config.toml', close_event=Non
     background_color = config['display']['background_color']
     monitor_index = config['display'].get('monitor_index', 0)
 
-    app = QApplication(sys.argv)
-    screens = app.screens()
-    if not screens:
-        print("No screens detected. Ensure you are running in a GUI-capable environment.")
-        return
+    logging.debug(f"Display image from config: {'default image' if use_default else 'normal image'}")
+    logging.debug(f"Image path: {image_path}, Background color: {background_color}")
 
-    if monitor_index >= len(screens):
-        print(f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.")
-        monitor_index = 0
-
-    screen = screens[monitor_index]
-    process = multiprocessing.Process(
-        target=run_app,
-        args=(image_path, background_color, screen.geometry(), close_event),
-        name="arcade_station-image"
-    )
-    process.start()
-    return process
+    # Use the display_image function which now uses the standardized approach with marquee_image identifier
+    return display_image(image_path, background_color)
 
 def close_image_window():
     """
@@ -187,6 +174,61 @@ def display_image(image_path, background_color='black'):
     display_config = load_toml_config('display_config.toml')
     monitor_index = display_config['display'].get('monitor_index', 0)
 
-    # Start the image display in a separate process
-    process = multiprocessing.Process(target=run_image_display, args=(image_path, background_color, monitor_index))
-    process.start()
+    # Get the path to the current script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    script_path = os.path.join(current_dir, "display_image_script.py")
+    
+    # Ensure the script exists and has the correct content
+    if not os.path.exists(script_path):
+        with open(script_path, 'w') as f:
+            f.write("""
+import sys
+import os
+import argparse
+import logging
+
+# Add the parent directory to the Python path to allow relative module imports
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
+
+from arcade_station.core.common.display_image import run_image_display
+
+def main():
+    # Configure logging
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    
+    try:
+        # Parse command line arguments
+        parser = argparse.ArgumentParser(description='Display an image on a monitor')
+        parser.add_argument('image_path', help='Path to the image file to display')
+        parser.add_argument('background_color', help='Background color (e.g., "black", "#000000")')
+        parser.add_argument('monitor_index', type=int, help='Index of the monitor to display on')
+        parser.add_argument('--identifier', default='marquee_image', help='Process identifier')
+        
+        args = parser.parse_args()
+        
+        # Verify image file exists
+        if not os.path.exists(args.image_path):
+            logging.error(f"Image file not found: {args.image_path}")
+            sys.exit(1)
+            
+        logging.debug(f"Starting image display - Image: {args.image_path}, Color: {args.background_color}, Monitor: {args.monitor_index}")
+        
+        # Run the image display function
+        run_image_display(args.image_path, args.background_color, args.monitor_index)
+    
+    except Exception as e:
+        logging.error(f"Error in image display script: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+""")
+    
+    # Use the standardized launch_script function with marquee_image identifier
+    from arcade_station.core.common.core_functions import launch_script
+    process = launch_script(
+        script_path, 
+        identifier="marquee_image",
+        extra_args=[image_path, background_color, str(monitor_index)]
+    )
+    return process

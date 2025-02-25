@@ -223,25 +223,48 @@ def start_app(executable_path):
         print(f"Failed to start process: {e}")
 
 def kill_process_by_identifier(identifier):
-    print("Loading processes to kill...")
+    """
+    Kill a process by its identifier.
+    
+    The identifier can be either a standard name (like 'marquee_image') or 
+    any part of the command line used to start the process.
+    """
+    print(f"Searching for processes with identifier: {identifier}")
+    killed = False
+    
+    # Map standard identifiers to specific command-line patterns
+    identifier_patterns = {
+        "marquee_image": ["--identifier=marquee_image"],
+        "open_image": ["--identifier=marquee_image"],  # For backward compatibility, point to new ID
+        "start_pegasus": ["--identifier=start_pegasus"]
+    }
+    
+    # Get the patterns to look for
+    patterns = identifier_patterns.get(identifier, [identifier])
+    
     for proc in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
         try:
             cmdline = proc.info["cmdline"]
-            if cmdline and any(identifier in arg for arg in cmdline):
+            if cmdline and any(any(pattern in arg for arg in cmdline) for pattern in patterns):
                 print(f"Found process {proc.pid} with cmdline: {cmdline}")
                 # First, kill any children of this process.
                 children = proc.children(recursive=True)
                 for child in children:
-                    print(f"Terminating child process {child.pid} with cmdline: {child.cmdline()}")
+                    print(f"Terminating child process {child.pid}")
                     child.kill()
                 # Now kill the process itself.
-                print(f"Terminating process {proc.pid} with cmdline: {cmdline}")
+                print(f"Terminating process {proc.pid}")
                 proc.kill()
                 proc.wait(timeout=5)
+                killed = True
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             print(f"Error processing process {proc.pid}: {e}")
             continue
-
+    
+    if not killed:
+        print(f"No processes found with identifier: {identifier}")
+    
+    return killed
 
 def launch_script(script_path, identifier=None, extra_args=None):
     """

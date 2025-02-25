@@ -32,7 +32,7 @@ def launch_game(game_name):
         banner_path = game_config['banner']
         if banner_path and os.path.exists(banner_path):
             logging.debug(f"Displaying banner: {banner_path}")
-            kill_process_by_identifier("open_image")  # Kill any existing image display
+            kill_process_by_identifier("marquee_image")  # Use standardized identifier
             display_image(banner_path, display_config['display']['background_color'])
     
     # Existing logic to launch the game...
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     if dynamic_marquee_enabled and 'banner' in config['games'].get(game_name, {}):
         banner_path = config['games'][game_name]['banner']
         if banner_path and os.path.exists(banner_path):
-            kill_process_by_identifier("open_image")  # Kill any existing image display
+            kill_process_by_identifier("marquee_image")  # Use standardized identifier
             display_image(banner_path, display_config['display']['background_color'])
 
     if game_name in config['games']:
