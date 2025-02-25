@@ -19,13 +19,13 @@ launch:
     "not_itg"
 assets.box_front: ../../../../assets/images/banners/notitg.png
 
-game: StepMania 3.9
-file: not\using\files\to\launch\games\StepMania 3.9
+game: StepMania 3
+file: not\using\files\to\launch\games\StepMania 3
 sortBy: c
 launch: 
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "stepmania_3.9"
+    "stepmania_3"
 assets.box_front: ../../../../assets/images/banners/stepmania3.png
 
 game: In The Groove 3

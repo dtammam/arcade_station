@@ -1,8 +1,8 @@
 [games]
 itgmania = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/simply-love.png" }
 not_itg = { path = "C:/path/to/NotITG.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/notitg.png" }
-stepmania_3.9 = "C:/Games/ITGmania/Program/ITGmania.exe"
-itg_3 = ""
+stepmania_3 = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/stepmania3.png" }
+itg_3 = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "" }
 itg_2 = "C:/Games/In The Groove 2/Program/OpenITG.exe"
 itg_1 = ""
 mungyodance_3 = ""
