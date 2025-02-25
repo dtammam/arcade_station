@@ -217,7 +217,7 @@ def start_app(executable_path):
                 subprocess.Popen(['open', executable_path])
             else:
                 subprocess.Popen(['xdg-open', executable_path])
-        
+                
         log_message(f"Launched process [{executable_path}].", "MENU")
     except Exception as e:
         log_message(f"Failed to start process: {e}", "MENU")
