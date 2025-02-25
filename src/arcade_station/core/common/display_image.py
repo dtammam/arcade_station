@@ -23,14 +23,25 @@ class ImageWindow(QMainWindow):
         super().__init__()
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
-        # Set the background color for the entire window
-        self.setStyleSheet(f"background-color: {background_color};")
+        # Handle transparency specially
+        if background_color.lower() == 'transparent':
+            # Enable window transparency
+            self.setAttribute(Qt.WA_TranslucentBackground)
+            # Use transparent stylesheet
+            self.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
+        else:
+            # Set the background color for the entire window
+            self.setStyleSheet(f"background-color: {background_color};")
 
         # Load the image
         pixmap = QPixmap(image_path)
 
         # Calculate the aspect ratio
         aspect_ratio = pixmap.height() / pixmap.width()
+        
+        # For transparent PNGs, ensure alpha channel is preserved
+        if background_color.lower() == 'transparent' and image_path.lower().endswith('.png'):
+            pixmap.setMask(pixmap.createMaskFromColor(Qt.transparent))
 
         # Determine the maximum size for the image to fit within the screen
         screen_width = screen_geometry.width() if screen_geometry else QApplication.primaryScreen().size().width()

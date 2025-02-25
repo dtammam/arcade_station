@@ -1,6 +1,6 @@
 [display]
 image_path = "C:/Repositories/arcade_station/assets/images/banners/ddr-v.png" 
 default_image_path = "C:/Repositories/arcade_station/assets/images/banners/supernova.png" 
-background_color = "transparent" 
+background_color = "black" 
 monitor_index = 1 
 dynamic_marquee_enabled = true 
