@@ -11,8 +11,15 @@ reset_lights()
 kill_process_by_identifier("marquee_image")
 kill_process_by_identifier("start_pegasus")
 
-# Directly use display_image_from_config instead of launching open_image.py
-process = display_image_from_config(use_default=True)
-log_message("Started marquee image display process", "MENU")
+# Check if dynamic marquee is enabled before displaying an image
+config = load_toml_config('display_config.toml')
+dynamic_marquee_enabled = config.get('dynamic_marquee', {}).get('enabled', False)
+
+if dynamic_marquee_enabled:
+    # Only display the default image if dynamic marquee is enabled
+    process = display_image_from_config(use_default=True)
+    log_message("Started marquee image display process", "MENU")
+else:
+    log_message("Dynamic marquee is disabled, not showing an image", "MENU")
 
 start_pegasus() 

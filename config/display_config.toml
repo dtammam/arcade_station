@@ -3,4 +3,8 @@ image_path = "C:/Repositories/arcade_station/assets/images/banners/ddr-v.png"
 default_image_path = "C:/Repositories/arcade_station/assets/images/banners/supernova.png" 
 background_color = "black" 
 monitor_index = 1 
-dynamic_marquee_enabled = true 
+
+[dynamic_marquee]
+enabled = true
+itgmania_display_enabled = true
+itgmania_display_file_path = "C:/Games/ITGmania/Save/CurrentSongInfo.log" 

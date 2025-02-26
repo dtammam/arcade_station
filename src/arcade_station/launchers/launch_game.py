@@ -26,7 +26,7 @@ def launch_game(game_name):
     game_config = config['games'].get(game_name, {})    
     # Check if dynamic marquee is enabled
     display_config = load_toml_config('display_config.toml')
-    dynamic_marquee_enabled = display_config['display'].get('dynamic_marquee_enabled', False)
+    dynamic_marquee_enabled = display_config.get('dynamic_marquee', {}).get('enabled', False)
     
     # Display banner if configured
     if dynamic_marquee_enabled and 'banner' in game_config:
