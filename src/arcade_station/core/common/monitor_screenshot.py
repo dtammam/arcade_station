@@ -6,6 +6,11 @@ from PyQt5.QtGui import QScreen
 import tomllib
 import subprocess
 
+# Add the parent directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+from arcade_station.core.common.core_functions import log_message
+
 # Load configuration from TOML file
 def load_config(config_path='config/screenshot_config.toml'):
     with open(config_path, 'rb') as f:
@@ -25,11 +30,11 @@ def take_screenshot(monitor_index=0, file_location='.', file_name=None, quality=
     app = QApplication(sys.argv)
     screens = app.screens()
     if not screens:
-        print("No screens detected. Ensure you are running in a GUI-capable environment.")
+        log_message("No screens detected. Ensure you are running in a GUI-capable environment.", "SCREENSHOT")
         return
 
     if monitor_index >= len(screens):
-        print(f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.")
+        log_message(f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.", "SCREENSHOT")
         monitor_index = 0
 
     screen = screens[monitor_index]
@@ -50,13 +55,13 @@ def take_screenshot(monitor_index=0, file_location='.', file_name=None, quality=
     elif quality == 'Low':
         screenshot.save(file_path.replace('.png', '.jpg'), 'JPEG', quality=50)
 
-    print(f"Screenshot saved to {file_path}")
+    log_message(f"Screenshot saved to {file_path}", "SCREENSHOT")
 
     # Resolve the sound file path to an absolute path
     sound_file = os.path.abspath(os.path.join(os.path.dirname(__file__), config['screenshot'].get('sound_file', '')))
 
     # Debug: Print the resolved sound file path
-    print(f"Resolved sound file path: {sound_file}")
+    log_message(f"Resolved sound file path: {sound_file}", "SCREENSHOT")
 
     # Play sound if specified and exists
     if sound_file and os.path.exists(sound_file) and config['screenshot'].get('sound_file', '').strip():
@@ -68,9 +73,9 @@ def take_screenshot(monitor_index=0, file_location='.', file_name=None, quality=
             elif sys.platform.startswith('linux'):
                 subprocess.run(['mpg123', sound_file])
         except Exception as e:
-            print(f"Error playing sound: {e}")
+            log_message(f"Error playing sound: {e}", "SCREENSHOT")
     else:
-        print("No sound file specified or file not found.")
+        log_message("No sound file specified or file not found.", "SCREENSHOT")
 
     app.quit()
 

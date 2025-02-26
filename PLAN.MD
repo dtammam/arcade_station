@@ -110,7 +110,7 @@ This phase is complete when a user can take the installer, run it on their Windo
 
 #### Technical Specifications
 1. Environment
-    - Python Version: [3.12.8](https://www.python.org/downloads/release/python-3128/)
+    - Python Version: [3.12.9](https://www.python.org/downloads/release/python-3128/)
     - Dependency Management: `venv` with explicit `requirements.txt`, pin to <= major/minor versions of dependencies used in development (choosing not to use `pyproject.toml` as I am looking to ease into this)
     - UI Framework: `tkinter` for installer interface
 

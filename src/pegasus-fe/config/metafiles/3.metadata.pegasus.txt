@@ -1,8 +1,8 @@
-collection: b_Dancing Stage
-shortname: DS
+collection: 3metadata
+shortname: 3metadata
 
 game: Disney's Rave
-file: not\using\files\to\launch\games\1
+file: not\using\files\to\launch\games\Disney's Rave
 sortBy: ds1
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -11,7 +11,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/disney.png
 
 game: True Kiss Destination
-file: not\using\files\to\launch\games\2
+file: not\using\files\to\launch\games\True Kiss Destination
 sortBy: ds2
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -20,7 +20,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/dstkd.png
 
 game: Dreams Come True
-file: not\using\files\to\launch\games\3
+file: not\using\files\to\launch\games\Dreams Come True
 sortBy: ds3
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -29,7 +29,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/dsdct.png
 
 game: Euromix 2
-file: not\using\files\to\launch\games\4
+file: not\using\files\to\launch\games\Euromix 2
 sortBy: ds4
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -38,7 +38,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/euromix2.png
 
 game: Euromix
-file: not\using\files\to\launch\games\5
+file: not\using\files\to\launch\games\Euromix
 sortBy: ds5
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -47,7 +47,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/euromix.png
 
 game: Dancing Stage
-file: not\using\files\to\launch\games\6
+file: not\using\files\to\launch\games\Dancing Stage
 sortBy: ds6
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 

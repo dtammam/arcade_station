@@ -1,5 +1,5 @@
 [logging]
-logdirectory = "C:/Program Files/_scriptLogs"
+logdirectory = "C:/Program Files/_scriptLogs" 
 
 [paths]
 pegasus_base_path = "../../../pegasus-fe"

@@ -1,8 +1,8 @@
-collection: c_Dance Dance Revolution
-shortname: DDR
+collection: 2metadata
+shortname: 2metadata
 
 game: DDR Omnimix
-file: not\using\files\to\launch\games\1
+file: not\using\files\to\launch\games\DDR Omnimix
 sortBy: a
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -11,7 +11,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/omni-custom.png
 
 game: DDR A3
-file: not\using\files\to\launch\games\2
+file: not\using\files\to\launch\games\DDR A3
 sortBy: b
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -20,7 +20,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/a3-custom.png
 
 game: DDR A20
-file: not\using\files\to\launch\games\3
+file: not\using\files\to\launch\games\DDR A20
 sortBy: c
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -29,7 +29,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/ddr-a20.png
 
 game: EXTREME Pro Clarity
-file: not\using\files\to\launch\games\4
+file: not\using\files\to\launch\games\EXTREME Pro Clarity
 sortBy: d
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -38,7 +38,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/extreme.png
 
 game: EXTREME
-file: not\using\files\to\launch\games\5
+file: not\using\files\to\launch\games\EXTREME
 sortBy: e
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -47,7 +47,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/extreme-nonproclarity.png
 
 game: DDRMAX2
-file: not\using\files\to\launch\games\6
+file: not\using\files\to\launch\games\DDRMAX2
 sortBy: f
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -56,7 +56,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/ddrmax2.png
 
 game: DDRMAX
-file: not\using\files\to\launch\games\7
+file: not\using\files\to\launch\games\DDRMAX
 sortBy: g
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -65,7 +65,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/ddrmax.png
 
 game: 5thMix
-file: not\using\files\to\launch\games\8
+file: not\using\files\to\launch\games\5thMix
 sortBy: h
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -74,7 +74,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/5thmix.png
 
 game: 4thMix
-file: not\using\files\to\launch\games\9
+file: not\using\files\to\launch\games\4thMix
 sortBy: i
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -83,7 +83,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/4thmix.png
 
 game: 3rdMix
-file: not\using\files\to\launch\games\10
+file: not\using\files\to\launch\games\3rdMix
 sortBy: j
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -92,7 +92,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/3rdmix.png
 
 game: 2ndMix
-file: not\using\files\to\launch\games\11
+file: not\using\files\to\launch\games\2ndMix
 sortBy: k
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
@@ -101,7 +101,7 @@ launch:
 assets.box_front: ../../../../assets/images/banners/2ndmix.png
 
 game: DDR Internet Ranking
-file: not\using\files\to\launch\games\12
+file: not\using\files\to\launch\games\DDR Internet Ranking
 sortBy: l
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 

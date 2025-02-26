@@ -1,0 +1,4 @@
+[mame]
+executable_path = "C:/pegasus/games/ddr573-mame/"
+executable = "mame.exe"
+ini_path = "-inipath C:/pegasus/games/ddr573-mame/"
