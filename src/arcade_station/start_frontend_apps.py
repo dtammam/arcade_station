@@ -6,9 +6,14 @@ import time
 import argparse
 
 # Check Python version
-if sys.version_info[:3] != (3, 12, 8):
-    print(f"Warning: This application was developed with Python 3.12.8")
-    print(f"Current version: {sys.version.split()[0]}")
+REQUIRED_VERSION = (3, 12, 9)  # Updated to 3.12.9
+version_info = sys.version_info[:3]
+current_version = f"{version_info[0]}.{version_info[1]}.{version_info[2]}"
+required_version_str = ".".join(map(str, REQUIRED_VERSION))
+
+if version_info != REQUIRED_VERSION:
+    print(f"Warning: This application was developed with Python {required_version_str}")
+    print(f"Current version: {current_version}")
     print("Some features may not work correctly.")
 
 # Add the project root to the Python path

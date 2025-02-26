@@ -9,7 +9,7 @@ def reset_lights():
     config = load_toml_config('utility_config.toml')
     lights_config = config.get('lights', {})
     executable_path = lights_config.get('light_reset_executable_path')
-    enabled = lights_config.get('lights_enabled', False)
+    enabled = lights_config.get('enabled', False)
 
     if enabled and executable_path and platform.system() == 'Windows':
         try:
@@ -28,7 +28,7 @@ def launch_mame_lights():
     config = load_toml_config('utility_config.toml')
     lights_config = config.get('lights', {})
     mame_executable_path = lights_config.get('light_mame_executable_path')
-    enabled = lights_config.get('lights_enabled', False)
+    enabled = lights_config.get('enabled', False)
 
     if enabled and mame_executable_path and platform.system() == 'Windows':
         try:

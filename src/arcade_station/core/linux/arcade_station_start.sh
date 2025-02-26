@@ -15,17 +15,17 @@ fi
 # Check if Python is available
 if ! command -v python3 &> /dev/null; then
     echo "Python 3 is not installed or not in PATH."
-    echo "Please install Python 3.12.8."
+    echo "Please install Python 3.12.9."
     read -p "Press Enter to continue..."
     exit 1
 fi
 
-# Check Python version
-PYTHON_VERSION=$(python3 -c "import sys; print(sys.version.split()[0])")
+# Check Python version using a more reliable method
+PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}')")
 echo "Detected Python version: $PYTHON_VERSION"
 
-if [ "$PYTHON_VERSION" != "3.12.8" ]; then
-    echo "Warning: This application was developed with Python 3.12.8."
+if [ "$PYTHON_VERSION" != "3.12.9" ]; then
+    echo "Warning: This application was developed with Python 3.12.9."
     echo "Current version: $PYTHON_VERSION"
     echo "Some features may not work correctly."
     echo

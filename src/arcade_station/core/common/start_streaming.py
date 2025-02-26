@@ -36,7 +36,7 @@ def start_streaming():
         # Get executable paths and settings
         obs_executable = streaming_config.get("obs_executable", "")
         webcam_executable = streaming_config.get("webcam_management_executable", "")
-        launch_webcam = streaming_config.get("launch_webcam_management", False)
+        launch_webcam = streaming_config.get("webcam_management_enabled", False)
         obs_arguments = streaming_config.get("obs_arguments", "")
         
         # Validate OBS executable path
