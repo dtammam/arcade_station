@@ -11,6 +11,8 @@ The motivation behind this project is a desire to recreate the [ddr-picker](http
 
 Stay tuned for our one-click installation solution that will handle all the setup for you.
 
+> **Note:** This application requires Python 3.12.9. If you have multiple Python versions installed, the launcher will attempt to find and use the correct version.
+
 ## Features
 
 - Seamless startup experience with automatic dependency management
@@ -21,3 +23,20 @@ Stay tuned for our one-click installation solution that will handle all the setu
 - Support for ITGMania dynamic marquee display
 - Optional VPN connectivity
 - Windows shell replacement capability
+
+## Integration with ITGMania
+
+Arcade Station can display song banners from ITGMania on your marquee display in real-time as you select them. To set up this integration:
+
+1. Make sure Arcade Station is installed and configured
+2. Run the setup script from the arcade_station root directory:
+   ```
+   python setup_itgmania_dynamic_marquee_for_song_banners.py
+   ```
+3. Follow the prompts to specify your ITGMania installation path
+4. The setup script will automatically:
+   - Copy the necessary files to your ITGMania installation
+   - Configure Arcade Station to use the dynamic marquee feature
+   - Create the required log file in the correct location
+
+Once set up, your marquee display will automatically show the banner for songs you select while playing ITGMania!
