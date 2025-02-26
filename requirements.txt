@@ -1,0 +1,21 @@
+# Python Version: 3.12.8 required
+#
+# This file lists the Python package dependencies for arcade_station.
+# Install using: pip install -r requirements.txt
+
+# Core dependencies
+tomllib;python_version<'3.11'  # For parsing TOML files, built-in starting in Python 3.11
+keyboard>=0.13.5  # For key bindings and hotkeys
+psutil>=5.9.0  # For process management
+PyQt5>=5.15.0  # For GUI elements and image display
+
+# Optional dependencies
+# Uncomment as needed for your specific setup
+
+# For testing
+# pytest>=7.0.0
+
+# For development
+# black>=23.0.0  # Code formatting
+# flake8>=6.0.0  # Linting
+# mypy>=1.0.0  # Type checking 

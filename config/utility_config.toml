@@ -10,6 +10,7 @@ webcam_management_executable = "C:/Program Files/Logitech/LogiCapture/bin/LogiCa
 launch_webcam_management = true 
 
 [vpn]
+enabled = false
 vpn_application_directory = "C:/Program Files/OpenVPN/bin" 
 vpn_application = "openvpn-gui.exe" 
 vpn_process = "openvpn" 

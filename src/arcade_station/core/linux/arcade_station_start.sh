@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Determine the script location and project root
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/../../../.." && pwd )"
+cd "$PROJECT_ROOT"
+
+# Check if we're running as a shell replacement
+SHELL_MODE=false
+if [ "$1" == "--shell" ]; then
+    SHELL_MODE=true
+    echo "Running in shell replacement mode..."
+fi
+
+# Check if Python is available
+if ! command -v python3 &> /dev/null; then
+    echo "Python 3 is not installed or not in PATH."
+    echo "Please install Python 3.12.8."
+    read -p "Press Enter to continue..."
+    exit 1
+fi
+
+# Check Python version
+PYTHON_VERSION=$(python3 -c "import sys; print(sys.version.split()[0])")
+echo "Detected Python version: $PYTHON_VERSION"
+
+if [ "$PYTHON_VERSION" != "3.12.8" ]; then
+    echo "Warning: This application was developed with Python 3.12.8."
+    echo "Current version: $PYTHON_VERSION"
+    echo "Some features may not work correctly."
+    echo
+    read -p "Continue anyway? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Exiting due to Python version mismatch."
+        exit 1
+    fi
+    echo
+fi
+
+# Determine the virtual environment path
+VENV_ACTIVATE="$PROJECT_ROOT/.venv/bin/activate"
+
+# Check if virtual environment exists
+if [ ! -f "$VENV_ACTIVATE" ]; then
+    echo "Virtual environment not found. Creating one..."
+    python3 -m venv .venv
+    if [ $? -ne 0 ]; then
+        echo "Failed to create virtual environment."
+        read -p "Press Enter to continue..."
+        exit 1
+    fi
+    
+    echo "Installing requirements..."
+    source "$VENV_ACTIVATE"
+    pip install -r requirements.txt
+    if [ $? -ne 0 ]; then
+        echo "Failed to install requirements."
+        read -p "Press Enter to continue..."
+        exit 1
+    fi
+else
+    echo "Using existing virtual environment..."
+fi
+
+# Activate the virtual environment
+source "$VENV_ACTIVATE"
+
+# Set PYTHONPATH to include the project root
+export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
+
+# Run the startup script with or without shell mode
+if [ "$SHELL_MODE" = true ]; then
+    python3 "$PROJECT_ROOT/src/arcade_station/start_frontend_apps.py" --shell-mode
+else
+    python3 "$PROJECT_ROOT/src/arcade_station/start_frontend_apps.py"
+fi
+
+# Only pause if not in shell mode
+if [ "$SHELL_MODE" = false ]; then
+    read -p "Press Enter to continue..."
+fi 
