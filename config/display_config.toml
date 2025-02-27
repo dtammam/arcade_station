@@ -7,4 +7,4 @@ monitor_index = 1
 [dynamic_marquee]
 enabled = true
 itgmania_display_enabled = true
-itgmania_display_file_path = "C:/Users/dean/AppData/Roaming/ITGmania/Save/CurrentSongInfo.log"
+itgmania_display_file_path = "C:/Users/me/AppData/Roaming/ITGmania/Save/CurrentSongInfo.log"
