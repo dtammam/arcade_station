@@ -21,7 +21,18 @@ PID_FILE = "arcade_station_image.pid"  # Use a relative path or specify a direct
 class ImageWindow(QMainWindow):
     def __init__(self, image_path, background_color='black', screen_geometry=None):
         super().__init__()
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        # Add Qt.Tool and Qt.NoFocus flags to prevent stealing focus
+        # Qt.Tool tells Windows this is a tool window (not a main app window), they don't show in taskbar and don't steal focus
+        # Qt.WindowDoesNotAcceptFocus prevents the window from accepting keyboard focus
+        self.setWindowFlags(
+            Qt.FramelessWindowHint | 
+            Qt.WindowStaysOnTopHint | 
+            Qt.Tool | 
+            Qt.WindowDoesNotAcceptFocus
+        )
+        
+        # Add additional attribute to never activate the window
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
 
         # Handle transparency specially
         if background_color.lower() == 'transparent':
@@ -168,7 +179,14 @@ def run_image_display(image_path, background_color, monitor_index):
     screen_geometry = screens[monitor_index].geometry()
 
     window = ImageWindow(image_path, background_color, screen_geometry)
+    
+    # Use show() instead of activating the window
+    # This ensures the window is displayed without stealing focus
     window.show()
+    log_message("Showing image window without stealing focus", "BANNER")
+
+    # Disable window activation through the event queue
+    app.setQuitOnLastWindowClosed(True)
 
     # Start the application event loop
     log_message("Starting application event loop for image display.", "BANNER")

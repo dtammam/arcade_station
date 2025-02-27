@@ -11,6 +11,8 @@ import sys
 import time
 import re
 from pathlib import Path
+import platform
+import subprocess
 
 # Add the parent directory of 'arcade_station' to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -22,6 +24,89 @@ from arcade_station.core.common.core_functions import (
 )
 from arcade_station.core.common.display_image import display_image
 
+def ensure_required_packages():
+    """
+    Check for and install required packages if they're missing.
+    """
+    if platform.system() != "Windows":
+        return
+    
+    try:
+        import win32gui
+        import win32process
+        import win32con
+        import psutil
+        log_message("All required Windows modules available", "BANNER")
+    except ImportError:
+        log_message("Installing required Windows packages for focus management...", "BANNER")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pywin32", "psutil"])
+            log_message("Successfully installed required packages", "BANNER")
+            # Need to restart the script to use newly installed packages
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        except Exception as e:
+            log_message(f"Failed to install required packages: {str(e)}", "BANNER")
+
+# Import Windows-specific modules for window focus
+if platform.system() == "Windows":
+    try:
+        import win32gui
+        import win32process
+        import win32con
+        import psutil
+        has_win32_modules = True
+    except ImportError:
+        log_message("Windows modules not available for focus management", "BANNER")
+        has_win32_modules = False
+else:
+    has_win32_modules = False
+
+def find_itgmania_window():
+    """
+    Find the ITGMania window by looking for windows with 'ITGmania' in the title.
+    Returns the window handle or None if not found.
+    """
+    if not has_win32_modules:
+        return None
+        
+    result = None
+    
+    def enum_windows_callback(hwnd, results):
+        if win32gui.IsWindowVisible(hwnd):
+            window_title = win32gui.GetWindowText(hwnd)
+            if 'ITGmania' in window_title:
+                results.append(hwnd)
+        return True
+        
+    windows = []
+    win32gui.EnumWindows(enum_windows_callback, windows)
+    
+    if windows:
+        return windows[0]  # Return first found ITGMania window
+    return None
+
+def refocus_itgmania():
+    """
+    Attempt to find the ITGMania window and ensure it has focus.
+    """
+    if not has_win32_modules:
+        return False
+        
+    try:
+        hwnd = find_itgmania_window()
+        if hwnd:
+            # First make sure the window is not minimized
+            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+            # Set the window as foreground
+            win32gui.SetForegroundWindow(hwnd)
+            log_message("Refocused ITGMania window", "BANNER")
+            return True
+        else:
+            log_message("ITGMania window not found for refocusing", "BANNER")
+            return False
+    except Exception as e:
+        log_message(f"Failed to refocus ITGMania window: {str(e)}", "BANNER")
+        return False
 
 def monitor_itgmania_log(config_path='display_config.toml'):
     """
@@ -141,26 +226,51 @@ def update_marquee_from_file(file_path, fallback_banner_path, display_config):
             
             # Check if the banner file exists
             if os.path.exists(banner_path):
-                # Update the display with the banner image
+                # Update the display with the banner image without stealing focus
                 background_color = display_config.get('background_color', 'black')
+                
+                # Launch display_image in a non-focus-stealing mode
+                # The flags in ImageWindow are now set to prevent focus stealing
                 display_image(banner_path, background_color)
                 log_message(f"Updated marquee display with banner: {banner_path}", "BANNER")
+                
+                # Wait a moment for the display to update
+                time.sleep(0.5)
+                
+                # Ensure ITGMania window has focus
+                refocus_itgmania()
             else:
                 log_message(f"Banner file does not exist: {banner_path}", "BANNER")
                 if fallback_banner_path and os.path.exists(fallback_banner_path):
                     display_image(fallback_banner_path, display_config.get('background_color', 'black'))
                     log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
+                    
+                    # Wait a moment and refocus
+                    time.sleep(0.5)
+                    refocus_itgmania()
         else:
             log_message("No banner path found in log file", "BANNER")
             if fallback_banner_path and os.path.exists(fallback_banner_path):
                 display_image(fallback_banner_path, display_config.get('background_color', 'black'))
                 log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
+                
+                # Wait a moment and refocus
+                time.sleep(0.5)
+                refocus_itgmania()
     except Exception as e:
         log_message(f"Error updating marquee from file: {str(e)}", "BANNER")
         if fallback_banner_path and os.path.exists(fallback_banner_path):
             display_image(fallback_banner_path, display_config.get('background_color', 'black'))
             log_message(f"Using fallback banner due to error: {fallback_banner_path}", "BANNER")
+            
+            # Wait a moment and refocus
+            time.sleep(0.5)
+            refocus_itgmania()
 
 
 if __name__ == "__main__":
+    # Ensure we have required packages
+    ensure_required_packages()
+    
+    # Start monitoring
     monitor_itgmania_log() 
