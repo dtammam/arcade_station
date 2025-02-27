@@ -143,39 +143,18 @@ def start_conditional_scripts():
         if icloud_enabled and determine_operating_system() == "Windows":
             log_message("iCloud upload enabled and running on Windows - starting upload manager", "STARTUP")
             
-            # Get the base directory of the application
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            
-            # Debug mode flag - set to True to use debug version with visible output
-            debug_mode = False
-            
-            # Choose which batch file to use based on debug mode
-            batch_filename = "debug_icloud_manager.bat" if debug_mode else "run_icloud_manager.bat"
-            batch_file = os.path.normpath(os.path.join(base_dir, "core", "windows", batch_filename))
-            
-            if not os.path.exists(batch_file):
-                log_message(f"Batch file not found at: {batch_file}", "STARTUP")
-            else:
-                log_message(f"Launching iCloud manager batch file: {batch_file}", "STARTUP")
+            try:
+                # Import the Python iCloud manager module
+                from arcade_station.core.windows.manage_icloud import start_icloud_manager_thread
                 
-                try:
-                    # Run the batch file completely hidden
-                    startupinfo = subprocess.STARTUPINFO()
-                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                    startupinfo.wShowWindow = 0  # SW_HIDE
-                    
-                    # Launch the batch file hidden
-                    subprocess.Popen(
-                        ["cmd.exe", "/c", "start", "/b", batch_file],
-                        shell=False,
-                        startupinfo=startupinfo,
-                        stderr=subprocess.PIPE,
-                        stdout=subprocess.PIPE
-                    )
-                    log_message("iCloud manager batch file started successfully", "STARTUP")
-                except Exception as e:
-                    log_message(f"Failed to start iCloud manager: {e}", "STARTUP")
-                    log_message(traceback.format_exc(), "STARTUP")
+                # Start the iCloud manager as a background thread
+                if start_icloud_manager_thread():
+                    log_message("iCloud manager thread started successfully", "STARTUP")
+                else:
+                    log_message("Failed to start iCloud manager thread", "STARTUP")
+            except Exception as e:
+                log_message(f"Error starting iCloud manager: {e}", "STARTUP")
+                log_message(traceback.format_exc(), "STARTUP")
         
         # Other conditional scripts can be added here based on configuration
         
