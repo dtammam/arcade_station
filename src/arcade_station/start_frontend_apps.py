@@ -4,6 +4,7 @@ import platform
 import subprocess
 import time
 import argparse
+import json
 
 # Check Python version
 REQUIRED_VERSION = (3, 12, 9)  # Updated to 3.12.9
@@ -29,7 +30,8 @@ from arcade_station.core.common.core_functions import (
 )
 from arcade_station.core.common.display_image import display_image_from_config
 from arcade_station.core.common.launch_binary import launch_osd
-from arcade_station.core.common.manage_icloud import manage_icloud_uploads
+# Commenting out as we'll implement the functionality directly
+# from arcade_station.core.common.manage_icloud import manage_icloud_uploads
 
 def setup_virtual_environment():
     """
@@ -102,6 +104,109 @@ def prepare_system():
         log_message(f"Failed to prepare system: {e}", "STARTUP")
         return False
 
+def launch_icloud_manager():
+    """
+    Launches the iCloud upload management script directly.
+    
+    Returns:
+        subprocess.Popen: The process object for the PowerShell script or None on failure
+    """
+    try:
+        if determine_operating_system() != "Windows":
+            log_message("iCloud upload management is only supported on Windows", "ICLOUD")
+            return None
+        
+        # Load configuration
+        screenshot_config = load_toml_config('screenshot_config.toml')
+        icloud_config = screenshot_config.get('icloud_upload', {})
+        
+        if not icloud_config.get('enabled', False):
+            log_message("iCloud upload management is disabled in configuration", "ICLOUD")
+            return None
+        
+        # Get parameters
+        apple_services_path = icloud_config.get('apple_services_path')
+        processes_to_restart = icloud_config.get('processes_to_restart', [])
+        upload_directory = icloud_config.get('upload_directory')
+        interval_seconds = icloud_config.get('interval_seconds', 300)
+        delete_after_upload = icloud_config.get('delete_after_upload', True)
+        
+        # Validate parameters
+        if not apple_services_path or not upload_directory or not processes_to_restart:
+            log_message("Missing required iCloud configuration parameters", "ICLOUD")
+            return None
+        
+        # Build process array string for PowerShell
+        processes_str = ','.join([f'"{p}"' for p in processes_to_restart])
+        
+        # Path to PowerShell script
+        ps_script_path = os.path.join(
+            base_dir, "core", "windows", "manage_icloud_uploads.ps1"
+        )
+        ps_script_path = os.path.normpath(ps_script_path)
+        
+        if not os.path.exists(ps_script_path):
+            log_message(f"PowerShell script not found at {ps_script_path}", "ICLOUD")
+            return None
+        
+        # Debug output for troubleshooting
+        log_message("Starting iCloud upload management with parameters:", "ICLOUD")
+        log_message(f"- Script path: {ps_script_path}", "ICLOUD")
+        log_message(f"- AppleServicesPath: {apple_services_path}", "ICLOUD")
+        log_message(f"- ProcessesToRestart: {processes_to_restart}", "ICLOUD")
+        log_message(f"- UploadDirectory: {upload_directory}", "ICLOUD")
+        log_message(f"- IntervalSeconds: {interval_seconds}", "ICLOUD")
+        log_message(f"- DeleteAfterUpload: {delete_after_upload}", "ICLOUD")
+        
+        # Direct PowerShell command - simplest possible approach
+        command = [
+            'powershell.exe',
+            '-ExecutionPolicy', 'Bypass',
+            '-WindowStyle', 'Hidden',
+            '-File', ps_script_path,
+            '-AppleServicesPath', apple_services_path,
+            '-ProcessesToRestart', processes_str,
+            '-UploadDirectory', upload_directory,
+            '-IntervalSeconds', str(interval_seconds),
+            '-DeleteAfterUpload', "$" + str(delete_after_upload).lower()
+        ]
+        
+        log_message(f"Full command: {' '.join(command)}", "ICLOUD")
+        
+        # Launch PowerShell directly
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,  # Capture output for logging
+            stderr=subprocess.PIPE,  # Capture errors for logging
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+        
+        # Start a thread to read and log output
+        def log_output():
+            try:
+                stdout, stderr = process.communicate(timeout=5)  # Short timeout to avoid blocking
+                if stdout:
+                    log_message(f"PowerShell output: {stdout.decode('utf-8', errors='ignore')}", "ICLOUD")
+                if stderr:
+                    log_message(f"PowerShell error: {stderr.decode('utf-8', errors='ignore')}", "ICLOUD")
+            except subprocess.TimeoutExpired:
+                # Process is still running, which is expected for long-running scripts
+                log_message("PowerShell script is running in background", "ICLOUD")
+                pass
+        
+        # Start output logging in a separate thread to avoid blocking
+        import threading
+        threading.Thread(target=log_output, daemon=True).start()
+        
+        log_message(f"iCloud upload management started with PID: {process.pid}", "ICLOUD")
+        return process
+    
+    except Exception as e:
+        log_message(f"Failed to start iCloud upload management: {str(e)}", "ICLOUD")
+        import traceback
+        log_message(f"Stack trace: {traceback.format_exc()}", "ICLOUD")
+        return None
+
 def start_conditional_scripts():
     """
     Start additional scripts based on configuration settings.
@@ -139,7 +244,8 @@ def start_conditional_scripts():
         icloud_enabled = screenshot_config.get('icloud_upload', {}).get('enabled', False)
         
         if icloud_enabled and determine_operating_system() == "Windows":
-            icloud_process = manage_icloud_uploads()
+            # Direct approach instead of using manage_icloud.py module
+            icloud_process = launch_icloud_manager()
             if icloud_process:
                 log_message(f"Launched iCloud upload management with PID: {icloud_process.pid}", "STARTUP")
             else:
