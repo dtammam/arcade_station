@@ -18,6 +18,7 @@ import os
 import sys
 import argparse
 import platform
+import psutil
 
 # Add the parent directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
@@ -63,6 +64,47 @@ def launch_by_type(binary_type):
         log_message(f"Unknown binary type: {binary_type}", "ERROR")
         return False
 
+def set_process_priority(pid, priority_level="high"):
+    """
+    Set the priority level of a process.
+    
+    Args:
+        pid (int): Process ID
+        priority_level (str): Priority level (low, below_normal, normal, above_normal, high, realtime)
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        if not pid:
+            log_message("Cannot set priority - invalid process ID", "GAME")
+            return False
+            
+        process = psutil.Process(pid)
+        
+        # Map priority levels to psutil constants
+        priority_map = {
+            "low": psutil.IDLE_PRIORITY_CLASS,
+            "below_normal": psutil.BELOW_NORMAL_PRIORITY_CLASS,
+            "normal": psutil.NORMAL_PRIORITY_CLASS,
+            "above_normal": psutil.ABOVE_NORMAL_PRIORITY_CLASS,
+            "high": psutil.HIGH_PRIORITY_CLASS,
+            "realtime": psutil.REALTIME_PRIORITY_CLASS
+        }
+        
+        # Set priority
+        if priority_level in priority_map:
+            process.nice(priority_map[priority_level])
+            log_message(f"Set process {pid} priority to {priority_level}", "GAME")
+            return True
+        else:
+            log_message(f"Invalid priority level: {priority_level}", "GAME")
+            return False
+            
+    except Exception as e:
+        log_message(f"Failed to set process priority: {e}", "GAME")
+        return False
+
 def main():
     """Main function to parse arguments and launch the binary."""
     # Setup argument parser
@@ -103,6 +145,9 @@ def main():
             # Launch the binary using start_app from core_functions
             start_app(binary_path)
             log_message(f"Binary launched successfully: {binary_path}", "BINARY")
+            
+            # Set high priority for the game process
+            set_process_priority(process.pid, "high")
         except Exception as e:
             log_message(f"Failed to launch binary: {e}", "ERROR")
             sys.exit(1)

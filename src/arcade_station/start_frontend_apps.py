@@ -126,7 +126,7 @@ def start_conditional_scripts():
             else:
                 log_message("Failed to launch OSD application", "STARTUP")
         
-        # Dynamic marquee configuration
+        # Dynamic marquee configuration - Launch ITGMania monitor
         display_config = load_toml_config('display_config.toml')
         dynamic_marquee_enabled = display_config.get('dynamic_marquee', {}).get('enabled', False)
         itgmania_display_enabled = display_config.get('dynamic_marquee', {}).get('itgmania_display_enabled', False)
