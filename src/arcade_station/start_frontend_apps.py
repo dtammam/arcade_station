@@ -29,6 +29,7 @@ from arcade_station.core.common.core_functions import (
 )
 from arcade_station.core.common.display_image import display_image_from_config
 from arcade_station.core.common.launch_binary import launch_osd
+from arcade_station.core.common.manage_icloud import manage_icloud_uploads
 
 def setup_virtual_environment():
     """
@@ -132,6 +133,17 @@ def start_conditional_scripts():
             itgmania_script = os.path.join(base_dir, "launchers", "monitor_itgmania.py")
             itgmania_process = launch_script(itgmania_script, identifier="monitor_itgmania")
             log_message(f"Launched ITGMania monitor script with PID: {itgmania_process.pid}", "STARTUP")
+        
+        # iCloud upload management configuration (Windows-only)
+        screenshot_config = load_toml_config('screenshot_config.toml')
+        icloud_enabled = screenshot_config.get('icloud_upload', {}).get('enabled', False)
+        
+        if icloud_enabled and determine_operating_system() == "Windows":
+            icloud_process = manage_icloud_uploads()
+            if icloud_process:
+                log_message(f"Launched iCloud upload management with PID: {icloud_process.pid}", "STARTUP")
+            else:
+                log_message("Failed to launch iCloud upload management", "STARTUP")
         
         # Other conditional scripts can be added here based on configuration
         
