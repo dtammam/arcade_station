@@ -5,6 +5,8 @@ import subprocess
 import time
 import argparse
 import json
+import threading
+import traceback
 
 # Check Python version
 REQUIRED_VERSION = (3, 12, 9)  # Updated to 3.12.9
@@ -139,36 +141,41 @@ def start_conditional_scripts():
         icloud_enabled = screenshot_config.get('icloud_upload', {}).get('enabled', False)
         
         if icloud_enabled and determine_operating_system() == "Windows":
-            # Absolute simplest approach - direct powershell call with hard coded parameters
-            try:
-                ps_script_path = os.path.normpath(os.path.join(base_dir, "core", "windows", "manage_icloud_uploads.ps1"))
+            log_message("iCloud upload enabled and running on Windows - starting upload manager", "STARTUP")
+            
+            # Get the base directory of the application
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Debug mode flag - set to True to use debug version with visible output
+            debug_mode = False
+            
+            # Choose which batch file to use based on debug mode
+            batch_filename = "debug_icloud_manager.bat" if debug_mode else "run_icloud_manager.bat"
+            batch_file = os.path.normpath(os.path.join(base_dir, "core", "windows", batch_filename))
+            
+            if not os.path.exists(batch_file):
+                log_message(f"Batch file not found at: {batch_file}", "STARTUP")
+            else:
+                log_message(f"Launching iCloud manager batch file: {batch_file}", "STARTUP")
                 
-                # Get just the essential parameters from config
-                apple_path = screenshot_config.get('icloud_upload', {}).get('apple_services_path', '')
-                upload_dir = screenshot_config.get('icloud_upload', {}).get('upload_directory', '')
-                interval = screenshot_config.get('icloud_upload', {}).get('interval_seconds', 300)
-                
-                # Simple string array for processes
-                processes = ','.join([f'"{p}"' for p in screenshot_config.get('icloud_upload', {}).get('processes_to_restart', [])])
-                
-                # Launch PowerShell with minimum required arguments
-                log_message("Starting iCloud manager PowerShell script...", "STARTUP")
-                subprocess.Popen(
-                    [
-                        "powershell.exe", 
-                        "-WindowStyle", "Hidden", 
-                        "-File", ps_script_path,
-                        "-AppleServicesPath", apple_path,
-                        "-ProcessesToRestart", processes,
-                        "-UploadDirectory", upload_dir,
-                        "-IntervalSeconds", str(interval),
-                        "-DeleteAfterUpload", "$true"
-                    ],
-                    creationflags=subprocess.CREATE_NO_WINDOW
-                )
-                log_message("iCloud manager PowerShell script started", "STARTUP")
-            except Exception as e:
-                log_message(f"Failed to start iCloud manager: {e}", "STARTUP")
+                try:
+                    # Run the batch file completely hidden
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                    startupinfo.wShowWindow = 0  # SW_HIDE
+                    
+                    # Launch the batch file hidden
+                    subprocess.Popen(
+                        ["cmd.exe", "/c", "start", "/b", batch_file],
+                        shell=False,
+                        startupinfo=startupinfo,
+                        stderr=subprocess.PIPE,
+                        stdout=subprocess.PIPE
+                    )
+                    log_message("iCloud manager batch file started successfully", "STARTUP")
+                except Exception as e:
+                    log_message(f"Failed to start iCloud manager: {e}", "STARTUP")
+                    log_message(traceback.format_exc(), "STARTUP")
         
         # Other conditional scripts can be added here based on configuration
         
