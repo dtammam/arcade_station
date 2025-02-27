@@ -1,166 +1,195 @@
 """
-Module for managing iCloud photo uploads.
+Module for managing iCloud photo uploads and services.
 
-This module reads configuration from screenshot_config.toml and launches
-the PowerShell script to manage iCloud services and photo uploads.
+This module provides functionality to restart iCloud services on Windows and
+manage the upload directory. It runs as a background thread, periodically
+restarting iCloud services and cleaning the upload directory.
 """
 import os
 import sys
+import time
 import subprocess
-import json
+import threading
 
 # Add the project root to the Python path
-base_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(base_dir, '..', '..', '..'))
+script_dir = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.abspath(os.path.join(script_dir, '..', '..'))
+project_root = os.path.abspath(os.path.join(base_dir, '..'))
+sys.path.insert(0, project_root)
 
 from arcade_station.core.common.core_functions import (
-    load_toml_config,
     log_message,
-    determine_operating_system
+    load_toml_config
 )
 
-def manage_icloud_uploads():
+def restart_process(process_name, process_path):
     """
-    Reads the iCloud upload configuration and starts the PowerShell script
-    to manage iCloud services and photo uploads.
+    Stop and restart a Windows process.
+    
+    Args:
+        process_name (str): Name of the process to restart (without .exe)
+        process_path (str): Path to the directory containing the process executable
     
     Returns:
-        subprocess.Popen: The process object for the PowerShell script or None on failure
-    """
-    # Check if we're on Windows
-    if determine_operating_system() != "Windows":
-        log_message("iCloud upload management is only supported on Windows", "ICLOUD")
-        return None
-    
-    try:
-        # Load configuration
-        config = load_toml_config('screenshot_config.toml')
-        
-        # Check if iCloud upload management is enabled
-        icloud_config = config.get('icloud_upload', {})
-        if not icloud_config.get('enabled', False):
-            log_message("iCloud upload management is disabled in configuration", "ICLOUD")
-            return None
-        
-        # Get parameters from config
-        apple_services_path = icloud_config.get('apple_services_path')
-        processes_to_restart = icloud_config.get('processes_to_restart', [])
-        upload_directory = icloud_config.get('upload_directory')
-        interval_seconds = icloud_config.get('interval_seconds', 300)
-        delete_after_upload = icloud_config.get('delete_after_upload', True)
-        
-        # Validate required parameters
-        if not apple_services_path or not upload_directory or not processes_to_restart:
-            log_message("Missing required iCloud configuration parameters", "ICLOUD")
-            return None
-        
-        # Prepare PowerShell script path
-        ps_script_path = os.path.join(base_dir, '..', 'windows', 'manage_icloud_uploads.ps1')
-        ps_script_path = os.path.normpath(ps_script_path)
-        
-        # Create a simple PowerShell command that runs the script as a background job
-        # Convert parameters to JSON for safe passing to PowerShell
-        params_json = json.dumps({
-            'AppleServicesPath': apple_services_path,
-            'ProcessesToRestart': processes_to_restart,
-            'UploadDirectory': upload_directory,
-            'IntervalSeconds': interval_seconds,
-            'DeleteAfterUpload': delete_after_upload
-        })
-        
-        # Create the PowerShell command to run our script as a background job
-        ps_command = (
-            f'Start-Job -ScriptBlock {{ '
-            f'$params = ConvertFrom-Json \'{params_json}\'; '
-            f'& "{ps_script_path}" '
-            f'-AppleServicesPath $params.AppleServicesPath '
-            f'-ProcessesToRestart $params.ProcessesToRestart '
-            f'-UploadDirectory $params.UploadDirectory '
-            f'-IntervalSeconds $params.IntervalSeconds '
-            f'-DeleteAfterUpload $params.DeleteAfterUpload '
-            f'}}'
-        )
-        
-        # This is the simplest way to launch PowerShell commands invisibly
-        process = subprocess.Popen(
-            ['powershell.exe', '-WindowStyle', 'Hidden', '-Command', ps_command],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            creationflags=subprocess.CREATE_NO_WINDOW
-        )
-        
-        log_message(f"iCloud upload management started with PID: {process.pid}", "ICLOUD")
-        return process
-        
-    except Exception as e:
-        log_message(f"Failed to start iCloud upload management: {e}", "ICLOUD")
-        return None
-
-def create_debug_script():
-    """
-    Creates a simple debug script to test the PowerShell functionality directly.
-    
-    Returns:
-        str: Path to the created PowerShell script
+        bool: True if successful, False otherwise
     """
     try:
-        # Load configuration
-        config = load_toml_config('screenshot_config.toml')
-        icloud_config = config.get('icloud_upload', {})
+        log_message(f"Attempting to stop process: {process_name}", "ICLOUD")
         
-        # Path to PowerShell script
-        ps_script_path = os.path.join(
-            base_dir, '..', 'windows', 'manage_icloud_uploads.ps1'
-        )
-        ps_script_path = os.path.normpath(ps_script_path)
+        # Try to terminate the process gracefully
+        subprocess.run(['taskkill', '/F', '/IM', f"{process_name}.exe"], 
+                      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                      creationflags=subprocess.CREATE_NO_WINDOW)
         
-        # Create a simple debug script
-        debug_content = f"""
-# Test script for iCloud upload management
-# Run this directly in PowerShell to debug issues
-
-$AppleServicesPath = "{icloud_config.get('apple_services_path', '')}"
-$ProcessesToRestart = @({','.join([f'"{p}"' for p in icloud_config.get('processes_to_restart', [])])})
-$UploadDirectory = "{icloud_config.get('upload_directory', '')}"
-$IntervalSeconds = {icloud_config.get('interval_seconds', 300)}
-$DeleteAfterUpload = ${str(icloud_config.get('delete_after_upload', True)).lower()}
-
-Write-Host "Testing with parameters:"
-Write-Host "AppleServicesPath: $AppleServicesPath"
-Write-Host "ProcessesToRestart: $ProcessesToRestart"
-Write-Host "UploadDirectory: $UploadDirectory"
-Write-Host "IntervalSeconds: $IntervalSeconds"
-Write-Host "DeleteAfterUpload: $DeleteAfterUpload"
-Write-Host ""
-Write-Host "Running script..."
-
-& "{ps_script_path}" -AppleServicesPath $AppleServicesPath -ProcessesToRestart $ProcessesToRestart -UploadDirectory $UploadDirectory -IntervalSeconds $IntervalSeconds -DeleteAfterUpload $DeleteAfterUpload
-"""
+        # Give it time to shut down
+        time.sleep(2)
         
-        # Save to a debug file
-        output_path = os.path.join(os.getcwd(), "debug_icloud_uploader.ps1")
-        with open(output_path, 'w') as f:
-            f.write(debug_content)
+        # Start the process
+        full_path = os.path.join(process_path, f"{process_name}.exe")
+        log_message(f"Starting process: {full_path}", "ICLOUD")
+        
+        if not os.path.exists(full_path):
+            log_message(f"Process executable not found: {full_path}", "ICLOUD")
+            return False
             
-        log_message(f"Created debug script at: {output_path}", "ICLOUD")
-        return output_path
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         
+        subprocess.Popen([full_path], startupinfo=startupinfo)
+        log_message(f"Successfully started {process_name}", "ICLOUD")
+        return True
     except Exception as e:
-        log_message(f"Failed to create debug script: {e}", "ICLOUD")
-        return None
+        log_message(f"Error restarting process {process_name}: {e}", "ICLOUD")
+        return False
+
+def clean_directory(directory, delete_files=True):
+    """
+    Clean a directory by deleting all files.
+    
+    Args:
+        directory (str): Path to the directory to clean
+        delete_files (bool): Whether to delete files or just count them
+    
+    Returns:
+        int: Number of files deleted or would have been deleted
+    """
+    if not delete_files:
+        log_message(f"File deletion disabled, skipping cleanup of {directory}", "ICLOUD")
+        return 0
+        
+    try:
+        if not os.path.exists(directory):
+            log_message(f"Upload directory does not exist: {directory}", "ICLOUD")
+            return 0
+            
+        log_message(f"Cleaning directory: {directory}", "ICLOUD")
+        count = 0
+        
+        for root, _, files in os.walk(directory):
+            for file in files:
+                try:
+                    file_path = os.path.join(root, file)
+                    os.remove(file_path)
+                    log_message(f"Deleted file: {file_path}", "ICLOUD")
+                    count += 1
+                except Exception as e:
+                    log_message(f"Failed to delete {file}: {e}", "ICLOUD")
+        
+        log_message(f"Deleted {count} files from {directory}", "ICLOUD")
+        return count
+    except Exception as e:
+        log_message(f"Error cleaning directory {directory}: {e}", "ICLOUD")
+        return 0
+
+def icloud_manager():
+    """
+    Main function to manage iCloud processes and files.
+    
+    This function runs in an infinite loop, periodically:
+    1. Restarting specified iCloud service processes
+    2. Waiting for a defined interval to allow uploads to complete
+    3. Cleaning the upload directory (optionally deleting files)
+    
+    Configuration is read from screenshot_config.toml [icloud_upload] section.
+    """
+    log_message("Starting iCloud manager", "ICLOUD")
+    
+    # Load configuration using the standard function
+    config = load_toml_config('screenshot_config.toml')
+    if not config or 'icloud_upload' not in config:
+        log_message("Failed to load iCloud configuration, exiting", "ICLOUD")
+        return
+    
+    icloud_config = config['icloud_upload']
+    
+    # Extract configuration values
+    apple_services_path = icloud_config.get('apple_services_path', 
+                                      r"C:\Program Files (x86)\Common Files\Apple\Internet Services")
+    processes_to_restart = icloud_config.get('processes_to_restart', 
+                                     ["iCloudServices", "iCloudPhotos"])
+    upload_directory = icloud_config.get('upload_directory', 
+                                 r"C:\Users\me\Pictures\Uploads")
+    interval_seconds = int(icloud_config.get('interval_seconds', 360))
+    delete_after_upload = icloud_config.get('delete_after_upload', True)
+    
+    # Validate interval
+    if interval_seconds < 10:
+        log_message(f"Interval too short ({interval_seconds}s), setting to 300s", "ICLOUD")
+        interval_seconds = 300
+    
+    # Log configuration
+    log_message("iCloud manager configuration:", "ICLOUD")
+    log_message(f"  Apple Services Path: {apple_services_path}", "ICLOUD")
+    log_message(f"  Processes to restart: {processes_to_restart}", "ICLOUD")
+    log_message(f"  Upload directory: {upload_directory}", "ICLOUD")
+    log_message(f"  Interval: {interval_seconds} seconds", "ICLOUD")
+    log_message(f"  Delete after upload: {delete_after_upload}", "ICLOUD")
+    
+    # Main loop
+    while True:
+        try:
+            log_message("Starting processing cycle", "ICLOUD")
+            
+            # Restart each process
+            for process in processes_to_restart:
+                restart_process(process, apple_services_path)
+                time.sleep(1)  # Give a short delay between process restarts
+            
+            # Wait for the specified interval
+            log_message(f"Waiting {interval_seconds} seconds before cleaning directory", "ICLOUD")
+            time.sleep(interval_seconds)
+            
+            # Clean the upload directory
+            deleted_count = clean_directory(upload_directory, delete_after_upload)
+            log_message(f"Deleted {deleted_count} files", "ICLOUD")
+            
+            log_message("Processing cycle completed", "ICLOUD")
+            
+        except Exception as e:
+            log_message(f"Error in processing cycle: {e}", "ICLOUD")
+            # Sleep for a bit before trying again
+            time.sleep(30)
+
+def start_icloud_manager_thread():
+    """
+    Start the iCloud manager in a background thread.
+    
+    This function creates a daemon thread that runs the iCloud manager process.
+    The thread will automatically terminate when the main program exits.
+    
+    Returns:
+        bool: True if the thread was started successfully, False otherwise
+    """
+    try:
+        # Create and start daemon thread
+        thread = threading.Thread(target=icloud_manager, daemon=True)
+        thread.start()
+        log_message(f"Started iCloud manager thread: {thread.name}", "ICLOUD")
+        return True
+    except Exception as e:
+        log_message(f"Failed to start iCloud manager thread: {e}", "ICLOUD")
+        return False
 
 if __name__ == "__main__":
-    # When run directly, create debug script and start the service
-    debug_script = create_debug_script()
-    
-    if debug_script:
-        print(f"Created debug script at: {debug_script}")
-        print("You can run this script directly in PowerShell for testing.")
-    
-    print("Starting iCloud upload management in background...")
-    process = manage_icloud_uploads()
-    if process:
-        print(f"Service started with PID: {process.pid}")
-        print("The service is running invisibly. Check task manager or logs for activity.")
-    else:
-        print("Failed to start service. Check logs for details.") 
+    # If run directly, start in the foreground
+    icloud_manager() 

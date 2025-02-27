@@ -145,7 +145,7 @@ def start_conditional_scripts():
             
             try:
                 # Import the Python iCloud manager module
-                from arcade_station.core.windows.manage_icloud import start_icloud_manager_thread
+                from arcade_station.core.common.manage_icloud import start_icloud_manager_thread
                 
                 # Start the iCloud manager as a background thread
                 if start_icloud_manager_thread():
