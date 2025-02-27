@@ -46,9 +46,13 @@ def connect_vpn():
     log_message(f"Initiating VPN [{app_name}] using config [{config_profile}]...", "VPN")
     
     try:
-        # Launch the VPN application with the connect argument
-        subprocess.Popen([vpn_app_path, f"--connect \"{config_profile}\""], 
-                        shell=True)
+        # Method 1: Use a properly formatted list with shell=False (preferred)
+        subprocess.Popen([vpn_app_path, "--connect", config_profile], 
+                        shell=False)
+        
+        # Method 2 (fallback): If needed, use a properly formatted string with shell=True
+        # command = f'"{vpn_app_path}" --connect "{config_profile}"'
+        # subprocess.Popen(command, shell=True)
         
         log_message(f"Waiting for {seconds_to_wait} seconds before checking VPN process...", "VPN")
         time.sleep(seconds_to_wait)
