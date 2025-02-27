@@ -144,14 +144,10 @@ def start_conditional_scripts():
             log_message("iCloud upload enabled and running on Windows - starting upload manager", "STARTUP")
             
             try:
-                # Import the Python iCloud manager module
-                from arcade_station.core.common.manage_icloud import start_icloud_manager_thread
-                
-                # Start the iCloud manager as a background thread
-                if start_icloud_manager_thread():
-                    log_message("iCloud manager thread started successfully", "STARTUP")
-                else:
-                    log_message("Failed to start iCloud manager thread", "STARTUP")
+                # Launch the iCloud manager as a separate process
+                icloud_script = os.path.join(base_dir, "core", "common", "manage_icloud.py")
+                icloud_process = launch_script(icloud_script, identifier="manage_icloud")
+                log_message(f"Launched iCloud manager with PID: {icloud_process.pid}", "STARTUP")
             except Exception as e:
                 log_message(f"Error starting iCloud manager: {e}", "STARTUP")
                 log_message(traceback.format_exc(), "STARTUP")
