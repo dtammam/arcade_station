@@ -28,6 +28,7 @@ from arcade_station.core.common.core_functions import (
     determine_operating_system
 )
 from arcade_station.core.common.display_image import display_image_from_config
+from arcade_station.core.common.launch_binary import launch_osd
 
 def setup_virtual_environment():
     """
@@ -113,6 +114,14 @@ def start_conditional_scripts():
             vpn_script = os.path.join(base_dir, "core", "common", "connect_vpn.py")
             vpn_process = launch_script(vpn_script, identifier="connect_vpn")
             log_message(f"Launched VPN connection script with PID: {vpn_process.pid}", "STARTUP")
+        
+        # OSD configuration - Launch OSD if enabled (Windows-only)
+        osd_enabled = utility_config.get('osd', {}).get('enabled', False)
+        if osd_enabled and determine_operating_system() == "Windows":
+            if launch_osd():
+                log_message("Successfully launched OSD application", "STARTUP")
+            else:
+                log_message("Failed to launch OSD application", "STARTUP")
         
         # Dynamic marquee configuration
         display_config = load_toml_config('display_config.toml')

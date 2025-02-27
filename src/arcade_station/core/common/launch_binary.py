@@ -17,14 +17,20 @@ Options:
 import os
 import sys
 import argparse
+import platform
 
 # Add the parent directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
-from arcade_station.core.common.core_functions import start_app, log_message, open_header, load_toml_config
+from arcade_station.core.common.core_functions import start_app, log_message, open_header, load_toml_config, determine_operating_system
 
 def launch_osd():
-    """Launch the OSD executable if enabled in config."""
+    """Launch the OSD executable if enabled in config and platform is Windows."""
+    # Check if running on Windows
+    if determine_operating_system() != "Windows":
+        log_message("OSD is only supported on Windows.", "OSD")
+        return False
+    
     # Load configuration
     config = load_toml_config('utility_config.toml')
     
@@ -39,51 +45,15 @@ def launch_osd():
         log_message("OSD executable path not defined in configuration.", "OSD")
         return False
     
-    # Normalize the path (convert / to \ on Windows)
-    executable_path = os.path.normpath(executable_path)
-    log_message(f"Normalized path: {executable_path}", "OSD_DEBUG")
-    
-    # Debug: Output file existence check
-    file_exists = os.path.exists(executable_path)
-    log_message(f"File exists check: {file_exists}", "OSD_DEBUG")
-    
-    # Try to get absolute path
-    try:
-        abs_path = os.path.abspath(executable_path)
-        log_message(f"Absolute path: {abs_path}", "OSD_DEBUG")
-    except Exception as e:
-        log_message(f"Error getting absolute path: {e}", "OSD_DEBUG")
-    
-    # Check if file exists with proper error handling
-    try:
-        if not os.path.isfile(executable_path):
-            log_message(f"OSD executable not found at: {executable_path}", "OSD")
-            # Try an alternative approach for Windows
-            if sys.platform == 'win32' and '"' in executable_path:
-                # Try removing quotes that might be causing issues
-                clean_path = executable_path.replace('"', '')
-                log_message(f"Trying alternate path without quotes: {clean_path}", "OSD_DEBUG")
-                if os.path.isfile(clean_path):
-                    executable_path = clean_path
-                    log_message(f"Found file using alternate path", "OSD")
-                else:
-                    return False
-            else:
-                return False
-    except Exception as e:
-        log_message(f"Error checking if file exists: {e}", "OSD_ERROR")
+    # Check if file exists
+    if not os.path.exists(executable_path):
+        log_message(f"OSD executable not found at: {executable_path}", "OSD")
         return False
     
     # Launch the application
     log_message(f"Launching OSD application: {executable_path}", "OSD")
-    
-    try:
-        start_app(executable_path)
-        log_message("Successfully called start_app", "OSD_DEBUG")
-        return True
-    except Exception as e:
-        log_message(f"Error launching application: {e}", "OSD_ERROR")
-        return False
+    start_app(executable_path)
+    return True
 
 def launch_by_type(binary_type):
     """Launch a preconfigured binary based on type."""
