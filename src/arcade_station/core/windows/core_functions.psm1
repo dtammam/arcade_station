@@ -30,7 +30,7 @@ function Restart-ComputerSafely {
     #>
     try {
         Write-Information "Restarting computer now..."
-        Restart-ComputerSafely
+        Restart-Computer -Force
     } catch {
         Write-Information "Failed to restart computer: [$($_.Exception.Message)]"
     }
