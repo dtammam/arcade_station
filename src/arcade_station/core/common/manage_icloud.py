@@ -64,26 +64,24 @@ def manage_icloud_uploads():
         # Format processes as a PowerShell array string
         processes_str = ','.join([f'"{p}"' for p in processes_to_restart])
         
-        # Build PowerShell command
-        powershell_exe = "powershell.exe"
-        powershell_args = [
-            "-ExecutionPolicy", "Bypass",
-            "-File", ps_script_path,
-            "-AppleServicesPath", f'"{apple_services_path}"',
-            "-ProcessesToRestart", f'@({processes_str})',
-            "-UploadDirectory", f'"{upload_directory}"',
-            "-IntervalSeconds", str(interval_seconds),
-            "-DeleteAfterUpload", "$" + ("true" if delete_after_upload else "false")
-        ]
+        # Create a PowerShell command with proper escaping for all parameters
+        powershell_cmd = (
+            f'powershell.exe -ExecutionPolicy Bypass -NoProfile -Command '
+            f'"& {{& \'{ps_script_path}\' '
+            f'-AppleServicesPath \'{apple_services_path}\' '
+            f'-ProcessesToRestart @({processes_str}) '
+            f'-UploadDirectory \'{upload_directory}\' '
+            f'-IntervalSeconds {interval_seconds} '
+            f'-DeleteAfterUpload ${str(delete_after_upload).lower()}}}"'
+        )
         
-        # Launch PowerShell script
-        cmd = [powershell_exe] + powershell_args
-        log_message(f"Starting iCloud upload management script with parameters: {powershell_args}", "ICLOUD")
+        log_message(f"Starting iCloud upload management with command:\n{powershell_cmd}", "ICLOUD")
         
-        # Run PowerShell script as a separate process
+        # Run PowerShell script as a separate process, using shell=True to preserve command formatting
         process = subprocess.Popen(
-            cmd,
-            creationflags=subprocess.CREATE_NEW_CONSOLE
+            powershell_cmd,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+            shell=True
         )
         
         log_message(f"iCloud upload management started with PID: {process.pid}", "ICLOUD")

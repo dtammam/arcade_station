@@ -9,10 +9,19 @@
 #>
 
 param (
+    [Parameter(Mandatory=$true)]
     [string]$AppleServicesPath,
+    
+    [Parameter(Mandatory=$true)]
     [string[]]$ProcessesToRestart,
+    
+    [Parameter(Mandatory=$true)]
     [string]$UploadDirectory,
+    
+    [Parameter(Mandatory=$true)]
     [int]$IntervalSeconds,
+    
+    [Parameter(Mandatory=$true)]
     [bool]$DeleteAfterUpload
 )
 
@@ -37,6 +46,20 @@ if (Test-Path $coreFunctionsPath) {
 
 try {
     Write-Log "Starting iCloud upload management service"
+    
+    # Log and validate parameters
+    Write-Log "Parameters received:"
+    Write-Log "  AppleServicesPath: $AppleServicesPath"
+    Write-Log "  ProcessesToRestart: $($ProcessesToRestart -join ', ')"
+    Write-Log "  UploadDirectory: $UploadDirectory"
+    Write-Log "  IntervalSeconds: $IntervalSeconds"
+    Write-Log "  DeleteAfterUpload: $DeleteAfterUpload"
+    
+    # Ensure IntervalSeconds is valid
+    if ($IntervalSeconds -lt 10) {
+        Write-Log "Warning: IntervalSeconds is too low ($IntervalSeconds). Setting to default of 300 seconds."
+        $IntervalSeconds = 300
+    }
     
     # Main loop
     while ($true) {
