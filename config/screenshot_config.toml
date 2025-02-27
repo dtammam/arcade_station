@@ -6,8 +6,8 @@ quality = "High"
 sound_file = "../../../../assets/sounds/megatouch_yahoo.wav" 
 
 [icloud_upload]
-enabled = false
-interval_seconds = 300
+enabled = true
+interval_seconds = 360
 delete_after_upload = true
 upload_directory = "C:/Users/me/Pictures/Uploads"
 apple_services_path = "C:/Program Files (x86)/Common Files/Apple/Internet Services/"
