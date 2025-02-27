@@ -146,8 +146,8 @@ def main():
             start_app(binary_path)
             log_message(f"Binary launched successfully: {binary_path}", "BINARY")
             
-            # Set high priority for the game process
-            set_process_priority(process.pid, "high")
+            # Remove the line that tried to set process priority since we don't have access to the PID here
+            # The process creation happens inside start_app and we don't get the PID back
         except Exception as e:
             log_message(f"Failed to launch binary: {e}", "ERROR")
             sys.exit(1)

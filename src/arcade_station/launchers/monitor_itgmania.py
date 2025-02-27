@@ -49,11 +49,22 @@ def monitor_itgmania_log(config_path='display_config.toml'):
             log_message("ITGMania log file path not specified in configuration", "BANNER")
             return
         
-        # Verify log file directory exists
+        # Verify log file directory exists and resolve any user variables in path
+        log_file_path = os.path.expanduser(log_file_path)
+        log_file_path = os.path.normpath(log_file_path)
         log_file = Path(log_file_path)
+        
+        log_message(f"Using resolved ITGMania log file path: {log_file}", "BANNER")
+        
         if not log_file.parent.exists():
             log_message(f"Directory for ITGMania log file does not exist: {log_file.parent}", "BANNER")
-            return
+            log_message(f"Will attempt to create directory: {log_file.parent}", "BANNER")
+            try:
+                log_file.parent.mkdir(parents=True, exist_ok=True)
+                log_message(f"Created directory: {log_file.parent}", "BANNER")
+            except Exception as e:
+                log_message(f"Failed to create directory: {str(e)}", "BANNER")
+                return
         
         # Create the file if it doesn't exist
         if not log_file.exists():
@@ -64,6 +75,7 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         last_mod_time = log_file.stat().st_mtime
         
         log_message(f"Monitoring ITGMania log file: {log_file}", "BANNER")
+        log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
         
         # Main monitoring loop
         while True:
@@ -83,6 +95,15 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                         
                         # Update last modification time
                         last_mod_time = current_mod_time
+                else:
+                    log_message(f"ITGMania log file no longer exists: {log_file}", "BANNER")
+                    log_message("Attempting to recreate the file", "BANNER")
+                    try:
+                        log_file.touch()
+                        log_message(f"Recreated ITGMania log file: {log_file}", "BANNER")
+                        last_mod_time = log_file.stat().st_mtime
+                    except Exception as e:
+                        log_message(f"Failed to recreate log file: {str(e)}", "BANNER")
             except Exception as e:
                 log_message(f"Error monitoring ITGMania log file: {str(e)}", "BANNER")
             
