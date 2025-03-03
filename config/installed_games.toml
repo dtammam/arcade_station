@@ -10,8 +10,8 @@ ddr_starlight = { path = "C:/Games/StepMania 5.3 Outfox STARLiGHT TWOpointZERO/P
 ddr_omnimix = { path = "C:/Games/DDR-JAO-2022052400/spice.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/omni.png" }
 ddr_a3 = { path = "C:/Games/DDR-A3_20230704/contents/spice.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/a3.png" }
 ddr_a20 = { path = "C:/Games/MDX-001-2020020300/contents/spice.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/ddr-a20.png" }
-ddr_extreme_proclarity = { rom = "ddrexproc", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme-proclarity.png" }
-ddr_extreme = { rom = "ddrexproc", state = "p", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme.png" }
+ddr_extreme_proclarity = { rom = "ddrexproc", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme.png" }
+ddr_extreme = { rom = "ddrexproc", state = "p", banner = "C:/Repositories/arcade_station/assets/images/banners/extreme-nonproclarity.png" }
 ddr_max_2 = { rom = "ddrmax2", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/ddrmax2.png" }
 ddr_max_1 = { rom = "ddrmax", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/ddrmax.png" }
 ddr_5th_mix = { rom = "ddr5m", state = "o", banner = "C:/Repositories/arcade_station/assets/images/banners/5thmix.png" }
