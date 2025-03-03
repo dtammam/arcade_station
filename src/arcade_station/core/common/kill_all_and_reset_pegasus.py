@@ -6,19 +6,10 @@ from arcade_station.core.common.light_control import reset_lights, kill_lights_p
 from arcade_station.core.common.display_image import display_image_from_config
 
 
-# First kill all processes listed in the toml file
 kill_processes_from_toml('processes_to_kill.toml')
-
-# Explicitly kill any remaining lights processes
-kill_lights_processes()
-
-# Reset lights if enabled
 reset_lights()
-
-# Additional explicit kill to ensure no lingering processes
+# Double-check that all light processes are killed after resetting
 kill_lights_processes()
-
-# Continue with other kill operations
 kill_process_by_identifier("marquee_image")
 kill_process_by_identifier("start_pegasus")
 
