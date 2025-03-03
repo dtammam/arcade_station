@@ -209,6 +209,14 @@ def start_app(executable_path):
                 subprocess.Popen(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', executable_path])
             else:
                 log_message("PowerShell scripts are not supported on non-Windows systems.", "MENU")
+        # Check if the file is a VBScript
+        elif executable_path.endswith('.vbs'):
+            if os_type == "Windows":
+                # Use Windows Script Host to run VBScript invisibly
+                # The 0 parameter means "hide the window"
+                subprocess.Popen(['wscript.exe', executable_path], creationflags=subprocess.CREATE_NO_WINDOW)
+            else:
+                log_message("VBScript is not supported on non-Windows systems.", "MENU")
         else:
             # Logic to handle different operating systems for other executables
             if os_type == "Windows":
