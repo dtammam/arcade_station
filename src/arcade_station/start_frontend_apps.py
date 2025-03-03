@@ -186,15 +186,10 @@ def main():
     listener_process = launch_script(listener_script, identifier="key_listener")
     log_message(f"Launched key_listener.py with PID: {listener_process.pid}", "MENU")
     
-    # Launch the start_pegasus.py script with its identifier
-    pegasus_script = os.path.join(base_dir, "core", "common", "start_pegasus.py")
-    pegasus_process = launch_script(pegasus_script, identifier="start_pegasus")
-    log_message(f"Launched start_pegasus.py with PID: {pegasus_process.pid}", "GAME")
-    
     # Start conditional scripts based on configuration
     start_conditional_scripts()
     
-    # Run kill_all_and_reset_pegasus.py as the last step
+    # Use kill_all_and_reset_pegasus.py to launch Pegasus (replaced the direct Pegasus launch)
     reset_script = os.path.join(base_dir, "core", "common", "kill_all_and_reset_pegasus.py")
     reset_process = launch_script(reset_script, identifier="kill_all_and_reset_pegasus")
     log_message(f"Launched kill_all_and_reset_pegasus.py with PID: {reset_process.pid}", "RESET")
