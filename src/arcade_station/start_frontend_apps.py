@@ -194,6 +194,11 @@ def main():
     # Start conditional scripts based on configuration
     start_conditional_scripts()
     
+    # Run kill_all_and_reset_pegasus.py as the last step
+    reset_script = os.path.join(base_dir, "core", "common", "kill_all_and_reset_pegasus.py")
+    reset_process = launch_script(reset_script, identifier="kill_all_and_reset_pegasus")
+    log_message(f"Launched kill_all_and_reset_pegasus.py with PID: {reset_process.pid}", "RESET")
+    
     # If running in shell replacement mode, we need to keep this process running
     if args.shell_mode:
         log_message("Running in shell replacement mode, keeping process alive", "STARTUP")
