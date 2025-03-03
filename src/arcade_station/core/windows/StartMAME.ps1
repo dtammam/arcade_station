@@ -140,54 +140,11 @@ function Set-WindowFocus {
     }
 }
 
-# Add function to disable screen saver and power management during game
-function Disable-PowerManagement {
-    try {
-        # Prevent display from turning off
-        $null = powercfg -change -monitor-timeout-ac 0
-        $null = powercfg -change -monitor-timeout-dc 0
-        
-        # Prevent system from sleeping
-        $null = powercfg -change -standby-timeout-ac 0
-        $null = powercfg -change -standby-timeout-dc 0
-        
-        Write-Information "Disabled power management features"
-        return $true
-    }
-    catch {
-        Write-Information "Failed to disable power management: $_"
-        return $false
-    }
-}
-
-# Restore power settings when done
-function Restore-PowerManagement {
-    try {
-        # Restore default display timeout (15 minutes on AC, 5 minutes on battery)
-        $null = powercfg -change -monitor-timeout-ac 15
-        $null = powercfg -change -monitor-timeout-dc 5
-        
-        # Restore default sleep timeout (30 minutes on AC, 15 minutes on battery)
-        $null = powercfg -change -standby-timeout-ac 30
-        $null = powercfg -change -standby-timeout-dc 15
-        
-        Write-Information "Restored power management features"
-        return $true
-    }
-    catch {
-        Write-Information "Failed to restore power management: $_"
-        return $false
-    }
-}
-
 # Main execution block
 try {
     Write-Information "Received ROM: [$ROM], State: [$State]"
     # Change the working directory to the directory with MAME in it, does not parse well without it    
     Set-Location -Path $ExecutablePath
-    
-    # Disable power management to prevent screen blanking
-    # Disable-PowerManagement
     
     # Create our function for launching MAME with the appropriate ROM and state
     function Start-MAME {
@@ -238,8 +195,5 @@ try {
     Write-Information "Script failed with the following exception: [$($_.Message)]"
     $Script:exitCode = 1
 } finally {
-    # After 30 seconds, restore power management settings
-    Start-Sleep -Seconds 30
-    # Restore-PowerManagement
     exit $script:exitCode
 }
