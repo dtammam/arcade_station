@@ -20,12 +20,26 @@ def kill_lights_processes():
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
             log_message(f"Error killing lights process: {e}", "LIGHTS")
 
+def kill_specific_lights_process(process_name):
+    """
+    Kill a specific lights-related process by name.
+    """
+    for proc in psutil.process_iter(['name']):
+        try:
+            proc_name = proc.info['name']
+            if process_name in proc_name:
+                log_message(f"Killing specific lights process: {proc_name}", "LIGHTS")
+                proc.kill()
+                proc.wait(timeout=1)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess) as e:
+            log_message(f"Error killing specific lights process: {e}", "LIGHTS")
+
 def reset_lights():
     """
     Resets the lights using the LightsTest.exe if configured.
     """
-    # Always kill any existing lights processes first
-    kill_lights_processes()
+    # Only kill LightsTest, not mame2lit
+    kill_specific_lights_process("LightsTest")
     
     config = load_toml_config('utility_config.toml')
     lights_config = config.get('lights', {})
@@ -46,12 +60,12 @@ def reset_lights():
                 process.kill()  # Force kill instead of terminate
                 log_message("Forcefully killed light test process", "LIGHTS")
             # Ensure it's gone
-            kill_lights_processes()
+            kill_specific_lights_process("LightsTest")
             log_message("Light test completed and process confirmed killed", "LIGHTS")
         except Exception as e:
             log_message(f"Failed to reset lights: {e}", "LIGHTS")
             # Still try to kill any remaining processes
-            kill_lights_processes()
+            kill_specific_lights_process("LightsTest")
 
 def launch_mame_lights():
     """
@@ -64,8 +78,8 @@ def launch_mame_lights():
 
     if enabled and mame_executable_path and platform.system() == 'Windows':
         try:
-            # Kill any existing lights processes before launching new ones
-            kill_lights_processes()
+            # Only kill existing mame2lit processes before launching a new one
+            kill_specific_lights_process("mame2lit")
             
             log_message("Launching MAME lights...", "LIGHTS")
             launch_script(mame_executable_path, identifier="mame_lights")
