@@ -22,6 +22,17 @@ from arcade_station.core.common.core_functions import (
     load_toml_config
 )
 
+# Import Windows-specific modules for focus management
+if sys.platform == "win32":
+    try:
+        import ctypes
+        has_focus_modules = True
+    except ImportError:
+        has_focus_modules = False
+        log_message("Windows focus modules not available", "ICLOUD")
+else:
+    has_focus_modules = False
+
 def restart_process(process_name, process_path):
     """
     Stop and restart a Windows process.
@@ -36,13 +47,18 @@ def restart_process(process_name, process_path):
     try:
         log_message(f"Attempting to stop process: {process_name}", "ICLOUD")
         
-        # Try to terminate the process gracefully
+        # Try to terminate the process gracefully with hidden window
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 0  # SW_HIDE
+        
+        # Use more precise targeting to minimize disruption
         subprocess.run(['taskkill', '/F', '/IM', f"{process_name}.exe"], 
                       stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                      creationflags=subprocess.CREATE_NO_WINDOW)
+                      startupinfo=startupinfo)
         
         # Give it time to shut down
-        time.sleep(2)
+        time.sleep(1)
         
         # Start the process
         full_path = os.path.join(process_path, f"{process_name}.exe")
@@ -52,10 +68,19 @@ def restart_process(process_name, process_path):
             log_message(f"Process executable not found: {full_path}", "ICLOUD")
             return False
             
+        # Ensure the process starts with minimal UI disruption
         startupinfo = subprocess.STARTUPINFO()
         startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = 0  # SW_HIDE
         
-        subprocess.Popen([full_path], startupinfo=startupinfo)
+        # Use a lower priority for starting
+        if has_focus_modules and sys.platform == "win32":
+            # Start with BELOW_NORMAL priority to reduce focus disruption
+            subprocess.Popen([full_path], startupinfo=startupinfo, 
+                            creationflags=subprocess.BELOW_NORMAL_PRIORITY_CLASS)
+        else:
+            subprocess.Popen([full_path], startupinfo=startupinfo)
+            
         log_message(f"Successfully started {process_name}", "ICLOUD")
         return True
     except Exception as e:
@@ -132,10 +157,11 @@ def icloud_manager():
     interval_seconds = int(icloud_config.get('interval_seconds', 360))
     delete_after_upload = icloud_config.get('delete_after_upload', True)
     
-    # Validate interval
-    if interval_seconds < 10:
-        log_message(f"Interval too short ({interval_seconds}s), setting to 300s", "ICLOUD")
-        interval_seconds = 300
+    # Use a minimum safe interval
+    minimum_interval = 300  # 5 minutes
+    if interval_seconds < minimum_interval:
+        log_message(f"Interval too short ({interval_seconds}s), setting to {minimum_interval}s", "ICLOUD")
+        interval_seconds = minimum_interval
     
     # Log configuration
     log_message("iCloud manager configuration:", "ICLOUD")
@@ -145,23 +171,86 @@ def icloud_manager():
     log_message(f"  Interval: {interval_seconds} seconds", "ICLOUD")
     log_message(f"  Delete after upload: {delete_after_upload}", "ICLOUD")
     
+    # For detecting game activity to avoid interruptions
+    last_cycle_time = time.time() - interval_seconds  # Allow immediate first run
+    
     # Main loop
     while True:
         try:
+            # Check if enough time has passed since last cycle
+            current_time = time.time()
+            time_since_last = current_time - last_cycle_time
+            
+            if time_since_last < interval_seconds:
+                # Not time for a cycle yet, sleep for a bit and check again
+                time.sleep(min(10, interval_seconds - time_since_last))
+                continue
+            
+            # Check if any game processes are currently active (avoid interrupting gameplay)
+            game_active = False
+            try:
+                if sys.platform == "win32":
+                    # Check for common game processes
+                    import psutil
+                    game_processes = ["mame", "game.exe", "steam.exe", "retroarch.exe"]
+                    for proc in psutil.process_iter(['name']):
+                        proc_name = proc.info['name'].lower()
+                        if any(game in proc_name for game in game_processes):
+                            log_message(f"Game process detected ({proc_name}), deferring iCloud cycle", "ICLOUD")
+                            game_active = True
+                            break
+            except Exception as e:
+                log_message(f"Error checking for game processes: {e}", "ICLOUD")
+                
+            if game_active:
+                # Games are active, sleep and try again later
+                time.sleep(60)  # Check again in a minute
+                continue
+                
+            # Save the current foreground window before performing operations
+            foreground_hwnd = None
+            if has_focus_modules:
+                try:
+                    foreground_hwnd = ctypes.windll.user32.GetForegroundWindow()
+                    log_message("Saved current foreground window handle for later restoration", "ICLOUD")
+                except Exception as e:
+                    log_message(f"Failed to get foreground window: {e}", "ICLOUD")
+            
             log_message("Starting processing cycle", "ICLOUD")
+            
+            # Update last cycle time
+            last_cycle_time = time.time()
             
             # Restart each process
             for process in processes_to_restart:
                 restart_process(process, apple_services_path)
                 time.sleep(1)  # Give a short delay between process restarts
             
-            # Wait for the specified interval
-            log_message(f"Waiting {interval_seconds} seconds before cleaning directory", "ICLOUD")
-            time.sleep(interval_seconds)
+            # Wait for a shorter interval during this cycle since we already waited
+            wait_time = min(120, interval_seconds // 3)  # No more than 2 minutes
+            log_message(f"Waiting {wait_time} seconds before cleaning directory", "ICLOUD")
+            time.sleep(wait_time)
             
             # Clean the upload directory
             deleted_count = clean_directory(upload_directory, delete_after_upload)
             log_message(f"Deleted {deleted_count} files", "ICLOUD")
+            
+            # Restore focus to the original window if possible
+            if has_focus_modules and foreground_hwnd:
+                try:
+                    # Restore the original foreground window
+                    ctypes.windll.user32.SetForegroundWindow(foreground_hwnd)
+                    
+                    # Force Windows to refresh focus by simulating Alt key press
+                    ALT_KEY = 0x12
+                    KEYEVENTF_KEYUP = 0x0002
+                    ctypes.windll.user32.keybd_event(ALT_KEY, 0, 0, 0)  # Alt press
+                    time.sleep(0.1)
+                    ctypes.windll.user32.keybd_event(ALT_KEY, 0, KEYEVENTF_KEYUP, 0)  # Alt release
+                    
+                    log_message("Restored original window focus", "ICLOUD")
+                except Exception as e:
+                    log_message(f"Failed to restore window focus: {e}", "ICLOUD")
             
             log_message("Processing cycle completed", "ICLOUD")
             
