@@ -2,6 +2,7 @@ import subprocess
 import platform
 import psutil
 import time
+import os
 from arcade_station.core.common.core_functions import load_toml_config, launch_script, log_message
 
 def kill_lights_processes():
@@ -82,7 +83,19 @@ def launch_mame_lights():
             kill_specific_lights_process("mame2lit")
             
             log_message("Launching MAME lights...", "LIGHTS")
-            launch_script(mame_executable_path, identifier="mame_lights")
-            log_message("MAME lights launched.", "LIGHTS")
+            
+            # Check if the executable path exists
+            if not os.path.exists(mame_executable_path):
+                log_message(f"MAME lights executable not found at: {mame_executable_path}", "LIGHTS")
+                return
+            
+            # Launch mame2lit.exe directly as an executable, not as a Python script
+            process = subprocess.Popen(
+                [mame_executable_path],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                shell=False
+            )
+            
+            log_message(f"MAME lights launched with PID: {process.pid}", "LIGHTS")
         except Exception as e:
             log_message(f"Failed to launch MAME lights: {e}", "LIGHTS")
