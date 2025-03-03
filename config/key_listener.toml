@@ -7,5 +7,5 @@
 "ctrl+f6" = "C:/Windows/explorer.exe"
 "ctrl+f7" = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" 
 "ctrl+space" = "../arcade_station/core/common/kill_all_and_reset_pegasus.py"
-"+" = "../bin/windows/take_screenshot.vbs"
-"/" = "../bin/windows/take_screenshot.vbs"
+"+" = "../../bin/windows/take_screenshot.vbs"
+"/" = "../../bin/windows/take_screenshot.vbs"
