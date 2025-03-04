@@ -19,7 +19,7 @@ if (-not (Test-Path -Path $batchFilePath)) {
 
 # Convert to absolute path and ensure proper quoting
 $batchFileAbsPath = (Resolve-Path -Path $batchFilePath).Path
-$shellCommand = "`"$batchFileAbsPath`" --shell"
+$shellCommand = "`"$batchFileAbsPath`""
 
 # Registry key for the Windows shell
 $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
