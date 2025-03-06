@@ -1,9 +1,26 @@
+"""
+Arcade Station Frontend Launcher.
+
+This is the main entry point for starting the Arcade Station application.
+It handles initialization of the environment, launches required background
+services, sets up the frontend, and manages the overall application lifecycle.
+
+The module performs the following key tasks:
+1. Verifies Python version compatibility
+2. Sets up the virtual environment if needed
+3. Prepares the system by killing conflicting processes
+4. Launches background services (key listeners, OSD, etc.)
+5. Starts the Pegasus frontend
+6. Displays the default marquee/banner image
+
+This script should be run directly to start the Arcade Station system.
+"""
+
 import sys
 import os
-import platform
-import subprocess
 import time
 import argparse
+import traceback
 
 # Check Python version
 REQUIRED_VERSION = (3, 12, 9)  # Updated to 3.12.9
@@ -28,11 +45,21 @@ from arcade_station.core.common.core_functions import (
     determine_operating_system
 )
 from arcade_station.core.common.display_image import display_image_from_config
+from arcade_station.core.common.launch_binary import launch_osd
 
 def setup_virtual_environment():
     """
-    Sets up and activates the virtual environment if needed.
-    Returns True if successful, False otherwise.
+    Set up and activate the Python virtual environment for Arcade Station.
+    
+    Checks if the script is already running in a virtual environment. If not,
+    it attempts to locate and activate the project's virtual environment.
+    This ensures all dependencies are available and isolated from the system
+    Python installation.
+    
+    Returns:
+        bool: True if already in a virtual environment or if activation was
+              successful, False if the virtual environment couldn't be found
+              or activated.
     """
     try:
         # Check if we're already in a virtual environment
@@ -83,7 +110,14 @@ def setup_virtual_environment():
 
 def prepare_system():
     """
-    Prepares the system by killing any existing processes and resetting the system state.
+    Prepare the system environment for Arcade Station startup.
+    
+    Terminates any existing processes that might conflict with Arcade Station,
+    such as previous instances of the frontend, game processes, or utilities.
+    This ensures a clean state before launching the application components.
+    
+    Returns:
+        bool: True if system preparation was successful, False otherwise.
     """
     try:
         log_message("Preparing system by killing processes and resetting state...", "STARTUP")
@@ -102,11 +136,24 @@ def prepare_system():
 
 def start_conditional_scripts():
     """
-    Start additional scripts based on configuration settings.
+    Launch optional background services based on configuration settings.
+    
+    Reads the utility_config.toml and display_config.toml files to determine
+    which optional services should be started. This includes:
+    - VPN connection service (if enabled)
+    - On-screen display (OSD) service (Windows-only, if enabled)
+    - Dynamic marquee monitors for specific games (if enabled)
+    - ITGMania song banner display (if enabled)
+    
+    Returns:
+        None
+    
+    Note:
+        Some services are platform-specific and will only be launched on
+        compatible operating systems.
     """
-    # Load configuration
     try:
-        # VPN configuration
+        # Load configuration
         utility_config = load_toml_config('utility_config.toml')
         vpn_enabled = utility_config.get('vpn', {}).get('enabled', False)
         if vpn_enabled:
@@ -114,7 +161,15 @@ def start_conditional_scripts():
             vpn_process = launch_script(vpn_script, identifier="connect_vpn")
             log_message(f"Launched VPN connection script with PID: {vpn_process.pid}", "STARTUP")
         
-        # Dynamic marquee configuration
+        # OSD configuration - Launch OSD if enabled (Windows-only)
+        osd_enabled = utility_config.get('osd', {}).get('enabled', False)
+        if osd_enabled and determine_operating_system() == "Windows":
+            if launch_osd():
+                log_message("Successfully launched OSD application", "STARTUP")
+            else:
+                log_message("Failed to launch OSD application", "STARTUP")
+        
+        # Dynamic marquee configuration - Launch ITGMania monitor
         display_config = load_toml_config('display_config.toml')
         dynamic_marquee_enabled = display_config.get('dynamic_marquee', {}).get('enabled', False)
         itgmania_display_enabled = display_config.get('dynamic_marquee', {}).get('itgmania_display_enabled', False)
@@ -124,6 +179,22 @@ def start_conditional_scripts():
             itgmania_process = launch_script(itgmania_script, identifier="monitor_itgmania")
             log_message(f"Launched ITGMania monitor script with PID: {itgmania_process.pid}", "STARTUP")
         
+        # iCloud upload management configuration (Windows-only)
+        screenshot_config = load_toml_config('screenshot_config.toml')
+        icloud_enabled = screenshot_config.get('icloud_upload', {}).get('enabled', False)
+        
+        if icloud_enabled and determine_operating_system() == "Windows":
+            log_message("iCloud upload enabled and running on Windows - starting upload manager", "STARTUP")
+            
+            try:
+                # Launch the iCloud manager as a separate process
+                icloud_script = os.path.join(base_dir, "core", "common", "manage_icloud.py")
+                icloud_process = launch_script(icloud_script, identifier="manage_icloud")
+                log_message(f"Launched iCloud manager with PID: {icloud_process.pid}", "STARTUP")
+            except Exception as e:
+                log_message(f"Error starting iCloud manager: {e}", "STARTUP")
+                log_message(traceback.format_exc(), "STARTUP")
+        
         # Other conditional scripts can be added here based on configuration
         
     except Exception as e:
@@ -131,7 +202,24 @@ def start_conditional_scripts():
 
 def main():
     """
-    Main function to start the frontend applications.
+    Main entry point for the Arcade Station application.
+    
+    This function orchestrates the startup sequence for Arcade Station:
+    1. Parses command-line arguments
+    2. Sets up the virtual environment
+    3. Prepares the system by killing conflicting processes
+    4. Displays the default marquee/banner image
+    5. Launches the keyboard shortcut listener
+    6. Starts conditional background services based on configuration
+    7. Launches the Pegasus frontend
+    8. If in shell replacement mode, keeps the process running
+    
+    Command-line Arguments:
+        --shell-mode: Run in shell replacement mode, keeping the process alive
+                     to prevent the shell from returning to the command prompt.
+    
+    Returns:
+        None
     """
     parser = argparse.ArgumentParser(description='Start Arcade Station frontend applications')
     parser.add_argument('--shell-mode', action='store_true', help='Run in shell replacement mode')
@@ -158,13 +246,13 @@ def main():
     listener_process = launch_script(listener_script, identifier="key_listener")
     log_message(f"Launched key_listener.py with PID: {listener_process.pid}", "MENU")
     
-    # Launch the start_pegasus.py script with its identifier
-    pegasus_script = os.path.join(base_dir, "core", "common", "start_pegasus.py")
-    pegasus_process = launch_script(pegasus_script, identifier="start_pegasus")
-    log_message(f"Launched start_pegasus.py with PID: {pegasus_process.pid}", "GAME")
-    
     # Start conditional scripts based on configuration
     start_conditional_scripts()
+    
+    # Use kill_all_and_reset_pegasus.py to launch Pegasus (replaced the direct Pegasus launch)
+    reset_script = os.path.join(base_dir, "core", "common", "kill_all_and_reset_pegasus.py")
+    reset_process = launch_script(reset_script, identifier="kill_all_and_reset_pegasus")
+    log_message(f"Launched kill_all_and_reset_pegasus.py with PID: {reset_process.pid}", "RESET")
     
     # If running in shell replacement mode, we need to keep this process running
     if args.shell_mode:

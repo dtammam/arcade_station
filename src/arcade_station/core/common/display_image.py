@@ -1,7 +1,18 @@
+"""
+Display Image Module for Arcade Station.
+
+This module provides functionality to display images on specific monitors in a
+non-intrusive way. It creates frameless, always-on-top windows that display images
+without stealing focus from other applications, making it ideal for displaying
+marquee images, banners, or overlays while games are running.
+
+The module uses PyQt5 to create and manage the image windows, with support for
+multiple monitors, background colors, and image updates.
+"""
+
 import sys
 import os
 import threading
-import subprocess
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt
@@ -10,7 +21,7 @@ import logging
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
-from arcade_station.core.common.core_functions import load_toml_config, log_message
+from arcade_station.core.common.core_functions import load_toml_config, log_message, launch_script
 
 # Global variable to hold the window instance
 window_instance = None
@@ -19,9 +30,42 @@ app = None
 PID_FILE = "arcade_station_image.pid"  # Use a relative path or specify a directory
 
 class ImageWindow(QMainWindow):
+    """
+    A frameless window that displays an image without stealing focus.
+    
+    This class creates a non-interactive window that stays on top of other windows
+    and displays an image. It's designed to show marquee images, game art, or
+    other visual elements while games are running, without interfering with the
+    game's input handling.
+    
+    Attributes:
+        image_label (QLabel): The label that contains the displayed image.
+    """
+    
     def __init__(self, image_path, background_color='black', screen_geometry=None):
+        """
+        Initialize the image window with specified parameters.
+        
+        Args:
+            image_path (str): Path to the image file to display.
+            background_color (str): Color name or hex code for the window background.
+                                   Use 'transparent' for a transparent background.
+            screen_geometry: The geometry of the target screen to display on.
+                           If None, the primary monitor is used.
+        """
         super().__init__()
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        # Add Qt.Tool and Qt.NoFocus flags to prevent stealing focus
+        # Qt.Tool tells Windows this is a tool window (not a main app window), they don't show in taskbar and don't steal focus
+        # Qt.WindowDoesNotAcceptFocus prevents the window from accepting keyboard focus
+        self.setWindowFlags(
+            Qt.FramelessWindowHint | 
+            Qt.WindowStaysOnTopHint | 
+            Qt.Tool | 
+            Qt.WindowDoesNotAcceptFocus
+        )
+        
+        # Add additional attribute to never activate the window
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
 
         # Handle transparency specially
         if background_color.lower() == 'transparent':
@@ -74,17 +118,35 @@ class ImageWindow(QMainWindow):
         self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_width, screen_height)
 
     def update_image(self, image_path):
-        # Method to update the image
+        """
+        Update the displayed image without recreating the window.
+        
+        Args:
+            image_path (str): Path to the new image file to display.
+        """
         pixmap = QPixmap(image_path)
         self.label.setPixmap(pixmap)
 
     def close_window(self):
-        # Method to close the window programmatically
+        """
+        Close the window programmatically.
+        
+        This method can be called to close the window from outside the event loop.
+        """
         self.close()
 
 def list_monitors():
     """
-    List available monitors and their geometries.
+    Retrieve information about all connected monitors.
+    
+    Gets details about each connected display, including its index number,
+    name, and geometry (position and dimensions).
+    
+    Returns:
+        list: A list of dictionaries, each containing information about a monitor:
+              - index: The monitor index (0-based)
+              - name: The display name
+              - geometry: A tuple (x, y, width, height) representing the monitor's position and size
     """
     app = QApplication(sys.argv)
     screens = app.screens()
@@ -98,32 +160,21 @@ def list_monitors():
         })
     return monitor_info
 
-def run_app(image_path, background_color, screen_geometry, close_event):
-    # If no event is provided, create one that never gets set
-    if close_event is None:
-        close_event = threading.Event()
-
-    app = QApplication(sys.argv)
-    window = ImageWindow(image_path, background_color, screen_geometry)
-    window.show()
-
-    def check_close_event():
-        while not close_event.is_set():
-            app.processEvents()
-        window.close()
-
-    close_thread = threading.Thread(target=check_close_event)
-    close_thread.start()
-
-    app.exec_()
-
-    if os.path.exists(PID_FILE):
-        os.remove(PID_FILE)
-
 def display_image_from_config(config_path='display_config.toml', close_event=None, use_default=False):
     """
-    Display an image based on configuration from a TOML file.
-    If use_default is True then the default_image_path is used.
+    Display an image using parameters specified in a configuration file.
+    
+    Reads display settings from a TOML configuration file, including image path,
+    target monitor, and background color. Can optionally use a default image
+    instead of the configured one.
+    
+    Args:
+        config_path (str): Path to the TOML configuration file.
+        close_event (threading.Event, optional): Event that will signal when to close the window.
+        use_default (bool): If True, uses the default_image_path from config instead of image_path.
+    
+    Returns:
+        None
     """
     config = load_toml_config(config_path)
     if use_default:
@@ -139,21 +190,42 @@ def display_image_from_config(config_path='display_config.toml', close_event=Non
     # Use the display_image function which now uses the standardized approach with marquee_image identifier
     return display_image(image_path, background_color)
 
-def close_image_window():
-    """
-    Close the image window if it is open.
-    """
-    # This function will need to be adapted to communicate with the process
-    # For example, using a shared variable or a signal to indicate the window should close.
-    pass
-
 def main(image_path, background_color='black'):
+    """
+    Entry point for standalone image display functionality.
+    
+    Creates a QApplication and ImageWindow to display an image with the
+    specified background color. This function is used when the module
+    is run directly as a script.
+    
+    Args:
+        image_path (str): Path to the image file to display.
+        background_color (str): Color name or hex code for the window background.
+    
+    Note:
+        This function calls sys.exit() and does not return.
+    """
     app = QApplication(sys.argv)
     window = ImageWindow(image_path, background_color)
     window.show()
     sys.exit(app.exec_())
 
 def run_image_display(image_path, background_color, monitor_index):
+    """
+    Display an image on a specific monitor with the given background color.
+    
+    Creates a QApplication and ImageWindow to display an image on the specified
+    monitor. Handles monitor selection and ensures the window is displayed
+    without stealing focus.
+    
+    Args:
+        image_path (str): Path to the image file to display.
+        background_color (str): Color name or hex code for the window background.
+        monitor_index (int): Index of the monitor to display the image on.
+    
+    Returns:
+        None
+    """
     app = QApplication(sys.argv)
     screens = app.screens()
     if not screens:
@@ -168,7 +240,14 @@ def run_image_display(image_path, background_color, monitor_index):
     screen_geometry = screens[monitor_index].geometry()
 
     window = ImageWindow(image_path, background_color, screen_geometry)
+    
+    # Use show() instead of activating the window
+    # This ensures the window is displayed without stealing focus
     window.show()
+    log_message("Showing image window without stealing focus", "BANNER")
+
+    # Disable window activation through the event queue
+    app.setQuitOnLastWindowClosed(True)
 
     # Start the application event loop
     log_message("Starting application event loop for image display.", "BANNER")
@@ -177,7 +256,19 @@ def run_image_display(image_path, background_color, monitor_index):
 
 def display_image(image_path, background_color='black'):
     """
-    Function to create and display an ImageWindow in a separate process.
+    Display an image in a separate process to avoid blocking the main application.
+    
+    Launches a separate Python process to display the image, allowing the
+    calling process to continue execution. Uses a dedicated script to handle
+    the image display.
+    
+    Args:
+        image_path (str): Path to the image file to display.
+        background_color (str): Color name or hex code for the window background.
+                               Defaults to 'black'.
+    
+    Returns:
+        subprocess.Popen: The process object for the launched image display script.
     """
     log_message(f"Displaying image: {image_path} on monitor with background color: {background_color}", "BANNER")
 
@@ -193,50 +284,29 @@ def display_image(image_path, background_color='black'):
     if not os.path.exists(script_path):
         with open(script_path, 'w') as f:
             f.write("""
+# This script is auto-generated to display images
 import sys
 import os
 import argparse
-import logging
 
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 
-from arcade_station.core.common.display_image import run_image_display
+from arcade_station.core.common.display_image import display_image
 
 def main():
-    # Configure logging
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    parser = argparse.ArgumentParser(description='Display an image on a specific monitor')
+    parser.add_argument('image_path', help='Path to the image file')
+    parser.add_argument('--background', default='black', help='Background color (default: black)')
+    args = parser.parse_args()
     
-    try:
-        # Parse command line arguments
-        parser = argparse.ArgumentParser(description='Display an image on a monitor')
-        parser.add_argument('image_path', help='Path to the image file to display')
-        parser.add_argument('background_color', help='Background color (e.g., "black", "#000000")')
-        parser.add_argument('monitor_index', type=int, help='Index of the monitor to display on')
-        parser.add_argument('--identifier', default='marquee_image', help='Process identifier')
-        
-        args = parser.parse_args()
-        
-        # Verify image file exists
-        if not os.path.exists(args.image_path):
-            logging.error(f"Image file not found: {args.image_path}")
-            sys.exit(1)
-            
-        logging.debug(f"Starting image display - Image: {args.image_path}, Color: {args.background_color}, Monitor: {args.monitor_index}")
-        
-        # Run the image display function
-        run_image_display(args.image_path, args.background_color, args.monitor_index)
-    
-    except Exception as e:
-        logging.error(f"Error in image display script: {e}")
-        sys.exit(1)
+    display_image(args.image_path, args.background)
 
 if __name__ == "__main__":
     main()
 """)
     
     # Use the standardized launch_script function with marquee_image identifier
-    from arcade_station.core.common.core_functions import launch_script
     process = launch_script(
         script_path, 
         identifier="marquee_image",

@@ -6,8 +6,8 @@
 #>
 
 # Parameters to launch the .ps1 script from a command line
-param (
-)
+[CmdletBinding()]
+param ()
 
 # Import core modules relevant for all scripts
 [string]$coreFunctionsModule = Join-Path -Path $PSScriptRoot -ChildPath "core_functions.psm1"

@@ -67,7 +67,15 @@ def take_screenshot(monitor_index=0, file_location='.', file_name=None, quality=
     if sound_file and os.path.exists(sound_file) and config['screenshot'].get('sound_file', '').strip():
         try:
             if sys.platform.startswith('win'):
-                subprocess.run(['powershell', '-c', f'(New-Object Media.SoundPlayer "{sound_file}").PlaySync();'])
+                # Use hidden PowerShell window to play sound
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = 0  # 0 means SW_HIDE
+                subprocess.run(
+                    ['powershell', '-WindowStyle', 'Hidden', '-c', f'(New-Object Media.SoundPlayer "{sound_file}").PlaySync();'],
+                    startupinfo=startupinfo,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
             elif sys.platform.startswith('darwin'):
                 subprocess.run(['afplay', sound_file])
             elif sys.platform.startswith('linux'):

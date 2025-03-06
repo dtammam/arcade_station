@@ -10,7 +10,6 @@ import platform
 import subprocess
 import sys
 import time
-from pathlib import Path
 
 # Add the parent directory to the Python path if needed
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))

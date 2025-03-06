@@ -1,0 +1,52 @@
+# Arcade Station Coding Standards
+
+This document outlines the coding standards and best practices for the Arcade Station project.
+
+## Python Style Guidelines
+
+- Follow PEP 8 for Python code style
+- Maximum line length: 79 characters
+- Use Google-style docstrings
+- Import modules in the following order:
+  1. Standard library imports
+  2. Related third-party imports
+  3. Local application imports
+- Prefer using functions from `core_functions.py` for common tasks
+- Use `log_message()` for all logging needs with appropriate prefixes
+- Use `load_toml_config()` to load configuration files
+
+## File Organization
+
+- Place common utilities in `core/common/core_functions.py`
+- Platform-specific code should go in appropriate platform directories:
+  - Windows: `core/windows/`
+  - Linux: `core/linux/`
+  - macOS: `core/mac/`
+- Configuration files are stored in `config/` directory in TOML format
+
+## Configuration Files
+
+- Use TOML format for all configuration files
+- TOML files should use 2-space indentation
+- Group related settings into sections
+- Provide appropriate default values
+
+## Error Handling
+
+- Use try/except blocks around code that might fail
+- Log meaningful error messages
+- Include exception details in error logs
+- Handle platform-specific edge cases appropriately
+
+## Windows-Specific Guidelines
+
+- Use `CREATE_NO_WINDOW` flag for background processes
+- Set `startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW` for hidden processes
+- Properly handle file paths with spaces and special characters
+- Test on multiple Windows versions when possible
+
+## Process Management
+
+- Use daemon threads for background processes
+- Provide ways to gracefully terminate long-running processes
+- Implement appropriate logging for process lifecycle events 
