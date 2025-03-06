@@ -6,6 +6,7 @@ import subprocess
 import psutil
 import keyboard
 import sys
+import time
 
 # function Invoke-SetMarqueeFromFile
 # function Open-FullscreenImage
@@ -198,7 +199,6 @@ def get_pegasus_binary(installed_games):
     else:
         binary_path = os.path.join(pegasus_base_path, installed_games['pegasus']['linux_binary'])
     
-    print(f"Constructed binary path: {binary_path}")
     return binary_path
 
 def start_pegasus():
@@ -496,28 +496,28 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
 
 def log_message(message, prefix=""):
     """
-    Simple logging function that prints a message with an optional prefix.
-    Also writes the message to a log file for tracking game invocations.
+    Logs a message to the console and to the log file.
     
     Args:
-        message (str): The message to log
-        prefix (str): Optional prefix to add to the message
+        message (str): The message to log.
+        prefix (str, optional): A prefix to add to the message. Defaults to "".
     """
-    formatted_message = f"[{prefix}] {message}" if prefix else message
-    
-    # Print to console
-    print(formatted_message)
-    
-    # Write to log file
     try:
-        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..', 'logs')
-        os.makedirs(log_dir, exist_ok=True)
+        timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
         
-        log_file = os.path.join(log_dir, 'game_invocation.log')
+        # Format the message with timestamp and prefix
+        if prefix:
+            formatted_message = f"[{timestamp}] [{prefix}] {message}"
+        else:
+            formatted_message = f"[{timestamp}] {message}"
         
-        with open(log_file, 'a', encoding='utf-8') as f:
-            from datetime import datetime
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            f.write(f"[{timestamp}] {formatted_message}\n")
+        # Log to console (redirect through logging)
+        logging.info(formatted_message)
+        
+        # Also log to the log file if it exists
+        if 'log_file_path' in globals() and os.path.exists(os.path.dirname(log_file_path)):
+            with open(log_file_path, 'a', encoding='utf-8') as f:
+                f.write(formatted_message + '\n')
+                
     except Exception as e:
-        print(f"Failed to write to log file: {e}")
+        logging.error(f"Failed to write to log file: {e}")
