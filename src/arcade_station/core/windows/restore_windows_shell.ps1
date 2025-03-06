@@ -17,17 +17,9 @@ $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
 # Try to get the original shell value from registry
 try {
-    $originalShell = Get-ItemProperty -Path $shellKey -Name "OriginalShell" -ErrorAction SilentlyContinue | 
-                     Select-Object -ExpandProperty "OriginalShell"
-    
-    # If found, use it
-    if ($originalShell) {
-        Write-Host "Found original shell in registry: $originalShell"
-    } else {
-        # Default to explorer.exe if no backup found
-        $originalShell = "explorer.exe"
-        Write-Host "No backup found. Using default Windows shell: $originalShell"
-    }
+    # Windows Explorer back to normal
+    $originalShell = "explorer.exe"
+    Write-Host "Using default Windows shell: $originalShell"
     
     # Set original shell value
     Set-ItemProperty -Path $shellKey -Name "Shell" -Value $originalShell -Type String
