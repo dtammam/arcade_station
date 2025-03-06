@@ -1,3 +1,15 @@
+"""
+Display Image Module for Arcade Station.
+
+This module provides functionality to display images on specific monitors in a
+non-intrusive way. It creates frameless, always-on-top windows that display images
+without stealing focus from other applications, making it ideal for displaying
+marquee images, banners, or overlays while games are running.
+
+The module uses PyQt5 to create and manage the image windows, with support for
+multiple monitors, background colors, and image updates.
+"""
+
 import sys
 import os
 import threading
@@ -18,7 +30,29 @@ app = None
 PID_FILE = "arcade_station_image.pid"  # Use a relative path or specify a directory
 
 class ImageWindow(QMainWindow):
+    """
+    A frameless window that displays an image without stealing focus.
+    
+    This class creates a non-interactive window that stays on top of other windows
+    and displays an image. It's designed to show marquee images, game art, or
+    other visual elements while games are running, without interfering with the
+    game's input handling.
+    
+    Attributes:
+        image_label (QLabel): The label that contains the displayed image.
+    """
+    
     def __init__(self, image_path, background_color='black', screen_geometry=None):
+        """
+        Initialize the image window with specified parameters.
+        
+        Args:
+            image_path (str): Path to the image file to display.
+            background_color (str): Color name or hex code for the window background.
+                                   Use 'transparent' for a transparent background.
+            screen_geometry: The geometry of the target screen to display on.
+                           If None, the primary monitor is used.
+        """
         super().__init__()
         # Add Qt.Tool and Qt.NoFocus flags to prevent stealing focus
         # Qt.Tool tells Windows this is a tool window (not a main app window), they don't show in taskbar and don't steal focus
@@ -84,17 +118,35 @@ class ImageWindow(QMainWindow):
         self.setGeometry(screen_geometry.x(), screen_geometry.y(), screen_width, screen_height)
 
     def update_image(self, image_path):
-        # Method to update the image
+        """
+        Update the displayed image without recreating the window.
+        
+        Args:
+            image_path (str): Path to the new image file to display.
+        """
         pixmap = QPixmap(image_path)
         self.label.setPixmap(pixmap)
 
     def close_window(self):
-        # Method to close the window programmatically
+        """
+        Close the window programmatically.
+        
+        This method can be called to close the window from outside the event loop.
+        """
         self.close()
 
 def list_monitors():
     """
-    List available monitors and their geometries.
+    Retrieve information about all connected monitors.
+    
+    Gets details about each connected display, including its index number,
+    name, and geometry (position and dimensions).
+    
+    Returns:
+        list: A list of dictionaries, each containing information about a monitor:
+              - index: The monitor index (0-based)
+              - name: The display name
+              - geometry: A tuple (x, y, width, height) representing the monitor's position and size
     """
     app = QApplication(sys.argv)
     screens = app.screens()
@@ -110,8 +162,19 @@ def list_monitors():
 
 def display_image_from_config(config_path='display_config.toml', close_event=None, use_default=False):
     """
-    Display an image based on configuration from a TOML file.
-    If use_default is True then the default_image_path is used.
+    Display an image using parameters specified in a configuration file.
+    
+    Reads display settings from a TOML configuration file, including image path,
+    target monitor, and background color. Can optionally use a default image
+    instead of the configured one.
+    
+    Args:
+        config_path (str): Path to the TOML configuration file.
+        close_event (threading.Event, optional): Event that will signal when to close the window.
+        use_default (bool): If True, uses the default_image_path from config instead of image_path.
+    
+    Returns:
+        None
     """
     config = load_toml_config(config_path)
     if use_default:
@@ -128,12 +191,41 @@ def display_image_from_config(config_path='display_config.toml', close_event=Non
     return display_image(image_path, background_color)
 
 def main(image_path, background_color='black'):
+    """
+    Entry point for standalone image display functionality.
+    
+    Creates a QApplication and ImageWindow to display an image with the
+    specified background color. This function is used when the module
+    is run directly as a script.
+    
+    Args:
+        image_path (str): Path to the image file to display.
+        background_color (str): Color name or hex code for the window background.
+    
+    Note:
+        This function calls sys.exit() and does not return.
+    """
     app = QApplication(sys.argv)
     window = ImageWindow(image_path, background_color)
     window.show()
     sys.exit(app.exec_())
 
 def run_image_display(image_path, background_color, monitor_index):
+    """
+    Display an image on a specific monitor with the given background color.
+    
+    Creates a QApplication and ImageWindow to display an image on the specified
+    monitor. Handles monitor selection and ensures the window is displayed
+    without stealing focus.
+    
+    Args:
+        image_path (str): Path to the image file to display.
+        background_color (str): Color name or hex code for the window background.
+        monitor_index (int): Index of the monitor to display the image on.
+    
+    Returns:
+        None
+    """
     app = QApplication(sys.argv)
     screens = app.screens()
     if not screens:
@@ -164,7 +256,19 @@ def run_image_display(image_path, background_color, monitor_index):
 
 def display_image(image_path, background_color='black'):
     """
-    Function to create and display an ImageWindow in a separate process.
+    Display an image in a separate process to avoid blocking the main application.
+    
+    Launches a separate Python process to display the image, allowing the
+    calling process to continue execution. Uses a dedicated script to handle
+    the image display.
+    
+    Args:
+        image_path (str): Path to the image file to display.
+        background_color (str): Color name or hex code for the window background.
+                               Defaults to 'black'.
+    
+    Returns:
+        subprocess.Popen: The process object for the launched image display script.
     """
     log_message(f"Displaying image: {image_path} on monitor with background color: {background_color}", "BANNER")
 

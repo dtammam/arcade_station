@@ -1,3 +1,14 @@
+"""
+Core Functions Module for Arcade Station.
+
+This module contains essential utilities and functions used throughout the Arcade Station
+application. It handles configuration loading, process management, platform detection,
+and common operations that need to be accessible across the codebase.
+
+The functions in this module are designed to be platform-agnostic where possible,
+with platform-specific implementations when necessary.
+"""
+
 import os
 import logging
 import tomllib
@@ -16,8 +27,17 @@ import time
 
 def open_header(script_name):
     """
-    Prepares global variables that will be used for various functions throughout the script.
-    Specifically configured for logging locations and exit codes.
+    Prepare the environment for script execution and initialize logging.
+    
+    Sets up global variables for logging and exit codes, loads configuration,
+    and establishes the logging infrastructure. This should typically be
+    called at the beginning of each script.
+    
+    Args:
+        script_name: String identifier for the calling script, used in log files.
+        
+    Returns:
+        None. Sets global variables for use throughout the script.
     """
     # Determine the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -49,22 +69,27 @@ def open_header(script_name):
 
 def determine_operating_system():
     """
-    Determine the operating system.
+    Detect the current operating system.
     
     Returns:
-        str: The name of the operating system (Windows, Linux, MacOS)
+        str: The detected operating system - 'Windows', 'Linux', 'Darwin' (macOS),
+            or 'Unknown' if the platform cannot be determined.
     """
     return platform.system()
 
 def convert_path_for_platform(path):
     """
-    Convert file paths for the current platform.
+    Convert file paths to be compatible with the current operating system.
+    
+    Transforms forward slashes to backslashes on Windows and vice versa
+    on Unix-like systems to ensure cross-platform compatibility of paths.
     
     Args:
-        path (str): The path to convert
+        path (str): The file path to convert.
         
     Returns:
-        str: The converted path for the current platform
+        str: The converted path appropriate for the current platform.
+             Returns unchanged if path is None.
     """
     if not path:
         return path
@@ -80,7 +105,20 @@ def convert_path_for_platform(path):
 
 def load_toml_config(file_name):
     """
-    Load configuration from a specified TOML file.
+    Load configuration from a specified TOML file in the config directory.
+    
+    Locates the configuration file relative to the application structure
+    and parses its contents into a Python dictionary.
+    
+    Args:
+        file_name (str): The name of the TOML configuration file.
+    
+    Returns:
+        dict: Dictionary containing the configuration from the TOML file.
+        
+    Raises:
+        FileNotFoundError: If the specified configuration file doesn't exist.
+        tomllib.TOMLDecodeError: If the TOML file has invalid syntax.
     """
     # Determine the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -95,13 +133,17 @@ def load_toml_config(file_name):
 
 def load_key_mappings_from_toml(toml_file_path):
     """
-    Load key-action mappings from a specified TOML file.
+    Load keyboard shortcut mappings from a specified TOML configuration file.
+    
+    Parses the TOML file and extracts keyboard shortcuts and their associated
+    actions, logging the results for debugging purposes.
     
     Args:
         toml_file_path (str): Path to the TOML file containing key mappings.
     
     Returns:
-        dict: A dictionary of key-action mappings.
+        dict: A dictionary where keys are keyboard shortcuts and values are 
+             the corresponding actions to execute.
     """
     config = load_toml_config(toml_file_path)
     log_message(f"Loaded key mappings config: {config}", "MENU")
@@ -116,10 +158,16 @@ def load_key_mappings_from_toml(toml_file_path):
 
 def start_listening_to_keybinds_from_toml(toml_file_path):
     """
-    Load key-action mappings from a specified TOML file and start listening for keybinds.
+    Set up keyboard shortcut listeners based on mappings in a TOML file.
+    
+    Registers hotkeys that trigger either application launches or the
+    kill processes functionality. Runs indefinitely until interrupted.
     
     Args:
         toml_file_path (str): Path to the TOML file containing key mappings.
+        
+    Note:
+        This function blocks execution until interrupted with Ctrl+C.
     """
     # Load key mappings from the TOML file
     key_mappings = load_key_mappings_from_toml(toml_file_path)
@@ -146,10 +194,16 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
 
 def kill_processes_from_toml(toml_file_path):
     """
-    Load the list of processes to kill from a specified TOML file and kill them.
+    Terminate processes listed in a TOML configuration file.
+    
+    Reads process identifiers from the specified configuration file
+    and attempts to terminate each one, logging the results.
     
     Args:
-        toml_file_path (str): Path to the TOML file containing processes to kill.
+        toml_file_path (str): Path to the TOML file containing process identifiers.
+        
+    Returns:
+        None
     """
 
     log_message("Loading processes to kill...", "MENU")
@@ -179,13 +233,29 @@ def kill_processes_from_toml(toml_file_path):
 
 def load_installed_games():
     """
-    Load installed games configuration from a TOML file.
+    Load the configuration of installed games from the TOML configuration.
+    
+    Retrieves the list of installed games and their associated paths and 
+    configuration from the pegasus_binaries.toml file.
+    
+    Returns:
+        dict: Dictionary containing configuration for installed games and applications.
     """
     return load_toml_config('pegasus_binaries.toml')
 
 def get_pegasus_binary(installed_games):
     """
-    Returns the path to the appropriate Pegasus binary based on the operating system.
+    Determine the appropriate Pegasus frontend executable for the current OS.
+    
+    Uses platform detection to select the correct binary path from the
+    installed_games configuration, based on the operating system.
+    
+    Args:
+        installed_games (dict): Dictionary containing paths to Pegasus binaries
+                               for different operating systems.
+    
+    Returns:
+        str: Absolute path to the appropriate Pegasus binary for the current OS.
     """
     config = load_toml_config('default_config.toml')
     # Adjust the base path to point directly to the pegasus-fe directory
@@ -203,7 +273,13 @@ def get_pegasus_binary(installed_games):
 
 def start_pegasus():
     """
-    Function to start the Pegasus application.
+    Launch the Pegasus frontend application.
+    
+    Retrieves the appropriate binary path for the current operating system
+    and launches the Pegasus frontend. Logs the outcome of the launch attempt.
+    
+    Returns:
+        None
     """
     installed_games = load_installed_games()
     pegasus_binary = get_pegasus_binary(installed_games)
@@ -221,7 +297,20 @@ def start_pegasus():
 
 def start_app(executable_path):
     """
-    Function to start an application given its executable path.
+    Launch an application based on its executable path.
+    
+    Handles different types of executables (PowerShell scripts, VBScripts, 
+    and regular executables) with appropriate launching methods based on
+    the operating system.
+    
+    Args:
+        executable_path (str): Path to the executable or script to launch.
+        
+    Returns:
+        None
+        
+    Note:
+        PowerShell scripts and VBScripts are only supported on Windows systems.
     """
     try:
         os_type = determine_operating_system()
@@ -257,10 +346,23 @@ def start_app(executable_path):
 
 def kill_process_by_identifier(identifier):
     """
-    Kill a process by its identifier.
+    Terminate a process and its children based on an identifier string.
     
-    The identifier can be either a standard name (like 'marquee_image') or 
-    any part of the command line used to start the process.
+    Searches for processes with command line arguments matching the provided
+    identifier or its predefined patterns. Once found, terminates the process
+    and all its child processes.
+    
+    Args:
+        identifier (str): The identifier to search for in process command lines.
+                          Can be a predefined key ('marquee_image', 'open_image', 
+                          'start_pegasus') or any custom string.
+    
+    Returns:
+        bool: True if any processes were found and killed, False otherwise.
+        
+    Note:
+        Predefined identifiers map to specific command-line patterns for common
+        processes in the Arcade Station application.
     """
     log_message(f"Searching for processes with identifier: {identifier}", "MENU")
     killed = False
@@ -301,11 +403,24 @@ def kill_process_by_identifier(identifier):
 
 def launch_script(script_path, identifier=None, extra_args=None):
     """
-    Launch a Python script from your virtual environment.
+    Launch a Python script using the virtual environment's Python interpreter.
     
-    If an identifier is provided, it is appended as a command-line argument 
-    (e.g. '--identifier=open_image') so that external scripts can find this process.
-    Any extra_args is a list of additional command-line arguments.
+    Creates a subprocess running the specified Python script with optional
+    identifier and additional arguments. The identifier helps with process
+    management and can be used to find and terminate the process later.
+    
+    Args:
+        script_path (str): Path to the Python script to be executed.
+        identifier (str, optional): Identifier tag to append to the command line.
+                                   Used for process tracking and management.
+        extra_args (list, optional): List of additional command-line arguments
+                                    to pass to the script.
+    
+    Returns:
+        subprocess.Popen: The process object for the launched script.
+        
+    Note:
+        Uses the Python executable from the virtual environment.
     """
     # Path to your venv's Python executable.
     # TODO: Make this dynamic.
@@ -337,6 +452,20 @@ def launch_script(script_path, identifier=None, extra_args=None):
 
 # Function to kill Pegasus process
 def kill_pegasus():
+    """
+    Terminate the Pegasus frontend process.
+    
+    Identifies and terminates Pegasus frontend processes based on 
+    platform-specific executable names. Handles platform detection
+    automatically to target the correct process name.
+    
+    Returns:
+        None
+        
+    Note:
+        Supported platforms include Windows ('win32'), macOS ('darwin'), 
+        and Linux ('linux'). Logs an error for unsupported platforms.
+    """
     # Define the process names for Pegasus on different platforms
     pegasus_process_names = {
         'win32': ['pegasus-fe_windows', 'pegasus-fe_windows.exe'],
@@ -366,10 +495,22 @@ def kill_pegasus():
 
 def start_process(file_path):
     """
-    Start a process based on the file path and the operating system.
-
+    Start a process in a platform-appropriate way.
+    
+    Launches executables, scripts, or applications using the method
+    appropriate for the current operating system. Handles different
+    file types accordingly.
+    
     Args:
-        file_path (str): The path to the executable or script to run.
+        file_path (str): The path to the executable, script, or application to run.
+        
+    Returns:
+        None
+        
+    Note:
+        For Windows, uses os.startfile for .exe files and subprocess for others.
+        For macOS, uses the 'open' command.
+        For Linux, uses 'xdg-open' for GUI applications or direct execution.
     """
     os_type = sys.platform
 
@@ -399,25 +540,46 @@ def start_process(file_path):
 def load_game_config():
     """
     Load game configuration from the installed_games.toml file.
+    
+    Retrieves detailed configuration for games and applications installed
+    in the Arcade Station system.
+    
+    Returns:
+        dict: Dictionary containing installed game configurations.
     """
     return load_toml_config('installed_games.toml')
 
 def load_mame_config():
     """
-    Load MAME configuration from the mame_config.toml file.
+    Load MAME emulator configuration from the mame_config.toml file.
+    
+    Retrieves settings specific to the MAME arcade emulator,
+    including ROM paths, configuration options, and launch parameters.
+    
+    Returns:
+        dict: Dictionary containing MAME configuration settings.
     """
     return load_toml_config('mame_config.toml')
 
 def run_powershell_script(script_path, params=None):
     """
-    Run a PowerShell script with parameters.
+    Execute a PowerShell script with optional parameters.
+    
+    Runs a PowerShell script with hidden window style and bypassed execution policy.
+    Supports passing named parameters to the script and captures output.
     
     Args:
-        script_path (str): Path to the PowerShell script
-        params (dict, optional): Dictionary of parameters to pass to the script
+        script_path (str): Path to the PowerShell script file (.ps1).
+        params (dict, optional): Dictionary of parameter names and values
+                               to pass to the PowerShell script.
         
     Returns:
-        subprocess.CompletedProcess: The completed process instance
+        subprocess.Popen: The process object for the PowerShell script execution,
+                         or None if an error occurred.
+                         
+    Note:
+        This function is Windows-specific and will fail on other operating systems.
+        The PowerShell window is hidden from view during execution.
     """
     # Construct the command
     command = ['powershell.exe', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', script_path]
@@ -448,15 +610,22 @@ def run_powershell_script(script_path, params=None):
 
 def start_process_with_powershell(file_path, working_dir=None, arguments=None):
     """
-    Start a process silently using PowerShell's Start-ProcessSilently function.
+    Launch a process silently using PowerShell to hide console windows.
+    
+    Uses PowerShell to start a process in a way that prevents console windows
+    from appearing, even for command-line applications. Supports specifying
+    a working directory and command-line arguments.
     
     Args:
-        file_path (str): Path to the executable
-        working_dir (str, optional): Working directory for the process
-        arguments (str, optional): Command line arguments
+        file_path (str): Path to the executable or application to launch.
+        working_dir (str, optional): Working directory for the process.
+        arguments (str, optional): Command-line arguments to pass to the application.
         
     Returns:
-        bool: True if the process was started successfully, False otherwise
+        bool: True if the process was started successfully, False otherwise.
+        
+    Note:
+        This function is Windows-specific and relies on PowerShell.
     """
     # Get the path to the PowerShell module
     ps_module_path = os.path.abspath(os.path.join(
@@ -496,11 +665,25 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
 
 def log_message(message, prefix=""):
     """
-    Logs a message to the console and to the log file.
+    Log a message to both the console and log file with timestamp.
+    
+    Creates a formatted log entry with an optional category prefix and timestamp,
+    then writes it to both the Python logging system and a dedicated log file
+    if one has been configured by open_header().
     
     Args:
         message (str): The message to log.
-        prefix (str, optional): A prefix to add to the message. Defaults to "".
+        prefix (str, optional): A category prefix to add to the message for easier
+                               filtering and identification (e.g., "MENU", "GAME").
+                               Defaults to an empty string.
+    
+    Returns:
+        None
+        
+    Note:
+        This function requires open_header() to be called first to initialize
+        the log file path. If no log file is configured, it will only log to
+        the console through Python's logging system.
     """
     try:
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')

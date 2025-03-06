@@ -1,3 +1,15 @@
+"""
+Game Launcher Module for Arcade Station.
+
+This module handles the launching of games from the Arcade Station frontend.
+It provides functionality to launch games with appropriate settings, manage
+process priorities, handle window focus, and display game-specific artwork.
+
+The launcher supports various game types and platforms, with special handling
+for different operating systems. It also manages the lifecycle of the Pegasus
+frontend during game launches.
+"""
+
 import sys
 import os
 import subprocess
@@ -27,7 +39,25 @@ from arcade_station.core.common.display_image import display_image
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def set_process_priority(pid, priority="high"):
-    """Set the priority of a process to improve performance and focus."""
+    """
+    Set the priority of a process to improve performance and responsiveness.
+    
+    Adjusts the operating system's scheduling priority for the specified process,
+    which can help ensure games receive appropriate CPU time and resources.
+    
+    Args:
+        pid (int): Process ID of the target process.
+        priority (str): Priority level to set. Options are "low", "below_normal",
+                       "normal", "above_normal", "high", or "realtime".
+                       Defaults to "high".
+    
+    Returns:
+        bool: True if priority was set successfully, False otherwise.
+        
+    Note:
+        Setting a process to "realtime" priority can cause system instability
+        and should be used with caution.
+    """
     try:
         if not pid:
             return False
@@ -56,7 +86,20 @@ def set_process_priority(pid, priority="high"):
         return False
 
 def force_window_focus():
-    """Force Windows to refresh window focus by simulating Alt key press."""
+    """
+    Force Windows to refresh window focus by simulating Alt key press.
+    
+    Uses the Windows API to simulate pressing and releasing the Alt key,
+    which forces Windows to reevaluate window focus. This can help ensure
+    that the game window properly receives focus after launching.
+    
+    Returns:
+        None
+        
+    Note:
+        This function is Windows-specific and will fail on other operating systems.
+        It uses ctypes to directly access the Windows API.
+    """
     try:
         # Define Windows API constants
         ALT_KEY = 0x12
@@ -71,6 +114,29 @@ def force_window_focus():
         log_message(f"Failed to force window focus: {e}", "GAME")
 
 def launch_game(game_name):
+    """
+    Launch a game from the Arcade Station configuration.
+    
+    This is the main function for launching games from the Arcade Station frontend.
+    It handles different game types (MAME ROMs, standalone executables, etc.),
+    displays appropriate marquee/banner images, manages the Pegasus frontend
+    lifecycle, and sets up the environment for optimal game performance.
+    
+    Args:
+        game_name (str): The name of the game to launch, as defined in the
+                        installed_games.toml configuration file.
+    
+    Returns:
+        None
+        
+    Note:
+        This function will:
+        1. Display a game-specific banner/marquee if configured
+        2. Kill the Pegasus frontend if necessary
+        3. Launch the game with appropriate parameters
+        4. Set process priority for better performance
+        5. Handle platform-specific window focus issues
+    """
     # Log game launch attempt with timestamp
     log_message(f"Attempting to launch game: {game_name}", "GAME_LAUNCH")
     

@@ -1,3 +1,16 @@
+"""
+Launch the Pegasus Frontend Application.
+
+This utility script starts the Pegasus frontend, which serves as the main
+user interface for the Arcade Station system. It provides access to the
+game library, system settings, and other features.
+
+The script uses the start_pegasus function from core_functions.py, which
+determines the appropriate Pegasus binary for the current platform and
+launches it. This ensures that the correct version of Pegasus is started
+regardless of the operating system.
+"""
+
 import sys
 import os
 # Add the parent directory to the Python path to allow relative module imports

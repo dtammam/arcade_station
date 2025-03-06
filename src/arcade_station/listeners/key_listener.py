@@ -1,3 +1,16 @@
+"""
+Keyboard Event Listener for Arcade Station.
+
+This module sets up global keyboard shortcuts for the Arcade Station application.
+It loads key bindings from a TOML configuration file and registers hotkeys that
+trigger various actions when pressed, such as launching applications or killing
+processes.
+
+The listener runs in the background and monitors for configured key combinations,
+allowing users to control the Arcade Station system without needing to access
+the frontend directly.
+"""
+
 import sys
 import os
 
