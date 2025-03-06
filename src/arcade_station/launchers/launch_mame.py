@@ -241,7 +241,7 @@ def launch_mame(rom, save_state=None, config_path="display_config.toml"):
                 time.sleep(5)
                 
                 # Attempt to refocus MAME window from Python side as well
-                # refocus_result = refocus_mame(rom)
+                refocus_result = refocus_mame(rom)
                 log_message(f"Refocus MAME result: {refocus_result}", "MAME_LAUNCH")
                 
                 log_message("MAME launch process completed", "MAME_LAUNCH")
