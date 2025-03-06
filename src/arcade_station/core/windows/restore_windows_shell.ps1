@@ -44,7 +44,4 @@ catch {
     exit 1
 }
 
-Write-Host "`nYour original Windows shell has been restored."
-Write-Host "Changes will take effect at next login."
-Read-Host -Prompt "Press Enter to restart..." 
 Restart-ComputerSafely

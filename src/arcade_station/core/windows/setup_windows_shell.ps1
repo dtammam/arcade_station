@@ -42,7 +42,4 @@ catch {
     exit 1
 }
 
-Write-Host "`nWARNING: The next time you log in, Arcade Station will replace your Windows shell."
-Write-Host "To restore your original shell, run restore_windows_shell.ps1 as Administrator."
-Read-Host -Prompt "Press Enter to restart..." 
 Restart-ComputerSafely
