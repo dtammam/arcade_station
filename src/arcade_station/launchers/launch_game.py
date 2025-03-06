@@ -71,6 +71,9 @@ def force_window_focus():
         log_message(f"Failed to force window focus: {e}", "GAME")
 
 def launch_game(game_name):
+    # Log game launch attempt with timestamp
+    log_message(f"Attempting to launch game: {game_name}", "GAME_LAUNCH")
+    
     # Load game configuration
     config = load_game_config()
     game_config = config['games'].get(game_name, {})    
@@ -93,8 +96,11 @@ def launch_game(game_name):
             # MAME game logic
             rom = game_config['rom']
             state = game_config.get('state', '')
-            log_message(f"ROM: {rom}, State: {state}", "GAME")
+            log_message(f"Launching MAME game - ROM: {rom}, State: {state}", "GAME_LAUNCH")
             mame_script = os.path.join(os.path.dirname(__file__), '..', 'core', 'windows', 'start_mame.ps1')
+            
+            # Log the full script path for troubleshooting
+            log_message(f"MAME script path: {os.path.abspath(mame_script)}", "GAME_LAUNCH")
             
             # Load MAME configuration
             mame_config = load_mame_config()
@@ -121,6 +127,9 @@ def launch_game(game_name):
             # Set priority and force focus
             if process:
                 set_process_priority(process.pid, "high")
+                log_message(f"Successfully launched MAME game: {rom}", "GAME_LAUNCH")
+            else:
+                log_message(f"Failed to get process handle for MAME game: {rom}", "GAME_LAUNCH")
             
             # Give process time to start and then force window focus
             time.sleep(2)
@@ -132,13 +141,16 @@ def launch_game(game_name):
             # Binary game logic
             game_path = game_config.get('path', '') if isinstance(game_config, dict) else game_config
             if game_path and os.path.exists(game_path):
-                log_message(f"Launching binary game: {game_path}", "GAME")
+                log_message(f"Launching binary game: {game_path}", "GAME_LAUNCH")
                 try:
                     # Change the working directory to the directory of the executable
                     game_dir = os.path.dirname(game_path)
                     
                     # Check if we're on Windows and use PowerShell if so
                     if platform.system() == "Windows":
+                        # Log detailed info about game launch
+                        log_message(f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}", "GAME_LAUNCH")
+                        
                         # Use PowerShell to start the process
                         success = start_process_with_powershell(
                             file_path=game_path,
@@ -146,27 +158,32 @@ def launch_game(game_name):
                         )
                         
                         if not success:
+                            log_message("Failed to start game with PowerShell", "GAME_LAUNCH")
                             raise Exception("Failed to start game with PowerShell")
+                        else:
+                            log_message(f"Successfully launched game via PowerShell: {game_path}", "GAME_LAUNCH")
                     else:
                         # For non-Windows platforms, use the original approach
+                        log_message(f"Launching via subprocess on non-Windows platform", "GAME_LAUNCH")
                         os.chdir(game_dir)
                         process = subprocess.Popen(game_path)
                         # Set priority
                         set_process_priority(process.pid, "high")
+                        log_message(f"Successfully launched game via subprocess: {game_path}", "GAME_LAUNCH")
                     
                     # Give process time to start and then force window focus
                     time.sleep(2)
                     force_window_focus()
                     
                 except Exception as e:
-                    log_message(f"Failed to launch game: {e}", "GAME")
+                    log_message(f"Failed to launch game: {e}", "GAME_LAUNCH")
                 
                 # Kill Pegasus after launching the game
                 kill_pegasus()
             else:
-                log_message(f"Game path not found or invalid: {game_path}", "GAME")
+                log_message(f"Game path not found or invalid: {game_path}", "GAME_LAUNCH")
     else:
-        log_message(f"Game '{game_name}' not found in configuration.", "GAME")
+        log_message(f"Game '{game_name}' not found in configuration.", "GAME_LAUNCH")
 
 if __name__ == "__main__":
     # Check if a game name was provided as a command-line argument

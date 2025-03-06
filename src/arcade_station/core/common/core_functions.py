@@ -427,7 +427,10 @@ def run_powershell_script(script_path, params=None):
         for key, value in params.items():
             command.extend([f'-{key}', f'{value}'])
     
+    # Create a full command string for logging
+    full_command = ' '.join(command)
     log_message(f"Running PowerShell script: {script_path} with params: {params}", "PS")
+    log_message(f"Full command: {full_command}", "PS_COMMAND")
     
     try:
         # Run the command
@@ -470,6 +473,12 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
     if arguments:
         ps_command += f" -Arguments '{arguments}'"
     
+    # Log detailed information about what's being executed
+    log_message(f"Starting process using PowerShell: {file_path}", "PS")
+    log_message(f"Working directory: {working_dir}", "PS_DETAIL")
+    log_message(f"Arguments: {arguments}", "PS_DETAIL")
+    log_message(f"PowerShell command: {ps_command}", "PS_COMMAND")
+    
     try:
         # Execute the PowerShell command
         process = subprocess.Popen(
@@ -479,7 +488,7 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
             creationflags=subprocess.CREATE_NO_WINDOW
         )
         
-        log_message(f"Started process using PowerShell: {file_path}", "PS")
+        log_message(f"Successfully started process: {file_path}", "PS")
         return True
     except Exception as e:
         log_message(f"Failed to start process using PowerShell: {e}", "PS")
@@ -488,12 +497,27 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
 def log_message(message, prefix=""):
     """
     Simple logging function that prints a message with an optional prefix.
+    Also writes the message to a log file for tracking game invocations.
     
     Args:
         message (str): The message to log
         prefix (str): Optional prefix to add to the message
     """
-    if prefix:
-        print(f"[{prefix}] {message}")
-    else:
-        print(message)
+    formatted_message = f"[{prefix}] {message}" if prefix else message
+    
+    # Print to console
+    print(formatted_message)
+    
+    # Write to log file
+    try:
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..', '..', 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+        
+        log_file = os.path.join(log_dir, 'game_invocation.log')
+        
+        with open(log_file, 'a', encoding='utf-8') as f:
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"[{timestamp}] {formatted_message}\n")
+    except Exception as e:
+        print(f"Failed to write to log file: {e}")
