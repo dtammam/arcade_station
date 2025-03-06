@@ -108,28 +108,6 @@ def list_monitors():
         })
     return monitor_info
 
-def run_app(image_path, background_color, screen_geometry, close_event):
-    # If no event is provided, create one that never gets set
-    if close_event is None:
-        close_event = threading.Event()
-
-    app = QApplication(sys.argv)
-    window = ImageWindow(image_path, background_color, screen_geometry)
-    window.show()
-
-    def check_close_event():
-        while not close_event.is_set():
-            app.processEvents()
-        window.close()
-
-    close_thread = threading.Thread(target=check_close_event)
-    close_thread.start()
-
-    app.exec_()
-
-    if os.path.exists(PID_FILE):
-        os.remove(PID_FILE)
-
 def display_image_from_config(config_path='display_config.toml', close_event=None, use_default=False):
     """
     Display an image based on configuration from a TOML file.
@@ -148,14 +126,6 @@ def display_image_from_config(config_path='display_config.toml', close_event=Non
 
     # Use the display_image function which now uses the standardized approach with marquee_image identifier
     return display_image(image_path, background_color)
-
-def close_image_window():
-    """
-    Close the image window if it is open.
-    """
-    # This function will need to be adapted to communicate with the process
-    # For example, using a shared variable or a signal to indicate the window should close.
-    pass
 
 def main(image_path, background_color='black'):
     app = QApplication(sys.argv)
