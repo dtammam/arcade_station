@@ -1,7 +1,6 @@
 import sys
 import os
 import threading
-import subprocess
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt

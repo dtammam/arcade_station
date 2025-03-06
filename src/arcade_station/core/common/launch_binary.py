@@ -17,7 +17,6 @@ Options:
 import os
 import sys
 import argparse
-import platform
 import psutil
 
 # Add the parent directory to the Python path
