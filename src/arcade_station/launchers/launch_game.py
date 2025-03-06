@@ -5,6 +5,7 @@ import logging
 import time
 import ctypes
 import psutil
+import platform
 
 # Add the parent directory of 'arcade_station' to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -15,7 +16,9 @@ from arcade_station.core.common.core_functions import (
     kill_pegasus, 
     load_toml_config,
     kill_process_by_identifier,
-    log_message
+    log_message,
+    start_process_with_powershell,
+    run_powershell_script
 )
 from arcade_station.core.common.light_control import launch_mame_lights
 from arcade_station.core.common.display_image import display_image
@@ -104,14 +107,20 @@ def launch_game(game_name):
             launch_mame_lights()
             
             # Pass parameters to PowerShell script
-            process = subprocess.Popen([
-                'powershell.exe', '-WindowStyle', 'Hidden', '-File', mame_script,
-                '-ROM', rom, '-State', state,
-                '-ExecutablePath', executable_path, '-Executable', executable, '-IniPath', ini_path
-            ])
+            process = run_powershell_script(
+                script_path=mame_script,
+                params={
+                    "ROM": rom, 
+                    "State": state,
+                    "ExecutablePath": executable_path, 
+                    "Executable": executable, 
+                    "IniPath": ini_path
+                }
+            )
             
             # Set priority and force focus
-            set_process_priority(process.pid, "high")
+            if process:
+                set_process_priority(process.pid, "high")
             
             # Give process time to start and then force window focus
             time.sleep(2)
@@ -127,13 +136,23 @@ def launch_game(game_name):
                 try:
                     # Change the working directory to the directory of the executable
                     game_dir = os.path.dirname(game_path)
-                    os.chdir(game_dir)
                     
-                    # Launch the game
-                    process = subprocess.Popen(game_path)
-                    
-                    # Set priority and force focus
-                    set_process_priority(process.pid, "high")
+                    # Check if we're on Windows and use PowerShell if so
+                    if platform.system() == "Windows":
+                        # Use PowerShell to start the process
+                        success = start_process_with_powershell(
+                            file_path=game_path,
+                            working_dir=game_dir
+                        )
+                        
+                        if not success:
+                            raise Exception("Failed to start game with PowerShell")
+                    else:
+                        # For non-Windows platforms, use the original approach
+                        os.chdir(game_dir)
+                        process = subprocess.Popen(game_path)
+                        # Set priority
+                        set_process_priority(process.pid, "high")
                     
                     # Give process time to start and then force window focus
                     time.sleep(2)

@@ -48,9 +48,34 @@ def open_header(script_name):
 
 def determine_operating_system():
     """
-    Returns the current operating system.
+    Determine the operating system.
+    
+    Returns:
+        str: The name of the operating system (Windows, Linux, MacOS)
     """
     return platform.system()
+
+def convert_path_for_platform(path):
+    """
+    Convert file paths for the current platform.
+    
+    Args:
+        path (str): The path to convert
+        
+    Returns:
+        str: The converted path for the current platform
+    """
+    if not path:
+        return path
+        
+    # Convert slashes based on current OS
+    os_type = platform.system()
+    if os_type == "Windows":
+        # Replace forward slashes with backslashes for Windows
+        return path.replace('/', '\\')
+    else:
+        # Replace backslashes with forward slashes for Unix-like systems
+        return path.replace('\\', '/')
 
 def load_toml_config(file_name):
     """
@@ -382,6 +407,83 @@ def load_mame_config():
     Load MAME configuration from the mame_config.toml file.
     """
     return load_toml_config('mame_config.toml')
+
+def run_powershell_script(script_path, params=None):
+    """
+    Run a PowerShell script with parameters.
+    
+    Args:
+        script_path (str): Path to the PowerShell script
+        params (dict, optional): Dictionary of parameters to pass to the script
+        
+    Returns:
+        subprocess.CompletedProcess: The completed process instance
+    """
+    # Construct the command
+    command = ['powershell.exe', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', script_path]
+    
+    # Add parameters if provided
+    if params:
+        for key, value in params.items():
+            command.extend([f'-{key}', f'{value}'])
+    
+    log_message(f"Running PowerShell script: {script_path} with params: {params}", "PS")
+    
+    try:
+        # Run the command
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+        
+        return process
+    except Exception as e:
+        log_message(f"Error running PowerShell script: {e}", "PS")
+        return None
+
+def start_process_with_powershell(file_path, working_dir=None, arguments=None):
+    """
+    Start a process silently using PowerShell's Start-ProcessSilently function.
+    
+    Args:
+        file_path (str): Path to the executable
+        working_dir (str, optional): Working directory for the process
+        arguments (str, optional): Command line arguments
+        
+    Returns:
+        bool: True if the process was started successfully, False otherwise
+    """
+    # Get the path to the PowerShell module
+    ps_module_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), '..', 'windows', 'core_functions.psm1'
+    ))
+    
+    # Construct the PowerShell command
+    ps_command = f"Import-Module '{ps_module_path}'; "
+    ps_command += f"Start-ProcessSilently -FilePath '{file_path}'"
+    
+    if working_dir:
+        ps_command += f" -WorkingDirectory '{working_dir}'"
+    
+    if arguments:
+        ps_command += f" -Arguments '{arguments}'"
+    
+    try:
+        # Execute the PowerShell command
+        process = subprocess.Popen(
+            ['powershell.exe', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-Command', ps_command],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
+        
+        log_message(f"Started process using PowerShell: {file_path}", "PS")
+        return True
+    except Exception as e:
+        log_message(f"Failed to start process using PowerShell: {e}", "PS")
+        return False
 
 def log_message(message, prefix=""):
     """

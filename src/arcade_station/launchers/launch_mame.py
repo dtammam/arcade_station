@@ -13,7 +13,8 @@ from arcade_station.core.common.core_functions import (
     load_toml_config, 
     log_message,
     convert_path_for_platform,
-    run_powershell_script
+    run_powershell_script,
+    start_process_with_powershell
 )
 
 # Platform-specific window focus handling
@@ -176,7 +177,7 @@ def launch_mame(rom, save_state=None, config_path="display_config.toml"):
             current_dir = os.getcwd()
             
             try:
-                # On Windows, use the PowerShell script
+                # On Windows, prefer to use the PowerShell script
                 ps_script_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)), 
                     "..", "core", "windows", "StartMAME.ps1"
@@ -185,28 +186,43 @@ def launch_mame(rom, save_state=None, config_path="display_config.toml"):
                 # Ensure the script exists
                 if not os.path.exists(ps_script_path):
                     log_message(f"MAME launch script not found: {ps_script_path}", "MAME")
-                    return False
-                
-                # Execute the PowerShell script
-                process = run_powershell_script(
-                    script_path=ps_script_path,
-                    params={
-                        "ROM": rom,
-                        "State": state_param,
-                        "ExecutablePath": mame_path,
-                        "Executable": mame_executable,
-                        "IniPath": mame_ini_path
-                    }
-                )
-                
+                    
+                    # If script doesn't exist, fall back to using direct PowerShell process starting
+                    mame_full_path = os.path.join(mame_path, mame_executable)
+                    mame_args = f"{rom} {mame_ini_path}"
+                    if state_param:
+                        mame_args += f" -state {state_param}"
+                    
+                    success = start_process_with_powershell(
+                        file_path=mame_full_path,
+                        working_dir=mame_path,
+                        arguments=mame_args
+                    )
+                    
+                    if not success:
+                        log_message("Failed to start MAME using PowerShell", "MAME")
+                        return False
+                else:
+                    # Execute the PowerShell script if it exists
+                    process = run_powershell_script(
+                        script_path=ps_script_path,
+                        params={
+                            "ROM": rom,
+                            "State": state_param,
+                            "ExecutablePath": mame_path,
+                            "Executable": mame_executable,
+                            "IniPath": mame_ini_path
+                        }
+                    )
+                    
                 # Wait a moment for MAME to start
                 time.sleep(5)
                 
                 # Attempt to refocus MAME window from Python side as well
                 refocus_mame(rom)
                 
-                log_message(f"MAME launch process completed with exit code: {process.returncode}", "MAME")
-                return process.returncode == 0
+                log_message("MAME launch process completed", "MAME")
+                return True
                 
             finally:
                 # Return to the original directory
