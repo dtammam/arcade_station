@@ -9,7 +9,7 @@ import logging
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
-from arcade_station.core.common.core_functions import load_toml_config, log_message
+from arcade_station.core.common.core_functions import load_toml_config, log_message, launch_script
 
 # Global variable to hold the window instance
 window_instance = None
@@ -223,7 +223,6 @@ if __name__ == "__main__":
 """)
     
     # Use the standardized launch_script function with marquee_image identifier
-    from arcade_station.core.common.core_functions import launch_script
     process = launch_script(
         script_path, 
         identifier="marquee_image",
