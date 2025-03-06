@@ -180,7 +180,7 @@ def launch_mame(rom, save_state=None, config_path="display_config.toml"):
                 # On Windows, prefer to use the PowerShell script
                 ps_script_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)), 
-                    "..", "core", "windows", "StartMAME.ps1"
+                    "..", "core", "windows", "start_mame.ps1"
                 )
                 
                 # Ensure the script exists

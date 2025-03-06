@@ -94,7 +94,7 @@ def launch_game(game_name):
             rom = game_config['rom']
             state = game_config.get('state', '')
             log_message(f"ROM: {rom}, State: {state}", "GAME")
-            mame_script = os.path.join(os.path.dirname(__file__), '..', 'core', 'windows', 'StartMAME.ps1')
+            mame_script = os.path.join(os.path.dirname(__file__), '..', 'core', 'windows', 'start_mame.ps1')
             
             # Load MAME configuration
             mame_config = load_mame_config()
