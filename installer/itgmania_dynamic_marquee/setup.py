@@ -2,7 +2,7 @@
 Setup ITGMania Dynamic Marquee Integration
 
 This script sets up the integration between Arcade Station and ITGMania by:
-1. Copying shim files to the ITGMania installation
+1. Copying module files to the ITGMania installation
 2. Configuring the display_config.toml with the correct log file path
 """
 
@@ -128,7 +128,7 @@ def get_itgmania_install_path():
 
 def copy_shim_files(itgmania_path):
     """
-    Copy the shim files to the ITGMania installation.
+    Copy the module file to the ITGMania installation.
     
     Args:
         itgmania_path (Path): The path to the ITGMania installation.
@@ -137,51 +137,39 @@ def copy_shim_files(itgmania_path):
         bool: True if successful, False otherwise.
     """
     try:
-        # Source paths - using the new installer directory structure
-        source_base_dir = SCRIPT_DIR / "shims"
+        # Source path for the module file
+        source_file = SCRIPT_DIR / "shims" / "ArcadeStationMarquee.lua"
         
-        # Destination paths
-        dest_base_dir = itgmania_path / "Themes" / "Simply Love" / "BGAnimations"
+        if not source_file.exists():
+            log_message(f"Module file {source_file} does not exist.", "SETUP")
+            print(f"Error: Module file {source_file} not found.")
+            return False
         
-        # Directories to copy contents from
-        directories_to_copy = [
-            "ScreenGameplay overlay",
-            "ScreenSelectMusic overlay"
-        ]
+        # Destination path - the Modules directory in Simply Love theme
+        dest_dir = itgmania_path / "Themes" / "Simply Love" / "Modules"
         
-        # Check if destination directories exist
-        for dir_name in directories_to_copy:
-            dest_dir = dest_base_dir / dir_name
-            if not dest_dir.exists():
-                log_message(f"Destination directory {dest_dir} does not exist.", "SETUP")
-                print(f"Error: Required directory {dir_name} not found in ITGMania installation.")
-                return False
+        # Create the Modules directory if it doesn't exist
+        if not dest_dir.exists():
+            log_message(f"Creating Modules directory at {dest_dir}", "SETUP")
+            dest_dir.mkdir(parents=True, exist_ok=True)
         
-        # Copy files
-        for dir_name in directories_to_copy:
-            source_dir = source_base_dir / dir_name
-            dest_dir = dest_base_dir / dir_name
-            
-            print(f"Copying files to {dest_dir}...")
-            
-            for file_path in source_dir.glob('*'):
-                if file_path.is_file():
-                    dest_file = dest_dir / file_path.name
-                    # Always overwrite existing files
-                    shutil.copy2(file_path, dest_file)
-                    print(f"  - Copied {file_path.name}")
+        # Copy the module file
+        dest_file = dest_dir / "ArcadeStationMarquee.lua"
+        shutil.copy2(source_file, dest_file)
+        log_message(f"Copied module file to {dest_file}", "SETUP")
+        print(f"Copied module file to {dest_file}")
         
         return True
     
     except Exception as e:
-        log_message(f"Error copying shim files: {str(e)}", "SETUP")
-        print(f"Error: Failed to copy shim files: {str(e)}")
+        log_message(f"Error copying module file: {str(e)}", "SETUP")
+        print(f"Error: Failed to copy module file: {str(e)}")
         return False
 
 
 def determine_log_file_path(itgmania_path):
     """
-    Determine the log file path based on whether ITGMania is in portable mode.
+    Determine the log file path where the module will write its output.
     
     Args:
         itgmania_path (Path): The path to the ITGMania installation.
@@ -189,35 +177,12 @@ def determine_log_file_path(itgmania_path):
     Returns:
         str: The path to the log file.
     """
-    # Check if portable.txt exists
-    if (itgmania_path / "portable.txt").exists():
-        # Portable mode
-        log_file_path = itgmania_path / "Save" / "CurrentSongInfo.log"
-        
-        # Ensure Save directory exists
-        save_dir = itgmania_path / "Save"
-        if not save_dir.exists():
-            save_dir.mkdir(parents=True)
-        
-        print("ITGMania is in portable mode.")
-    else:
-        # Non-portable mode
-        if platform.system().lower() == "windows":
-            appdata = os.environ.get("APPDATA", "")
-            log_file_path = Path(appdata) / "ITGmania" / "Save" / "CurrentSongInfo.log"
-        else:
-            home = os.path.expanduser("~")
-            log_file_path = Path(home) / ".itgmania" / "Save" / "CurrentSongInfo.log"
-        
-        # Ensure Save directory exists
-        save_dir = log_file_path.parent
-        if not save_dir.exists():
-            save_dir.mkdir(parents=True)
-        
-        print("ITGMania is in non-portable mode.")
+    # The module will create a log file next to itself in the Modules directory
+    log_file_path = itgmania_path / "Themes" / "Simply Love" / "Modules" / "ArcadeStationMarquee.log"
     
-    # Create an empty log file if it doesn't exist
+    # Create an empty log file if it doesn't exist (though the module will do this too)
     if not log_file_path.exists():
+        log_file_path.parent.mkdir(parents=True, exist_ok=True)
         log_file_path.touch()
         print(f"Created empty log file at {log_file_path}")
     
@@ -300,8 +265,8 @@ def main():
         # Step 1: Get ITGMania installation path
         itgmania_path = get_itgmania_install_path()
         
-        # Step 2: Copy shim files
-        print("\nStep 1: Copying required files to ITGMania installation...")
+        # Step 2: Copy module file
+        print("\nStep 1: Copying module file to ITGMania installation...")
         if not copy_shim_files(itgmania_path):
             sys.exit(1)
         

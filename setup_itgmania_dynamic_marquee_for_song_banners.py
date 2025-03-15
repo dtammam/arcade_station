@@ -3,6 +3,9 @@ ITGMania Dynamic Marquee Integration Setup for Song Banners
 
 This script launches the ITGMania dynamic marquee integration setup process
 that allows song banners to be displayed on your marquee display.
+
+The integration uses Simply Love's module system to track song selection and
+gameplay events, displaying the appropriate banner on your secondary display.
 """
 
 import os
