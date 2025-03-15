@@ -173,7 +173,7 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                     # If the file has been modified
                     if current_mod_time > last_mod_time:
                         log_message(f"ITGMania log file updated: {log_file}", "BANNER")
-                        update_marquee_from_file(str(log_file), fallback_banner_path, display_config)
+                        update_marquee_from_file(str(log_file), fallback_banner_path, config)
                         
                         # Small delay to ensure the file is not being written to
                         time.sleep(1)
@@ -199,14 +199,14 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         log_message(f"Failed to monitor ITGMania log file: {str(e)}", "BANNER")
 
 
-def update_marquee_from_file(file_path, fallback_banner_path, display_config):
+def update_marquee_from_file(file_path, fallback_banner_path, config):
     """
     Parse the ITGMania log file and update the marquee with the banner image.
     
     Args:
         file_path (str): Path to the ITGMania log file.
         fallback_banner_path (str): Path to the fallback banner image.
-        display_config (dict): Display configuration.
+        config (dict): Display configuration.
     """
     try:
         # Read the file content
@@ -224,10 +224,27 @@ def update_marquee_from_file(file_path, fallback_banner_path, display_config):
             banner_path = banner_match.group(1).strip()
             log_message(f"Found banner path in log file: {banner_path}", "BANNER")
             
+            # Get ITGMania base path from config
+            itgmania_base_path = config.get('dynamic_marquee', {}).get('itgmania_base_path', '')
+            
+            # If banner path starts with a slash and doesn't have a drive letter, it's likely relative to ITGMania
+            if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
+                # Replace starting slash with empty string to normalize
+                # This handles paths like "/Songs/..." that should be "C:/Games/ITGmania/Songs/..."
+                banner_path = banner_path.lstrip('/\\')
+                # Join with base path
+                if itgmania_base_path:
+                    full_banner_path = os.path.join(itgmania_base_path, banner_path)
+                    banner_path = full_banner_path
+                    log_message(f"Resolved relative path to: {banner_path}", "BANNER")
+            
+            # Convert backslashes to forward slashes for consistency
+            banner_path = banner_path.replace('\\', '/')
+            
             # Check if the banner file exists
             if os.path.exists(banner_path):
                 # Update the display with the banner image without stealing focus
-                background_color = display_config.get('background_color', 'black')
+                background_color = config.get('display', {}).get('background_color', 'black')
                 
                 # Launch display_image in a non-focus-stealing mode
                 # The flags in ImageWindow are now set to prevent focus stealing
@@ -242,7 +259,7 @@ def update_marquee_from_file(file_path, fallback_banner_path, display_config):
             else:
                 log_message(f"Banner file does not exist: {banner_path}", "BANNER")
                 if fallback_banner_path and os.path.exists(fallback_banner_path):
-                    display_image(fallback_banner_path, display_config.get('background_color', 'black'))
+                    display_image(fallback_banner_path, config.get('display', {}).get('background_color', 'black'))
                     log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
                     
                     # Wait a moment and refocus
@@ -251,7 +268,7 @@ def update_marquee_from_file(file_path, fallback_banner_path, display_config):
         else:
             log_message("No banner path found in log file", "BANNER")
             if fallback_banner_path and os.path.exists(fallback_banner_path):
-                display_image(fallback_banner_path, display_config.get('background_color', 'black'))
+                display_image(fallback_banner_path, config.get('display', {}).get('background_color', 'black'))
                 log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
                 
                 # Wait a moment and refocus
@@ -260,7 +277,7 @@ def update_marquee_from_file(file_path, fallback_banner_path, display_config):
     except Exception as e:
         log_message(f"Error updating marquee from file: {str(e)}", "BANNER")
         if fallback_banner_path and os.path.exists(fallback_banner_path):
-            display_image(fallback_banner_path, display_config.get('background_color', 'black'))
+            display_image(fallback_banner_path, config.get('display', {}).get('background_color', 'black'))
             log_message(f"Using fallback banner due to error: {fallback_banner_path}", "BANNER")
             
             # Wait a moment and refocus

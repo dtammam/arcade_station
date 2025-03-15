@@ -8,6 +8,18 @@ local t = {}
 -- Put the log file next to this module in the Modules directory for simplicity
 local LOG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.log"
 
+-- Debug mode - set to true to output more details
+local DEBUG = true
+
+-----------------------------------------------------------------------------------------
+-- Debug logging function
+-----------------------------------------------------------------------------------------
+local function DebugLog(message)
+    if DEBUG then
+        Trace("ArcadeStationMarquee DEBUG: " .. tostring(message))
+    end
+end
+
 -----------------------------------------------------------------------------------------
 -- Determine the ITGMania root directory dynamically
 -----------------------------------------------------------------------------------------
@@ -29,6 +41,7 @@ end
 
 -- Store the root path
 local ITGManiaRoot = GetITGManiaRoot()
+DebugLog("ITGManiaRoot: " .. ITGManiaRoot)
 
 -----------------------------------------------------------------------------------------
 -- Utility: detect if a path is already absolute (on Windows)
@@ -65,6 +78,8 @@ end
 -- Writes song information to the log file
 -----------------------------------------------------------------------------------------
 local function WriteSongInfoToFile(song)
+    DebugLog("WriteSongInfoToFile called")
+    
     local mainTitle  = song:GetDisplayMainTitle() or "UnknownTitle"
     local pack       = song:GetGroupName()        or "UnknownPack"
 
@@ -91,39 +106,51 @@ ChartFile: %s
 MusicFile: %s
 ]], pack, mainTitle, absSongDir, absBanner, absChartPath, absMusicPath)
 
-    Trace("ArcadeStationMarquee: Attempting to open: " .. LOG_FILE_PATH)
+    DebugLog("Absolute banner path: " .. absBanner)
+    DebugLog("Attempting to open: " .. ITGManiaRoot .. LOG_FILE_PATH)
 
     local f = RageFileUtil.CreateRageFile()
-    if not f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-        Trace("WARNING: Failed to open file: " .. LOG_FILE_PATH)
-        f:destroy()
-        return
+    local fullLogPath = ITGManiaRoot .. LOG_FILE_PATH
+    if not f:Open(fullLogPath, 2) then  -- 2 = write mode
+        -- Try the non-absolute path as a fallback
+        if not f:Open(LOG_FILE_PATH, 2) then
+            Trace("WARNING: Failed to open file at either: " .. fullLogPath .. " OR " .. LOG_FILE_PATH)
+            f:destroy()
+            return
+        end
     end
 
-    Trace("ArcadeStationMarquee: Successfully opened file. Writing data...")
+    DebugLog("Successfully opened file. Writing data...")
     f:Write(output)
     f:Close()
     f:destroy()
+    DebugLog("Successfully wrote to log file")
 end
 
 -----------------------------------------------------------------------------------------
 -- Writes fallback banner information when a song ends
 -----------------------------------------------------------------------------------------
 local function WriteFallbackBannerToFile(fallbackPath)
+    DebugLog("WriteFallbackBannerToFile called with path: " .. tostring(fallbackPath))
+    
     local output = "Event: SongEnd\nBanner: " .. fallbackPath .. "\n"
 
     local f = RageFileUtil.CreateRageFile()
-    if not f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-        Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
-        f:destroy()
-        return
+    local fullLogPath = ITGManiaRoot .. LOG_FILE_PATH
+    if not f:Open(fullLogPath, 2) then  -- 2 = write mode
+        -- Try the non-absolute path as a fallback
+        if not f:Open(LOG_FILE_PATH, 2) then
+            Trace("ArcadeStationMarquee: WARNING - Failed to open file at either: " .. fullLogPath .. " OR " .. LOG_FILE_PATH)
+            f:destroy()
+            return
+        end
     end
-
+    
+    DebugLog("Successfully opened fallback file. Writing data...")
     f:Write(output)
     f:Close()
     f:destroy()
-
-    Trace("ArcadeStationMarquee: Wrote fallback banner to log: " .. fallbackPath)
+    DebugLog("Successfully wrote fallback banner to log file")
 end
 
 -- Create the log file during initialization
