@@ -11,6 +11,9 @@ local LOG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.log"
 -- Debug mode - set to true to output more details
 local DEBUG = true
 
+-- Track screen changes to detect when songs end
+local currentScreen = ""
+
 -----------------------------------------------------------------------------------------
 -- Debug logging function
 -----------------------------------------------------------------------------------------
@@ -78,7 +81,10 @@ end
 -- Writes song information to the log file
 -----------------------------------------------------------------------------------------
 local function WriteSongInfoToFile(song)
-    DebugLog("WriteSongInfoToFile called")
+    if not song then
+        Trace("ArcadeStationMarquee: No song provided")
+        return
+    end
     
     local mainTitle  = song:GetDisplayMainTitle() or "UnknownTitle"
     local pack       = song:GetGroupName()        or "UnknownPack"
@@ -106,51 +112,38 @@ ChartFile: %s
 MusicFile: %s
 ]], pack, mainTitle, absSongDir, absBanner, absChartPath, absMusicPath)
 
-    DebugLog("Absolute banner path: " .. absBanner)
-    DebugLog("Attempting to open: " .. ITGManiaRoot .. LOG_FILE_PATH)
-
     local f = RageFileUtil.CreateRageFile()
-    local fullLogPath = ITGManiaRoot .. LOG_FILE_PATH
-    if not f:Open(fullLogPath, 2) then  -- 2 = write mode
-        -- Try the non-absolute path as a fallback
-        if not f:Open(LOG_FILE_PATH, 2) then
-            Trace("WARNING: Failed to open file at either: " .. fullLogPath .. " OR " .. LOG_FILE_PATH)
-            f:destroy()
-            return
-        end
+    if not f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+        Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
+        f:destroy()
+        return
     end
 
-    DebugLog("Successfully opened file. Writing data...")
     f:Write(output)
     f:Close()
     f:destroy()
-    DebugLog("Successfully wrote to log file")
+    
+    Trace("ArcadeStationMarquee: Wrote song info for " .. mainTitle)
 end
 
 -----------------------------------------------------------------------------------------
 -- Writes fallback banner information when a song ends
 -----------------------------------------------------------------------------------------
 local function WriteFallbackBannerToFile(fallbackPath)
-    DebugLog("WriteFallbackBannerToFile called with path: " .. tostring(fallbackPath))
-    
     local output = "Event: SongEnd\nBanner: " .. fallbackPath .. "\n"
 
     local f = RageFileUtil.CreateRageFile()
-    local fullLogPath = ITGManiaRoot .. LOG_FILE_PATH
-    if not f:Open(fullLogPath, 2) then  -- 2 = write mode
-        -- Try the non-absolute path as a fallback
-        if not f:Open(LOG_FILE_PATH, 2) then
-            Trace("ArcadeStationMarquee: WARNING - Failed to open file at either: " .. fullLogPath .. " OR " .. LOG_FILE_PATH)
-            f:destroy()
-            return
-        end
+    if not f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+        Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
+        f:destroy()
+        return
     end
     
-    DebugLog("Successfully opened fallback file. Writing data...")
     f:Write(output)
     f:Close()
     f:destroy()
-    DebugLog("Successfully wrote fallback banner to log file")
+    
+    Trace("ArcadeStationMarquee: Wrote fallback banner info")
 end
 
 -- Create the log file during initialization
@@ -164,7 +157,7 @@ local function InitializeModule()
         f:Close()
         Trace("ArcadeStationMarquee: Created log file at " .. LOG_FILE_PATH)
     else
-        Trace("WARNING: Failed to create log file at " .. LOG_FILE_PATH)
+        Trace("ArcadeStationMarquee: WARNING - Failed to create log file at " .. LOG_FILE_PATH)
     end
     f:destroy()
 end
@@ -174,48 +167,32 @@ InitializeModule()
 
 -- Define the ActorFrame for ScreenSelectMusic
 t["ScreenSelectMusic"] = Def.ActorFrame {
-    ModuleCommand=function(self)
-        Trace("ArcadeStationMarquee: ScreenSelectMusic module loaded")
-        
-        -- Listen for the SongChosen message
-        self:queuecommand("SetupListeners")
+    OnCommand=function(self)
+        Trace("ArcadeStationMarquee: ScreenSelectMusic loaded")
     end,
     
-    SetupListenersCommand=function(self)
-        -- Register for the SongChosen message, which is sent when a song is selected
-        MESSAGEMAN:Broadcast("SongChosenMessageCommand")
-    end,
-    
-    SongChosenMessageCommand=function(self)
+    -- This runs when the song changes
+    CurrentSongChangedMessageCommand=function(self)
         local song = GAMESTATE:GetCurrentSong()
         if song then
-            Trace("ArcadeStationMarquee: SongChosenMessageCommand fired!")
-            Trace("   -> Title: " .. (song:GetDisplayFullTitle() or "???"))
+            Trace("ArcadeStationMarquee: CurrentSongChangedMessageCommand - " .. song:GetDisplayMainTitle())
             WriteSongInfoToFile(song)
-        else
-            Trace("ArcadeStationMarquee: SongChosen fired, but no current song.")
         end
     end
 }
 
 -- Define the ActorFrame for ScreenGameplay
 t["ScreenGameplay"] = Def.ActorFrame {
-    ModuleCommand=function(self)
-        Trace("ArcadeStationMarquee: ScreenGameplay module loaded")
-        
-        -- Listen for when the screen is transitioning out (end of gameplay)
-        self:queuecommand("SetupListeners")
+    OnCommand=function(self)
+        Trace("ArcadeStationMarquee: ScreenGameplay loaded")
     end,
     
-    SetupListenersCommand=function(self)
-        -- Register for screen transitioning out
-        self:addcommand("Off", function(self)
-            Trace("ArcadeStationMarquee: OffCommand triggered, reverting marquee.")
-            
-            -- Use a fallback banner that's part of the theme
-            local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
-            WriteFallbackBannerToFile(fallbackBanner)
-        end)
+    OffCommand=function(self)
+        Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - reverting to default banner")
+        
+        -- Use a fallback banner that's part of the theme
+        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+        WriteFallbackBannerToFile(fallbackBanner)
     end
 }
 

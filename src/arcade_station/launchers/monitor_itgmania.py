@@ -217,69 +217,74 @@ def update_marquee_from_file(file_path, fallback_banner_path, config):
         log_message("Killing any existing marquee image processes", "BANNER")
         kill_process_by_identifier("marquee_image")
         
-        # Extract the banner path using regex
+        # Get essential properties from config
+        background_color = config.get('display', {}).get('background_color', 'black')
+        itgmania_base_path = config.get('dynamic_marquee', {}).get('itgmania_base_path', '')
+        
+        # Check for event type and extract banner path
+        event_match = re.search(r'Event: (\w+)', content, re.MULTILINE)
         banner_match = re.search(r'Banner: (.+)$', content, re.MULTILINE)
         
-        if banner_match:
-            banner_path = banner_match.group(1).strip()
-            log_message(f"Found banner path in log file: {banner_path}", "BANNER")
+        # Handle the event based on its type
+        if event_match:
+            event_type = event_match.group(1).strip()
+            log_message(f"Found event: {event_type}", "BANNER")
             
-            # Get ITGMania base path from config
-            itgmania_base_path = config.get('dynamic_marquee', {}).get('itgmania_base_path', '')
-            
-            # If banner path starts with a slash and doesn't have a drive letter, it's likely relative to ITGMania
-            if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
-                # Replace starting slash with empty string to normalize
-                # This handles paths like "/Songs/..." that should be "C:/Games/ITGmania/Songs/..."
-                banner_path = banner_path.lstrip('/\\')
-                # Join with base path
-                if itgmania_base_path:
-                    full_banner_path = os.path.join(itgmania_base_path, banner_path)
-                    banner_path = full_banner_path
-                    log_message(f"Resolved relative path to: {banner_path}", "BANNER")
-            
-            # Convert backslashes to forward slashes for consistency
-            banner_path = banner_path.replace('\\', '/')
-            
-            # Check if the banner file exists
-            if os.path.exists(banner_path):
-                # Update the display with the banner image without stealing focus
-                background_color = config.get('display', {}).get('background_color', 'black')
+            # Handle different event types
+            if event_type == "Init":
+                # Just show the default banner for initialization
+                display_image(fallback_banner_path, background_color)
+                log_message(f"Showing fallback banner for initialization: {fallback_banner_path}", "BANNER")
                 
-                # Launch display_image in a non-focus-stealing mode
-                # The flags in ImageWindow are now set to prevent focus stealing
-                display_image(banner_path, background_color)
-                log_message(f"Updated marquee display with banner: {banner_path}", "BANNER")
+            elif event_type == "SongEnd":
+                # For song end, use fallback banner
+                display_image(fallback_banner_path, background_color)
+                log_message(f"Showing fallback banner for song end: {fallback_banner_path}", "BANNER")
                 
-                # Wait a moment for the display to update
-                time.sleep(0.5)
+            elif event_type == "Chosen" and banner_match:
+                # Handle song selection - get and process the banner path
+                banner_path = banner_match.group(1).strip()
+                log_message(f"Found banner path: {banner_path}", "BANNER")
                 
-                # Ensure ITGMania window has focus
-                refocus_itgmania()
+                # Process relative paths if needed
+                if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
+                    banner_path = banner_path.lstrip('/\\')
+                    if itgmania_base_path:
+                        full_banner_path = os.path.join(itgmania_base_path, banner_path)
+                        banner_path = full_banner_path
+                        log_message(f"Resolved relative path: {banner_path}", "BANNER")
+                
+                # Normalize backslashes to forward slashes
+                banner_path = banner_path.replace('\\', '/')
+                
+                # Display the banner if it exists
+                if os.path.exists(banner_path):
+                    display_image(banner_path, background_color)
+                    log_message(f"Showing song banner: {banner_path}", "BANNER")
+                else:
+                    log_message(f"Banner file not found: {banner_path}", "BANNER")
+                    display_image(fallback_banner_path, background_color)
+                    log_message(f"Using fallback banner instead: {fallback_banner_path}", "BANNER")
             else:
-                log_message(f"Banner file does not exist: {banner_path}", "BANNER")
-                if fallback_banner_path and os.path.exists(fallback_banner_path):
-                    display_image(fallback_banner_path, config.get('display', {}).get('background_color', 'black'))
-                    log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
-                    
-                    # Wait a moment and refocus
-                    time.sleep(0.5)
-                    refocus_itgmania()
+                # For unknown events, use fallback banner
+                display_image(fallback_banner_path, background_color)
+                log_message(f"Using fallback banner for unknown event: {fallback_banner_path}", "BANNER")
         else:
-            log_message("No banner path found in log file", "BANNER")
-            if fallback_banner_path and os.path.exists(fallback_banner_path):
-                display_image(fallback_banner_path, config.get('display', {}).get('background_color', 'black'))
-                log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
-                
-                # Wait a moment and refocus
-                time.sleep(0.5)
-                refocus_itgmania()
+            # No event found, use fallback banner
+            display_image(fallback_banner_path, background_color)
+            log_message(f"No event found. Using fallback banner: {fallback_banner_path}", "BANNER")
+        
+        # Wait a moment for the display to update
+        time.sleep(0.5)
+        
+        # Ensure ITGMania window has focus
+        refocus_itgmania()
     except Exception as e:
         log_message(f"Error updating marquee from file: {str(e)}", "BANNER")
+        # Use fallback banner in case of error
         if fallback_banner_path and os.path.exists(fallback_banner_path):
             display_image(fallback_banner_path, config.get('display', {}).get('background_color', 'black'))
             log_message(f"Using fallback banner due to error: {fallback_banner_path}", "BANNER")
-            
             # Wait a moment and refocus
             time.sleep(0.5)
             refocus_itgmania()
