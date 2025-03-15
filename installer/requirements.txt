@@ -1,0 +1,17 @@
+# Arcade Station Installer Requirements
+# Python 3.12.9 is required for this project
+
+# Required Packages
+tomllib>=1.0.0; python_version < "3.11"  # Built-in for Python 3.11+
+tomlkit>=0.11.0  # For writing TOML files
+pywin32>=305; sys_platform == "win32"  # For Windows-specific functionality
+pyinstaller>=5.7.0  # For building the installer executable
+
+# Optional but recommended for better UI
+customtkinter>=5.1.2  # Modern UI toolkit
+
+# Utilities
+pyperclip>=1.8.2  # For clipboard operations
+Pillow>=9.3.0  # For image processing
+psutil>=5.9.0  # For process management
+keyboard>=0.13.5  # For keyboard shortcuts 
