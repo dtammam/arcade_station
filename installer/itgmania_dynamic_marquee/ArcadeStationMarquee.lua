@@ -140,56 +140,18 @@ MusicFile: %s
     firstSelectionDone = true
 end
 
------------------------------------------------------------------------------------------
--- Writes fallback banner information when appropriate
------------------------------------------------------------------------------------------
-local function WriteFallbackBannerToFile(fallbackPath, forceWrite)
-    -- Skip writing fallback in various circumstances
-    -- Unless forceWrite is true (for song end)
-    if not forceWrite then
-        if currentScreen == "ScreenGameplay" then
-            -- Never override with fallback during gameplay
-            return
-        end
-        
-        -- Allow fallback on first entry to ScreenSelectMusic
-        if currentScreen == "ScreenSelectMusic" and firstSelectionDone and songSelected then
-            -- Don't show fallback if we have a selected song in song select screen
-            return
-        end
-    end
-
-    local output = "Event: SongEnd\nBanner: " .. fallbackPath .. "\n"
-
-    local f = RageFileUtil.CreateRageFile()
-    if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-        f:Write(output)
-        f:Close()
-        Trace("ArcadeStationMarquee: Wrote fallback banner info")
-    else
-        Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
-    end
-    f:destroy()
-    
-    -- We've shown fallback, so reset the selection state
-    -- but ONLY reset if we're not in ScreenSelectMusic OR this is first time
-    -- OR if forceWrite is true (for song end)
-    if forceWrite or currentScreen ~= "ScreenSelectMusic" or not firstSelectionDone then
-        songSelected = false
-        lastSelectedSong = nil
-    end
-end
-
 -- Create the log file during initialization
 local function InitializeModule()
     Trace("ArcadeStationMarquee: Initializing module...")
     
-    -- Create an empty log file if it doesn't exist yet
+    -- Create an initial log file with our specific image path
+    local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
+    
     local f = RageFileUtil.CreateRageFile()
     if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-        f:Write("Event: Init\nStatus: Ready\n")
+        f:Write("Event: Init\nBanner: " .. songSelectImage .. "\n")
         f:Close()
-        Trace("ArcadeStationMarquee: Created log file at " .. LOG_FILE_PATH)
+        Trace("ArcadeStationMarquee: Created log file with initial image path")
     else
         Trace("ArcadeStationMarquee: WARNING - Failed to create log file at " .. LOG_FILE_PATH)
     end
@@ -206,24 +168,40 @@ t["ScreenSelectMusic"] = Def.Actor {
         currentScreen = "ScreenSelectMusic"
         Trace("ArcadeStationMarquee: ScreenSelectMusic BeginCommand")
         
-        -- Show fallback image when returning to song select, unless it's first launch
-        if firstSelectionDone then
-            -- Indicate we're back at the song selection screen after playing
-            Trace("ArcadeStationMarquee: Returning to song selection screen - showing fallback")
-            local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
-            WriteFallbackBannerToFile(fallbackBanner, true)
+        -- Write specific image path to log file for song selection screen
+        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
+        
+        -- Open, write, close as quickly as possible
+        local f = RageFileUtil.CreateRageFile()
+        if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+            f:Write("Event: ScreenSelectMusic\nBanner: " .. songSelectImage .. "\n")
+            f:Close()
+            Trace("ArcadeStationMarquee: Wrote song selection screen image path to log")
+        else
+            Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
         end
+        f:destroy()
+        
+        -- Mark that we've been to the song selection screen
+        firstSelectionDone = true
     end,
     
     ModuleCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenSelectMusic ModuleCommand")
         
-        -- Only reset and show fallback on first entry to song selection
-        if not firstSelectionDone then
-            -- Write the default/empty state when entering song selection first time
-            local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
-            WriteFallbackBannerToFile(fallbackBanner)
+        -- Also write the image path in ModuleCommand to ensure it's shown
+        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
+        
+        -- Open, write, close as quickly as possible
+        local f = RageFileUtil.CreateRageFile()
+        if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+            f:Write("Event: ScreenSelectMusic\nBanner: " .. songSelectImage .. "\n")
+            f:Close()
+            Trace("ArcadeStationMarquee: Wrote song selection screen image path to log (ModuleCommand)")
+        else
+            Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
         end
+        f:destroy()
     end,
     
     -- This is specifically for when a song is selected
@@ -280,10 +258,19 @@ t["ScreenGameplay"] = Def.Actor {
     OffCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - song ended")
         
-        -- Force the fallback banner when song ends
-        local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
-        -- Pass true to force writing the fallback regardless of screen state
-        WriteFallbackBannerToFile(fallbackBanner, true)
+        -- Write specific image path to log file when song ends
+        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
+        
+        -- Open, write, close as quickly as possible
+        local f = RageFileUtil.CreateRageFile()
+        if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+            f:Write("Event: SongEnd\nBanner: " .. songSelectImage .. "\n")
+            f:Close()
+            Trace("ArcadeStationMarquee: Wrote song end image path to log")
+        else
+            Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
+        end
+        f:destroy()
         
         -- Explicitly reset the selection state
         songSelected = false
@@ -297,9 +284,19 @@ t["ScreenEvaluation"] = Def.Actor {
         currentScreen = "ScreenEvaluation"
         Trace("ArcadeStationMarquee: ScreenEvaluation BeginCommand")
         
-        -- Show fallback image at the results screen
-        local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
-        WriteFallbackBannerToFile(fallbackBanner, true)
+        -- Write specific image path to log file for evaluation screen
+        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
+        
+        -- Open, write, close as quickly as possible
+        local f = RageFileUtil.CreateRageFile()
+        if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+            f:Write("Event: ScreenEvaluation\nBanner: " .. songSelectImage .. "\n")
+            f:Close()
+            Trace("ArcadeStationMarquee: Wrote evaluation screen image path to log")
+        else
+            Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
+        end
+        f:destroy()
         
         -- Reset selection state
         songSelected = false
