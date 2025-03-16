@@ -11,10 +11,11 @@ local LOG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.log"
 -- Debug mode - set to true to output more details
 local DEBUG = true
 
--- Track screen changes to detect when songs end
+-- Track states to better handle transitions
 local currentScreen = ""
 local songSelected = false
 local lastSelectedSong = nil
+local firstSelectionDone = false
 
 -----------------------------------------------------------------------------------------
 -- Debug logging function
@@ -80,11 +81,18 @@ local function ForceAbsolutePath(relPath)
 end
 
 -----------------------------------------------------------------------------------------
--- Writes song information to the log file
+-- Writes song information to the log file - Optimized for performance
 -----------------------------------------------------------------------------------------
 local function WriteSongInfoToFile(song)
     if not song then
         Trace("ArcadeStationMarquee: No song provided")
+        return
+    end
+    
+    -- Don't rewrite if it's the exact same song (object comparison)
+    -- But DO allow writing even if songSelected=true if it's a different song
+    if songSelected and lastSelectedSong == song then
+        DebugLog("Skipping duplicate write for the same song")
         return
     end
     
@@ -103,6 +111,7 @@ local function WriteSongInfoToFile(song)
     local absChartPath = ForceAbsolutePath(relChartPath)
     local absMusicPath = ForceAbsolutePath(relMusicPath)
 
+    -- Pre-format string to minimize file write time
     local output = string.format([[
 Event: Chosen
 Pack: %s
@@ -114,38 +123,57 @@ ChartFile: %s
 MusicFile: %s
 ]], pack, mainTitle, absSongDir, absBanner, absChartPath, absMusicPath)
 
+    -- Open, write, close as quickly as possible
     local f = RageFileUtil.CreateRageFile()
-    if not f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+    if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+        f:Write(output)
+        f:Close()
+        Trace("ArcadeStationMarquee: Wrote song info for " .. mainTitle)
+    else
         Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
-        f:destroy()
-        return
     end
-
-    f:Write(output)
-    f:Close()
     f:destroy()
     
-    Trace("ArcadeStationMarquee: Wrote song info for " .. mainTitle)
+    -- Mark as selected to avoid duplicate writes of the SAME song
+    songSelected = true
+    lastSelectedSong = song
+    firstSelectionDone = true
 end
 
 -----------------------------------------------------------------------------------------
--- Writes fallback banner information when a song ends
+-- Writes fallback banner information when appropriate
 -----------------------------------------------------------------------------------------
 local function WriteFallbackBannerToFile(fallbackPath)
-    local output = "Event: SongEnd\nBanner: " .. fallbackPath .. "\n"
-
-    local f = RageFileUtil.CreateRageFile()
-    if not f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-        Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
-        f:destroy()
+    -- Skip writing fallback in various circumstances
+    if currentScreen == "ScreenGameplay" then
+        -- Never override with fallback during gameplay
         return
     end
     
-    f:Write(output)
-    f:Close()
+    -- Allow fallback on first entry to ScreenSelectMusic
+    if currentScreen == "ScreenSelectMusic" and firstSelectionDone and songSelected then
+        -- Don't show fallback if we have a selected song in song select screen
+        return
+    end
+
+    local output = "Event: SongEnd\nBanner: " .. fallbackPath .. "\n"
+
+    local f = RageFileUtil.CreateRageFile()
+    if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
+        f:Write(output)
+        f:Close()
+        Trace("ArcadeStationMarquee: Wrote fallback banner info")
+    else
+        Trace("ArcadeStationMarquee: WARNING - Failed to open file: " .. LOG_FILE_PATH)
+    end
     f:destroy()
     
-    Trace("ArcadeStationMarquee: Wrote fallback banner info")
+    -- We've shown fallback, so reset the selection state
+    -- but ONLY reset if we're not in ScreenSelectMusic OR this is first time
+    if currentScreen ~= "ScreenSelectMusic" or not firstSelectionDone then
+        songSelected = false
+        lastSelectedSong = nil
+    end
 end
 
 -- Create the log file during initialization
@@ -169,103 +197,80 @@ InitializeModule()
 
 -- Define the ActorFrame for ScreenSelectMusic
 t["ScreenSelectMusic"] = Def.Actor {
+    BeginCommand = function(self)
+        -- Track that we're on the song selection screen
+        currentScreen = "ScreenSelectMusic"
+        Trace("ArcadeStationMarquee: ScreenSelectMusic BeginCommand")
+    end,
+    
     ModuleCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenSelectMusic ModuleCommand")
         
-        -- Write the default/empty state when entering song selection
-        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
-        WriteFallbackBannerToFile(fallbackBanner)
+        -- Only reset and show fallback on first entry to song selection
+        if not firstSelectionDone then
+            -- Write the default/empty state when entering song selection
+            local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+            WriteFallbackBannerToFile(fallbackBanner)
+        end
     end,
     
+    -- This is specifically for when a song is selected
     ChosenCommand = function(self)
-        -- This gets triggered when a song is actually selected
-        Trace("ArcadeStationMarquee: ScreenSelectMusic ChosenCommand")
+        Trace("ArcadeStationMarquee: ChosenCommand triggered")
+        
         local song = GAMESTATE:GetCurrentSong()
         if song then
+            -- Immediately write song info - highest priority
+            Trace("ArcadeStationMarquee: Song chosen - " .. song:GetDisplayMainTitle())
             WriteSongInfoToFile(song)
+        end
+    end,
+    
+    -- Alternative catch for Start button press
+    StartButtonMessageCommand = function(self)
+        Trace("ArcadeStationMarquee: Start button pressed")
+        
+        local song = GAMESTATE:GetCurrentSong()
+        if song then
+            Trace("ArcadeStationMarquee: Start button for song - " .. song:GetDisplayMainTitle())
+            WriteSongInfoToFile(song)
+        end
+    end,
+    
+    -- Handle when song is changing (hover)
+    CurrentSongChangedMessageCommand = function(self)
+        -- Store the song for reference, but don't write to log on hover
+        local song = GAMESTATE:GetCurrentSong()
+        if song then
+            DebugLog("Song changed/hover: " .. song:GetDisplayMainTitle())
         end
     end
 }
 
 -- Define the ActorFrame for ScreenGameplay
 t["ScreenGameplay"] = Def.Actor {
+    BeginCommand = function(self)
+        currentScreen = "ScreenGameplay"
+        Trace("ArcadeStationMarquee: ScreenGameplay BeginCommand")
+    end,
+    
     ModuleCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenGameplay ModuleCommand")
         
-        -- Write the song info when gameplay starts
+        -- Make sure song info is written when gameplay actually starts
         local song = GAMESTATE:GetCurrentSong()
         if song then
+            Trace("ArcadeStationMarquee: Gameplay screen - writing song info")
             WriteSongInfoToFile(song)
         end
     end,
     
     OffCommand = function(self)
-        Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - reverting to default banner")
+        Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - song ended")
         
-        -- Use a fallback banner that's part of the theme
+        -- Use a fallback banner when leaving gameplay
         local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
         WriteFallbackBannerToFile(fallbackBanner)
-    end
-}
-
--- Additional hook for song ending
-t["ScreenGameplay"] = Def.ActorFrame {
-    OnCommand = function(self)
-        Trace("ArcadeStationMarquee: ScreenGameplay ActorFrame loaded")
-    end,
-    
-    -- These additional hooks help catch song end events that might be missed
-    OffCommand = function(self)
-        Trace("ArcadeStationMarquee: ScreenGameplay ActorFrame OffCommand")
-        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
-        WriteFallbackBannerToFile(fallbackBanner)
-    end,
-    
-    -- This catches when the song is skipped or fails
-    CancelCommand = function(self)
-        Trace("ArcadeStationMarquee: ScreenGameplay CancelCommand")
-        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
-        WriteFallbackBannerToFile(fallbackBanner)
-    end
-}
-
--- Add hook for ScreenEvaluation (appears after song)
-t["ScreenEvaluation"] = Def.Actor {
-    ModuleCommand = function(self)
-        Trace("ArcadeStationMarquee: ScreenEvaluation ModuleCommand")
-        
-        -- When we reach evaluation screen, the song has definitely ended
-        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
-        WriteFallbackBannerToFile(fallbackBanner)
-    end
-}
-
--- Add a global screen change monitor to detect transitions
-t[#t+1] = Def.ActorFrame {
-    OnCommand=function(self)
-        self:queuecommand("MonitorScreenChange")
-    end,
-    
-    MonitorScreenChangeCommand=function(self)
-        local newScreen = SCREENMAN:GetTopScreen():GetName()
-        
-        if currentScreen ~= newScreen then
-            DebugLog("Screen changed from " .. currentScreen .. " to " .. newScreen)
-            
-            -- If we transition from ScreenSelectMusic to another screen (like ScreenGameplay)
-            -- and we haven't yet logged the song, do it now
-            if currentScreen == "ScreenSelectMusic" and lastSelectedSong and not songSelected then
-                Trace("ArcadeStationMarquee: Song selected (screen transition) - " .. lastSelectedSong:GetDisplayMainTitle())
-                WriteSongInfoToFile(lastSelectedSong)
-                songSelected = true
-            end
-            
-            currentScreen = newScreen
-        end
-        
-        -- Queue the next check
-        self:sleep(0.1)
-        self:queuecommand("MonitorScreenChange")
     end
 }
 
