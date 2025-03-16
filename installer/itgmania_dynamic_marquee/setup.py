@@ -62,7 +62,7 @@ def fallback_load_toml_config(config_path):
         with open(config_path, "rb") as f:
             return tomllib.load(f)
     except Exception as e:
-        print(f"Error loading config from {config_path}: {e}")
+        fallback_log_message(f"Error loading config from {config_path}: {e}", "ERROR")
         return {}
 
 # Try to import from arcade_station, but use fallbacks if not available
@@ -71,9 +71,9 @@ try:
         load_toml_config,
         log_message
     )
-    print("Successfully imported arcade_station modules.")
+    log_message("Successfully imported arcade_station modules.", "SETUP")
 except ImportError:
-    print("Warning: Could not import arcade_station modules. Using fallback functions.")
+    fallback_log_message("Warning: Could not import arcade_station modules. Using fallback functions.", "SETUP")
     load_toml_config = fallback_load_toml_config
     log_message = fallback_log_message
 
@@ -86,8 +86,8 @@ def get_itgmania_install_path():
         Path: The validated ITGMania installation path.
     """
     while True:
-        print("\n===== ITGMania Integration Setup =====")
-        print("This script will configure your ITGMania installation to work with Arcade Station's dynamic marquee.")
+        log_message("===== ITGMania Integration Setup =====", "SETUP")
+        log_message("This script will configure your ITGMania installation to work with Arcade Station's dynamic marquee.", "SETUP")
         
         default_paths = {
             "windows": r"C:\Games\ITGmania",
@@ -110,7 +110,7 @@ def get_itgmania_install_path():
         
         # Validate the path
         if not install_path.exists():
-            print(f"Error: The path {install_path} does not exist.")
+            log_message(f"Error: The path {install_path} does not exist.", "SETUP")
             retry = input("Would you like to try again? (y/n): ").lower()
             if retry != 'y':
                 sys.exit(1)
@@ -118,7 +118,7 @@ def get_itgmania_install_path():
         
         # Check if this looks like an ITGMania installation
         if not (install_path / "Themes").exists():
-            print(f"Warning: This doesn't appear to be a valid ITGMania installation (no Themes folder found).")
+            log_message(f"Warning: This doesn't appear to be a valid ITGMania installation (no Themes folder found).", "SETUP")
             confirm = input("Continue anyway? (y/n): ").lower()
             if confirm != 'y':
                 continue
@@ -146,7 +146,7 @@ def copy_shim_files(itgmania_path):
         
         if not source_file.exists():
             log_message(f"Module file {source_file} does not exist.", "SETUP")
-            print(f"Error: Module file {source_file} not found.")
+            log_message(f"Error: Module file {source_file} not found.", "ERROR")
             return False, (None, False)
         
         # Check if ITGMania is running in portable mode
@@ -155,13 +155,13 @@ def copy_shim_files(itgmania_path):
         
         if is_portable:
             log_message("Detected ITGMania running in portable mode", "SETUP")
-            print(f"Detected portable mode (Portable.ini found). Installing to the local installation directory.")
+            log_message("Detected portable mode (Portable.ini found). Installing to the local installation directory.", "SETUP")
             
             # Use local install directory
             dest_dir = itgmania_path / "Themes" / "Simply Love" / "Modules"
         else:
             log_message("ITGMania is running in standard mode (using AppData)", "SETUP")
-            print(f"Standard installation detected. Installing to the user AppData directory.")
+            log_message("Standard installation detected. Installing to the user AppData directory.", "SETUP")
             
             # Use AppData location
             system = platform.system().lower()
@@ -189,13 +189,12 @@ def copy_shim_files(itgmania_path):
         dest_file = dest_dir / "ArcadeStationMarquee.lua"
         shutil.copy2(source_file, dest_file)
         log_message(f"Copied module file to {dest_file}", "SETUP")
-        print(f"Copied module file to {dest_file}")
         
         return True, (dest_file, is_portable)
     
     except Exception as e:
         log_message(f"Error copying module file: {str(e)}", "SETUP")
-        print(f"Error: Failed to copy module file: {str(e)}")
+        log_message(f"Error: Failed to copy module file: {str(e)}", "ERROR")
         return False, (None, False)
 
 
@@ -243,9 +242,9 @@ def determine_log_file_path(itgmania_path, dest_file=None, is_portable=False):
     if not log_file_path.exists():
         log_file_path.parent.mkdir(parents=True, exist_ok=True)
         log_file_path.touch()
-        print(f"Created empty log file at {log_file_path}")
+        log_message(f"Created empty log file at {log_file_path}", "SETUP")
     else:
-        print(f"Log file already exists at {log_file_path}")
+        log_message(f"Log file already exists at {log_file_path}", "SETUP")
     
     return str(log_file_path)
 
@@ -267,7 +266,7 @@ def update_config(log_file_path, itgmania_path=None):
         
         if not config_path.exists():
             log_message(f"Config file {config_path} does not exist.", "SETUP")
-            print(f"Error: Config file {config_path} not found.")
+            log_message(f"Error: Config file {config_path} not found.", "ERROR")
             return False
         
         # Load the config file using tomllib
@@ -291,7 +290,7 @@ def update_config(log_file_path, itgmania_path=None):
             # Convert backslashes to forward slashes for TOML-friendliness
             itgmania_path_str = str(itgmania_path).replace('\\', '/')
             config["dynamic_marquee"]["itgmania_base_path"] = itgmania_path_str
-            print(f"Added ITGMania base path: {itgmania_path_str}")
+            log_message(f"Added ITGMania base path: {itgmania_path_str}", "SETUP")
         
         # Save the updated config - tomllib doesn't provide a writer, so we write manually
         with open(config_path, "w", encoding="utf-8") as f:
@@ -313,12 +312,12 @@ def update_config(log_file_path, itgmania_path=None):
                 if section_idx < len(config) - 1:
                     f.write("\n")
         
-        print(f"Updated display_config.toml with log file path: {log_file_path}")
+        log_message(f"Updated display_config.toml with log file path: {log_file_path}", "SETUP")
         return True
     
     except Exception as e:
         log_message(f"Error updating config: {str(e)}", "SETUP")
-        print(f"Error: Failed to update config: {str(e)}")
+        log_message(f"Error: Failed to update config: {str(e)}", "ERROR")
         return False
 
 
@@ -327,45 +326,44 @@ def main():
     Main function to set up ITGMania integration.
     """
     try:
-        print("\n==================================================")
-        print("   Arcade Station - ITGMania Integration Setup")
-        print("==================================================")
+        log_message("==================================================", "SETUP")
+        log_message("   Arcade Station - ITGMania Integration Setup", "SETUP")
+        log_message("==================================================", "SETUP")
         
         # Step 1: Get ITGMania installation path
         itgmania_path = get_itgmania_install_path()
         
         # Step 2: Copy module file
-        print("\nStep 1: Copying module file to ITGMania installation...")
+        log_message("Step 1: Copying module file to ITGMania installation...", "SETUP")
         success, (dest_file, is_portable) = copy_shim_files(itgmania_path)
         if not success:
             sys.exit(1)
         
         # Step 3: Determine log file path
-        print("\nStep 2: Determining log file path...")
+        log_message("Step 2: Determining log file path...", "SETUP")
         log_file_path = determine_log_file_path(itgmania_path, dest_file, is_portable)
         
         # Step 4: Update config
-        print("\nStep 3: Updating configuration...")
+        log_message("Step 3: Updating configuration...", "SETUP")
         if not update_config(log_file_path, itgmania_path):
             sys.exit(1)
         
-        print("\n==================================================")
-        print("   Setup Complete!")
-        print("==================================================")
-        print("ITGMania is now configured to work with Arcade Station's dynamic marquee.")
-        print(f"Log file path: {log_file_path}")
-        print("\nTo use this feature:")
-        print("1. Make sure Arcade Station is running")
-        print("2. Launch ITGMania")
-        print("3. Select songs to see their banners on your marquee display")
-        print("==================================================")
+        log_message("==================================================", "SETUP")
+        log_message("   Setup Complete!", "SETUP")
+        log_message("==================================================", "SETUP")
+        log_message("ITGMania is now configured to work with Arcade Station's dynamic marquee.", "SETUP")
+        log_message(f"Log file path: {log_file_path}", "SETUP")
+        log_message("\nTo use this feature:", "SETUP")
+        log_message("1. Make sure Arcade Station is running", "SETUP")
+        log_message("2. Launch ITGMania", "SETUP")
+        log_message("3. Select songs to see their banners on your marquee display", "SETUP")
+        log_message("==================================================", "SETUP")
         
     except KeyboardInterrupt:
-        print("\nSetup canceled by user.")
+        log_message("\nSetup canceled by user.", "SETUP")
         sys.exit(1)
     except Exception as e:
-        log_message(f"Setup failed: {str(e)}", "SETUP")
-        print(f"\nError: Setup failed: {str(e)}")
+        log_message(f"Setup failed: {str(e)}", "ERROR")
         
         # Print traceback for debugging
         import traceback
