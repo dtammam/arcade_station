@@ -141,13 +141,18 @@ def copy_shim_files(itgmania_path):
         tuple: (dest_file, is_portable) - The destination file path and whether ITGMania is in portable mode
     """
     try:
-        # Source path for the module file
-        source_file = SCRIPT_DIR / "shims" / "ArcadeStationMarquee.lua"
+        # Source paths for the module files (now directly in the parent directory)
+        source_lua = SCRIPT_DIR / "ArcadeStationMarquee.lua"
+        source_png = SCRIPT_DIR / "simply-love.png"
         
-        if not source_file.exists():
-            log_message(f"Module file {source_file} does not exist.", "SETUP")
-            log_message(f"Error: Module file {source_file} not found.", "ERROR")
+        if not source_lua.exists():
+            log_message(f"Module file {source_lua} does not exist.", "SETUP")
+            log_message(f"Error: Module file {source_lua} not found.", "ERROR")
             return False, (None, False)
+            
+        if not source_png.exists():
+            log_message(f"Fallback image {source_png} does not exist.", "SETUP")
+            log_message(f"Warning: Fallback image {source_png} not found. Will use default theme image.", "WARNING")
         
         # Check if ITGMania is running in portable mode
         portable_ini = itgmania_path / "Portable.ini"
@@ -186,15 +191,21 @@ def copy_shim_files(itgmania_path):
             dest_dir.mkdir(parents=True, exist_ok=True)
         
         # Copy the module file
-        dest_file = dest_dir / "ArcadeStationMarquee.lua"
-        shutil.copy2(source_file, dest_file)
-        log_message(f"Copied module file to {dest_file}", "SETUP")
+        dest_lua = dest_dir / "ArcadeStationMarquee.lua"
+        shutil.copy2(source_lua, dest_lua)
+        log_message(f"Copied module file to {dest_lua}", "SETUP")
         
-        return True, (dest_file, is_portable)
+        # Copy the fallback image if it exists
+        if source_png.exists():
+            dest_png = dest_dir / "simply-love.png"
+            shutil.copy2(source_png, dest_png)
+            log_message(f"Copied fallback image to {dest_png}", "SETUP")
+        
+        return True, (dest_lua, is_portable)
     
     except Exception as e:
-        log_message(f"Error copying module file: {str(e)}", "SETUP")
-        log_message(f"Error: Failed to copy module file: {str(e)}", "ERROR")
+        log_message(f"Error copying module files: {str(e)}", "SETUP")
+        log_message(f"Error: Failed to copy module files: {str(e)}", "ERROR")
         return False, (None, False)
 
 

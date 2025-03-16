@@ -143,17 +143,20 @@ end
 -----------------------------------------------------------------------------------------
 -- Writes fallback banner information when appropriate
 -----------------------------------------------------------------------------------------
-local function WriteFallbackBannerToFile(fallbackPath)
+local function WriteFallbackBannerToFile(fallbackPath, forceWrite)
     -- Skip writing fallback in various circumstances
-    if currentScreen == "ScreenGameplay" then
-        -- Never override with fallback during gameplay
-        return
-    end
-    
-    -- Allow fallback on first entry to ScreenSelectMusic
-    if currentScreen == "ScreenSelectMusic" and firstSelectionDone and songSelected then
-        -- Don't show fallback if we have a selected song in song select screen
-        return
+    -- Unless forceWrite is true (for song end)
+    if not forceWrite then
+        if currentScreen == "ScreenGameplay" then
+            -- Never override with fallback during gameplay
+            return
+        end
+        
+        -- Allow fallback on first entry to ScreenSelectMusic
+        if currentScreen == "ScreenSelectMusic" and firstSelectionDone and songSelected then
+            -- Don't show fallback if we have a selected song in song select screen
+            return
+        end
     end
 
     local output = "Event: SongEnd\nBanner: " .. fallbackPath .. "\n"
@@ -170,7 +173,8 @@ local function WriteFallbackBannerToFile(fallbackPath)
     
     -- We've shown fallback, so reset the selection state
     -- but ONLY reset if we're not in ScreenSelectMusic OR this is first time
-    if currentScreen ~= "ScreenSelectMusic" or not firstSelectionDone then
+    -- OR if forceWrite is true (for song end)
+    if forceWrite or currentScreen ~= "ScreenSelectMusic" or not firstSelectionDone then
         songSelected = false
         lastSelectedSong = nil
     end
@@ -201,6 +205,14 @@ t["ScreenSelectMusic"] = Def.Actor {
         -- Track that we're on the song selection screen
         currentScreen = "ScreenSelectMusic"
         Trace("ArcadeStationMarquee: ScreenSelectMusic BeginCommand")
+        
+        -- Show fallback image when returning to song select, unless it's first launch
+        if firstSelectionDone then
+            -- Indicate we're back at the song selection screen after playing
+            Trace("ArcadeStationMarquee: Returning to song selection screen - showing fallback")
+            local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
+            WriteFallbackBannerToFile(fallbackBanner, true)
+        end
     end,
     
     ModuleCommand = function(self)
@@ -208,8 +220,8 @@ t["ScreenSelectMusic"] = Def.Actor {
         
         -- Only reset and show fallback on first entry to song selection
         if not firstSelectionDone then
-            -- Write the default/empty state when entering song selection
-            local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+            -- Write the default/empty state when entering song selection first time
+            local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
             WriteFallbackBannerToFile(fallbackBanner)
         end
     end,
@@ -268,9 +280,30 @@ t["ScreenGameplay"] = Def.Actor {
     OffCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - song ended")
         
-        -- Use a fallback banner when leaving gameplay
-        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
-        WriteFallbackBannerToFile(fallbackBanner)
+        -- Force the fallback banner when song ends
+        local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
+        -- Pass true to force writing the fallback regardless of screen state
+        WriteFallbackBannerToFile(fallbackBanner, true)
+        
+        -- Explicitly reset the selection state
+        songSelected = false
+        lastSelectedSong = nil
+    end
+}
+
+-- Define the ActorFrame for ScreenEvaluation
+t["ScreenEvaluation"] = Def.Actor {
+    BeginCommand = function(self)
+        currentScreen = "ScreenEvaluation"
+        Trace("ArcadeStationMarquee: ScreenEvaluation BeginCommand")
+        
+        -- Show fallback image at the results screen
+        local fallbackBanner = THEME:GetCurrentThemeDirectory() .. "Modules/simply-love.png"
+        WriteFallbackBannerToFile(fallbackBanner, true)
+        
+        -- Reset selection state
+        songSelected = false
+        lastSelectedSong = nil
     end
 }
 
