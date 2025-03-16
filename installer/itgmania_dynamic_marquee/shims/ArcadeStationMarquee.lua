@@ -13,6 +13,8 @@ local DEBUG = true
 
 -- Track screen changes to detect when songs end
 local currentScreen = ""
+local songSelected = false
+local lastSelectedSong = nil
 
 -----------------------------------------------------------------------------------------
 -- Debug logging function
@@ -166,33 +168,104 @@ end
 InitializeModule()
 
 -- Define the ActorFrame for ScreenSelectMusic
-t["ScreenSelectMusic"] = Def.ActorFrame {
-    OnCommand=function(self)
-        Trace("ArcadeStationMarquee: ScreenSelectMusic loaded")
+t["ScreenSelectMusic"] = Def.Actor {
+    ModuleCommand = function(self)
+        Trace("ArcadeStationMarquee: ScreenSelectMusic ModuleCommand")
+        
+        -- Write the default/empty state when entering song selection
+        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+        WriteFallbackBannerToFile(fallbackBanner)
     end,
     
-    -- This runs when the song changes
-    CurrentSongChangedMessageCommand=function(self)
+    ChosenCommand = function(self)
+        -- This gets triggered when a song is actually selected
+        Trace("ArcadeStationMarquee: ScreenSelectMusic ChosenCommand")
         local song = GAMESTATE:GetCurrentSong()
         if song then
-            Trace("ArcadeStationMarquee: CurrentSongChangedMessageCommand - " .. song:GetDisplayMainTitle())
             WriteSongInfoToFile(song)
         end
     end
 }
 
 -- Define the ActorFrame for ScreenGameplay
-t["ScreenGameplay"] = Def.ActorFrame {
-    OnCommand=function(self)
-        Trace("ArcadeStationMarquee: ScreenGameplay loaded")
+t["ScreenGameplay"] = Def.Actor {
+    ModuleCommand = function(self)
+        Trace("ArcadeStationMarquee: ScreenGameplay ModuleCommand")
+        
+        -- Write the song info when gameplay starts
+        local song = GAMESTATE:GetCurrentSong()
+        if song then
+            WriteSongInfoToFile(song)
+        end
     end,
     
-    OffCommand=function(self)
+    OffCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - reverting to default banner")
         
         -- Use a fallback banner that's part of the theme
         local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
         WriteFallbackBannerToFile(fallbackBanner)
+    end
+}
+
+-- Additional hook for song ending
+t["ScreenGameplay"] = Def.ActorFrame {
+    OnCommand = function(self)
+        Trace("ArcadeStationMarquee: ScreenGameplay ActorFrame loaded")
+    end,
+    
+    -- These additional hooks help catch song end events that might be missed
+    OffCommand = function(self)
+        Trace("ArcadeStationMarquee: ScreenGameplay ActorFrame OffCommand")
+        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+        WriteFallbackBannerToFile(fallbackBanner)
+    end,
+    
+    -- This catches when the song is skipped or fails
+    CancelCommand = function(self)
+        Trace("ArcadeStationMarquee: ScreenGameplay CancelCommand")
+        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+        WriteFallbackBannerToFile(fallbackBanner)
+    end
+}
+
+-- Add hook for ScreenEvaluation (appears after song)
+t["ScreenEvaluation"] = Def.Actor {
+    ModuleCommand = function(self)
+        Trace("ArcadeStationMarquee: ScreenEvaluation ModuleCommand")
+        
+        -- When we reach evaluation screen, the song has definitely ended
+        local fallbackBanner = ITGManiaRoot .. "Themes/Simply Love/Graphics/ScreenTitleMenu logo.png"
+        WriteFallbackBannerToFile(fallbackBanner)
+    end
+}
+
+-- Add a global screen change monitor to detect transitions
+t[#t+1] = Def.ActorFrame {
+    OnCommand=function(self)
+        self:queuecommand("MonitorScreenChange")
+    end,
+    
+    MonitorScreenChangeCommand=function(self)
+        local newScreen = SCREENMAN:GetTopScreen():GetName()
+        
+        if currentScreen ~= newScreen then
+            DebugLog("Screen changed from " .. currentScreen .. " to " .. newScreen)
+            
+            -- If we transition from ScreenSelectMusic to another screen (like ScreenGameplay)
+            -- and we haven't yet logged the song, do it now
+            if currentScreen == "ScreenSelectMusic" and lastSelectedSong and not songSelected then
+                Trace("ArcadeStationMarquee: Song selected (screen transition) - " .. lastSelectedSong:GetDisplayMainTitle())
+                WriteSongInfoToFile(lastSelectedSong)
+                songSelected = true
+            end
+            
+            currentScreen = newScreen
+        end
+        
+        -- Queue the next check
+        self:sleep(0.1)
+        self:queuecommand("MonitorScreenChange")
     end
 }
 
