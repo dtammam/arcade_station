@@ -296,6 +296,15 @@ def update_config(log_file_path, itgmania_path=None):
         config["dynamic_marquee"]["itgmania_display_enabled"] = True
         config["dynamic_marquee"]["itgmania_display_file_path"] = log_file_path
         
+        # Set the fallback path to the simply-love.png in the same directory as the log file
+        # Note: This path is kept for future compatibility but is not currently used
+        # for fallback behavior as the monitor only processes song selection events
+        fallback_path = os.path.dirname(log_file_path) + "/simply-love.png"
+        fallback_path = fallback_path.replace('\\', '/')
+        config["dynamic_marquee"]["itgmania_display_fallback_path"] = fallback_path
+        log_message(f"Set fallback banner path: {fallback_path}", "SETUP")
+        log_message("Note: Fallback banner is currently not used as monitor only processes song selection events", "SETUP")
+        
         # Add the ITGMania base path if provided
         if itgmania_path:
             # Convert backslashes to forward slashes for TOML-friendliness
