@@ -111,7 +111,6 @@ def refocus_itgmania():
 def monitor_itgmania_log(config_path='display_config.toml'):
     """
     Monitor the ITGMania log file for changes and update the marquee display.
-    Only handles song selection events and ignores fallback banner logic.
     
     Args:
         config_path (str): Path to the display configuration file.
@@ -120,6 +119,7 @@ def monitor_itgmania_log(config_path='display_config.toml'):
     try:
         config = load_toml_config(config_path)
         dynamic_marquee_config = config.get('dynamic_marquee', {})
+        display_config = config.get('display', {})
         
         # Check if ITGMania display is enabled
         if not dynamic_marquee_config.get('itgmania_display_enabled', False):
@@ -128,10 +128,6 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         
         # Get the log file path
         log_file_path = dynamic_marquee_config.get('itgmania_display_file_path')
-        
-        # We still need a fallback banner path for the function signature, but it won't be used
-        # except as a last resort if a banner file is missing
-        fallback_banner_path = config.get('display', {}).get('default_image_path', '')
         
         if not log_file_path:
             log_message("ITGMania log file path not specified in configuration", "BANNER")
@@ -163,7 +159,6 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         last_mod_time = log_file.stat().st_mtime
         
         log_message(f"Monitoring ITGMania log file: {log_file}", "BANNER")
-        log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
         
         # Main monitoring loop
         while True:
@@ -176,7 +171,7 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                     # If the file has been modified
                     if current_mod_time > last_mod_time:
                         log_message(f"ITGMania log file updated: {log_file}", "BANNER")
-                        update_marquee_from_file(str(log_file), fallback_banner_path, config)
+                        update_marquee_from_file(str(log_file), config)
                         
                         # Small delay to ensure the file is not being written to
                         time.sleep(1)
@@ -202,14 +197,12 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         log_message(f"Failed to monitor ITGMania log file: {str(e)}", "BANNER")
 
 
-def update_marquee_from_file(file_path, fallback_banner_path, config):
+def update_marquee_from_file(file_path, config):
     """
     Parse the ITGMania log file and update the marquee with the banner image.
-    Only processes song selection events and ignores fallback logic.
     
     Args:
         file_path (str): Path to the ITGMania log file.
-        fallback_banner_path (str): Path to the fallback banner image (not used unless banner missing).
         config (dict): Display configuration.
     """
     try:
@@ -217,66 +210,72 @@ def update_marquee_from_file(file_path, fallback_banner_path, config):
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
         
+        # Kill any existing marquee image process before displaying a new one
+        log_message("Killing any existing marquee image processes", "BANNER")
+        kill_process_by_identifier("marquee_image")
+        
         # Get essential properties from config
         background_color = config.get('display', {}).get('background_color', 'black')
         itgmania_base_path = config.get('dynamic_marquee', {}).get('itgmania_base_path', '')
         
-        # Check for event type
+        # Check for event type and extract banner path
         event_match = re.search(r'Event: (\w+)', content, re.MULTILINE)
+        banner_match = re.search(r'Banner: (.+)$', content, re.MULTILINE)
         
-        # Only proceed if we found an event
+        # Handle the event based on its type
         if event_match:
             event_type = event_match.group(1).strip()
             log_message(f"Found event: {event_type}", "BANNER")
             
-            # ONLY handle song selection (Chosen) events
-            if event_type == "Chosen":
-                # Kill any existing marquee image process before displaying a new one
-                log_message("Killing any existing marquee image processes", "BANNER")
-                kill_process_by_identifier("marquee_image")
-                
+            # Handle different event types
+            if event_type == "Chosen" and banner_match:
                 # Handle song selection - get and process the banner path
-                banner_match = re.search(r'Banner: (.+)$', content, re.MULTILINE)
+                banner_path = banner_match.group(1).strip()
+                log_message(f"Found banner path: {banner_path}", "BANNER")
                 
-                if banner_match:
-                    banner_path = banner_match.group(1).strip()
-                    log_message(f"Found banner path: {banner_path}", "BANNER")
-                    
-                    # Process relative paths if needed
-                    if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
-                        banner_path = banner_path.lstrip('/\\')
-                        if itgmania_base_path:
-                            full_banner_path = os.path.join(itgmania_base_path, banner_path)
-                            banner_path = full_banner_path
-                            log_message(f"Resolved relative path: {banner_path}", "BANNER")
-                    
-                    # Normalize backslashes to forward slashes
-                    banner_path = banner_path.replace('\\', '/')
-                    
-                    # Display the banner if it exists
-                    if os.path.exists(banner_path):
-                        display_image(banner_path, background_color)
-                        log_message(f"Showing song banner: {banner_path}", "BANNER")
-                    else:
-                        log_message(f"Banner file not found: {banner_path}", "BANNER")
-                else:
-                    log_message("No banner path found in Chosen event", "BANNER")
-            else:
-                # Simply log other events without taking action
-                log_message(f"Ignoring event: {event_type} (only processing Chosen events)", "BANNER")
-        else:
-            # No event found, do nothing
-            log_message("No event found in log file", "BANNER")
-            
-        # Wait a moment and refocus ITGMania regardless of what happened
+                # Process relative paths if needed
+                if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
+                    banner_path = banner_path.lstrip('/\\')
+                    if itgmania_base_path:
+                        full_banner_path = os.path.join(itgmania_base_path, banner_path)
+                        banner_path = full_banner_path
+                        log_message(f"Resolved relative path: {banner_path}", "BANNER")
+                
+                # Normalize backslashes to forward slashes
+                banner_path = banner_path.replace('\\', '/')
+                
+                # Display the banner if it exists
+                if os.path.exists(banner_path):
+                    display_image(banner_path, background_color)
+                    log_message(f"Showing song banner: {banner_path}", "BANNER")
+            elif banner_match:
+                # For other events with a banner path, use that
+                banner_path = banner_match.group(1).strip()
+                log_message(f"Found banner path for event {event_type}: {banner_path}", "BANNER")
+                
+                # Process relative paths if needed
+                if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
+                    banner_path = banner_path.lstrip('/\\')
+                    if itgmania_base_path:
+                        full_banner_path = os.path.join(itgmania_base_path, banner_path)
+                        banner_path = full_banner_path
+                        log_message(f"Resolved relative path: {banner_path}", "BANNER")
+                
+                # Normalize backslashes to forward slashes
+                banner_path = banner_path.replace('\\', '/')
+                
+                # Display the banner if it exists
+                if os.path.exists(banner_path):
+                    display_image(banner_path, background_color)
+                    log_message(f"Showing banner for {event_type}: {banner_path}", "BANNER")
+        
+        # Wait a moment for the display to update
         time.sleep(0.5)
+        
+        # Ensure ITGMania window has focus
         refocus_itgmania()
     except Exception as e:
-        log_message(f"Error processing log file: {str(e)}", "BANNER")
-        # No fallback behavior on error
-        # Just refocus ITGMania
-        time.sleep(0.5)
-        refocus_itgmania()
+        log_message(f"Error updating marquee from file: {str(e)}", "BANNER")
 
 
 if __name__ == "__main__":
