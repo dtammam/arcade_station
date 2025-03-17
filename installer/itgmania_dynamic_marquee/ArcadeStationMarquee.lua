@@ -9,9 +9,8 @@ local t = {}
 local LOG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.log"
 local CONFIG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.config"
 
--- Default banner path if config file can't be read
-local DEFAULT_BANNER_PATH = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
-local SONG_SELECT_BANNER = DEFAULT_BANNER_PATH
+-- Initialize with empty path - will only be set from config file
+local SONG_SELECT_BANNER = ""
 
 -- Try to read the banner path from the config file
 local function LoadBannerPath()
@@ -25,10 +24,12 @@ local function LoadBannerPath()
             Trace("ArcadeStationMarquee: Loaded banner path from config: " .. path)
             SONG_SELECT_BANNER = path
         else
-            Trace("ArcadeStationMarquee: Config file is empty, using default banner")
+            Trace("ArcadeStationMarquee: Config file is empty, no banner will be shown")
+            SONG_SELECT_BANNER = ""
         end
     else
-        Trace("ArcadeStationMarquee: Could not read config file, using default banner")
+        Trace("ArcadeStationMarquee: Could not read config file, no banner will be shown")
+        SONG_SELECT_BANNER = ""
     end
     f:destroy()
 end
