@@ -7,6 +7,6 @@ monitor_index = 1
 [dynamic_marquee]
 enabled = true
 itgmania_display_enabled = true
-itgmania_display_file_path = "C:/Users/dean/AppData/Roaming/ITGmania/Themes/Simply Love/Modules/ArcadeStationMarquee.log"
+itgmania_display_file_path = "C:/Games/ITGmania/Themes/Simply Love/Modules/ArcadeStationMarquee.log"
 itgmania_base_path = "C:/Games/ITGmania"
-itgmania_banner_path = "C:/Users/dean/AppData/Roaming/ITGmania/Themes/Simply Love/Modules/simply-love.png"
+itgmania_banner_path = "C:/Games/ITGmania/Themes/Simply Love/Modules/simply-love.png"
