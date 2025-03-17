@@ -210,6 +210,13 @@ def update_marquee_from_file(file_path, config):
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
         
+        # For debouncing - store the last displayed banner path
+        # Use a function attribute to persist between calls
+        if not hasattr(update_marquee_from_file, "last_banner_path"):
+            update_marquee_from_file.last_banner_path = ""
+        if not hasattr(update_marquee_from_file, "last_display_time"):
+            update_marquee_from_file.last_display_time = 0
+            
         # Kill any existing marquee image process before displaying a new one
         log_message("Killing any existing marquee image processes", "BANNER")
         kill_process_by_identifier("marquee_image")
@@ -223,51 +230,36 @@ def update_marquee_from_file(file_path, config):
         banner_match = re.search(r'Banner: (.+)$', content, re.MULTILINE)
         
         # Handle the event based on its type
-        if event_match:
+        if event_match and banner_match:
             event_type = event_match.group(1).strip()
-            log_message(f"Found event: {event_type}", "BANNER")
+            banner_path = banner_match.group(1).strip()
+            log_message(f"Found event: {event_type} with banner: {banner_path}", "BANNER")
             
-            # Handle different event types
-            if event_type == "Chosen" and banner_match:
-                # Handle song selection - get and process the banner path
-                banner_path = banner_match.group(1).strip()
-                log_message(f"Found banner path: {banner_path}", "BANNER")
+            # Process relative paths if needed
+            if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
+                banner_path = banner_path.lstrip('/\\')
+                if itgmania_base_path:
+                    full_banner_path = os.path.join(itgmania_base_path, banner_path)
+                    banner_path = full_banner_path
+                    log_message(f"Resolved relative path: {banner_path}", "BANNER")
+            
+            # Normalize backslashes to forward slashes
+            banner_path = banner_path.replace('\\', '/')
+            
+            # Debounce logic - don't show the same image within 1 second
+            current_time = time.time()
+            if banner_path == update_marquee_from_file.last_banner_path and current_time - update_marquee_from_file.last_display_time < 1.0:
+                log_message(f"Debouncing - skipping duplicate display of {banner_path}", "BANNER")
+                return
+            
+            # Display the banner if it exists
+            if os.path.exists(banner_path):
+                display_image(banner_path, background_color)
+                log_message(f"Showing banner for {event_type}: {banner_path}", "BANNER")
                 
-                # Process relative paths if needed
-                if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
-                    banner_path = banner_path.lstrip('/\\')
-                    if itgmania_base_path:
-                        full_banner_path = os.path.join(itgmania_base_path, banner_path)
-                        banner_path = full_banner_path
-                        log_message(f"Resolved relative path: {banner_path}", "BANNER")
-                
-                # Normalize backslashes to forward slashes
-                banner_path = banner_path.replace('\\', '/')
-                
-                # Display the banner if it exists
-                if os.path.exists(banner_path):
-                    display_image(banner_path, background_color)
-                    log_message(f"Showing song banner: {banner_path}", "BANNER")
-            elif banner_match:
-                # For other events with a banner path, use that
-                banner_path = banner_match.group(1).strip()
-                log_message(f"Found banner path for event {event_type}: {banner_path}", "BANNER")
-                
-                # Process relative paths if needed
-                if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
-                    banner_path = banner_path.lstrip('/\\')
-                    if itgmania_base_path:
-                        full_banner_path = os.path.join(itgmania_base_path, banner_path)
-                        banner_path = full_banner_path
-                        log_message(f"Resolved relative path: {banner_path}", "BANNER")
-                
-                # Normalize backslashes to forward slashes
-                banner_path = banner_path.replace('\\', '/')
-                
-                # Display the banner if it exists
-                if os.path.exists(banner_path):
-                    display_image(banner_path, background_color)
-                    log_message(f"Showing banner for {event_type}: {banner_path}", "BANNER")
+                # Update debounce tracking
+                update_marquee_from_file.last_banner_path = banner_path
+                update_marquee_from_file.last_display_time = current_time
         
         # Wait a moment for the display to update
         time.sleep(0.5)
