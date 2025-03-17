@@ -1,5 +1,5 @@
-collection: 1metadata
-shortname: 1metadata
+collection: arcade_station
+shortname: arcade_station
 
 game: ITGMania
 file: not\using\files\to\launch\games\ITGMania
