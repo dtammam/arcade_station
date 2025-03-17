@@ -1,6 +1,6 @@
 [display]
-image_path = "C:/Repositories/arcade_station/assets/images/banners/ddr-v.png"
-default_image_path = "C:/Repositories/arcade_station/assets/images/banners/supernova.png"
+image_path = "C:/Repositories/arcade_station/assets/images/banners/arcade_station.png"
+default_image_path = "C:/Repositories/arcade_station/assets/images/banners/arcade_station.png"
 background_color = "black"
 monitor_index = 1
 
