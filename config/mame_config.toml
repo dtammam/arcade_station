@@ -1,4 +1,4 @@
 [mame]
-executable_path = "C:/pegasus/games/ddr573-mame/"
+executable_path = "C:/Games/ddr573-mame/"
 executable = "mame.exe"
-ini_path = "-inipath C:/pegasus/games/ddr573-mame/"
+ini_path = "-inipath C:/Games/ddr573-mame/"

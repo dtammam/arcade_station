@@ -128,7 +128,6 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         
         # Get the log file path
         log_file_path = dynamic_marquee_config.get('itgmania_display_file_path')
-        fallback_banner_path = display_config.get('default_image_path')
         
         if not log_file_path:
             log_message("ITGMania log file path not specified in configuration", "BANNER")
@@ -140,6 +139,10 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         log_file = Path(log_file_path)
         
         log_message(f"Using resolved ITGMania log file path: {log_file}", "BANNER")
+        
+        # Initialize debounce variables
+        last_content = ""
+        last_update_time = 0
         
         if not log_file.parent.exists():
             log_message(f"Directory for ITGMania log file does not exist: {log_file.parent}", "BANNER")
@@ -160,7 +163,6 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         last_mod_time = log_file.stat().st_mtime
         
         log_message(f"Monitoring ITGMania log file: {log_file}", "BANNER")
-        log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
         
         # Main monitoring loop
         while True:
@@ -173,10 +175,24 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                     # If the file has been modified
                     if current_mod_time > last_mod_time:
                         log_message(f"ITGMania log file updated: {log_file}", "BANNER")
-                        update_marquee_from_file(str(log_file), fallback_banner_path, display_config)
+                        
+                        # Read the file content
+                        with open(log_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        
+                        # Only process if content has changed and not too soon after last update
+                        current_time = time.time()
+                        if (content != last_content and 
+                            current_time - last_update_time > 0.5):  # debounce for 500ms
+                            
+                            update_marquee_from_file(str(log_file), config)
+                            last_content = content
+                            last_update_time = current_time
+                        else:
+                            log_message("Debouncing rapid updates", "BANNER")
                         
                         # Small delay to ensure the file is not being written to
-                        time.sleep(1)
+                        time.sleep(0.2)
                         
                         # Update last modification time
                         last_mod_time = current_mod_time
@@ -193,79 +209,83 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                 log_message(f"Error monitoring ITGMania log file: {str(e)}", "BANNER")
             
             # Sleep to prevent high CPU usage
-            time.sleep(1)
+            time.sleep(0.5)
             
     except Exception as e:
         log_message(f"Failed to monitor ITGMania log file: {str(e)}", "BANNER")
 
 
-def update_marquee_from_file(file_path, fallback_banner_path, display_config):
+def update_marquee_from_file(file_path, config):
     """
     Parse the ITGMania log file and update the marquee with the banner image.
     
     Args:
         file_path (str): Path to the ITGMania log file.
-        fallback_banner_path (str): Path to the fallback banner image.
-        display_config (dict): Display configuration.
+        config (dict): Display configuration.
     """
     try:
         # Read the file content
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
         
+        # For debouncing - store the last displayed banner path
+        # Use a function attribute to persist between calls
+        if not hasattr(update_marquee_from_file, "last_banner_path"):
+            update_marquee_from_file.last_banner_path = ""
+        if not hasattr(update_marquee_from_file, "last_display_time"):
+            update_marquee_from_file.last_display_time = 0
+            
         # Kill any existing marquee image process before displaying a new one
         log_message("Killing any existing marquee image processes", "BANNER")
         kill_process_by_identifier("marquee_image")
         
-        # Extract the banner path using regex
+        # Get essential properties from config
+        background_color = config.get('display', {}).get('background_color', 'black')
+        itgmania_base_path = config.get('dynamic_marquee', {}).get('itgmania_base_path', '')
+        
+        # Check for event type and extract banner path
+        event_match = re.search(r'Event: (\w+)', content, re.MULTILINE)
         banner_match = re.search(r'Banner: (.+)$', content, re.MULTILINE)
         
-        if banner_match:
+        # Handle the event based on its type
+        if event_match and banner_match:
+            event_type = event_match.group(1).strip()
             banner_path = banner_match.group(1).strip()
-            log_message(f"Found banner path in log file: {banner_path}", "BANNER")
+            log_message(f"Found event: {event_type} with banner: {banner_path}", "BANNER")
             
-            # Check if the banner file exists
+            # Process relative paths if needed
+            if (banner_path.startswith('/') or banner_path.startswith('\\')) and not banner_path[1:2] == ':':
+                banner_path = banner_path.lstrip('/\\')
+                if itgmania_base_path:
+                    full_banner_path = os.path.join(itgmania_base_path, banner_path)
+                    banner_path = full_banner_path
+                    log_message(f"Resolved relative path: {banner_path}", "BANNER")
+            
+            # Normalize backslashes to forward slashes
+            banner_path = banner_path.replace('\\', '/')
+            
+            # Debounce logic - don't show the same image within 1 second
+            current_time = time.time()
+            if banner_path == update_marquee_from_file.last_banner_path and current_time - update_marquee_from_file.last_display_time < 1.0:
+                log_message(f"Debouncing - skipping duplicate display of {banner_path}", "BANNER")
+                return
+            
+            # Display the banner if it exists
             if os.path.exists(banner_path):
-                # Update the display with the banner image without stealing focus
-                background_color = display_config.get('background_color', 'black')
-                
-                # Launch display_image in a non-focus-stealing mode
-                # The flags in ImageWindow are now set to prevent focus stealing
                 display_image(banner_path, background_color)
-                log_message(f"Updated marquee display with banner: {banner_path}", "BANNER")
+                log_message(f"Showing banner for {event_type}: {banner_path}", "BANNER")
                 
-                # Wait a moment for the display to update
-                time.sleep(0.5)
-                
-                # Ensure ITGMania window has focus
-                refocus_itgmania()
-            else:
-                log_message(f"Banner file does not exist: {banner_path}", "BANNER")
-                if fallback_banner_path and os.path.exists(fallback_banner_path):
-                    display_image(fallback_banner_path, display_config.get('background_color', 'black'))
-                    log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
-                    
-                    # Wait a moment and refocus
-                    time.sleep(0.5)
-                    refocus_itgmania()
-        else:
-            log_message("No banner path found in log file", "BANNER")
-            if fallback_banner_path and os.path.exists(fallback_banner_path):
-                display_image(fallback_banner_path, display_config.get('background_color', 'black'))
-                log_message(f"Using fallback banner: {fallback_banner_path}", "BANNER")
-                
-                # Wait a moment and refocus
-                time.sleep(0.5)
-                refocus_itgmania()
+                # Update debounce tracking
+                update_marquee_from_file.last_banner_path = banner_path
+                update_marquee_from_file.last_display_time = current_time
+        
+        # Wait a moment for the display to update
+        time.sleep(0.5)
+        
+        # Ensure ITGMania window has focus
+        refocus_itgmania()
     except Exception as e:
         log_message(f"Error updating marquee from file: {str(e)}", "BANNER")
-        if fallback_banner_path and os.path.exists(fallback_banner_path):
-            display_image(fallback_banner_path, display_config.get('background_color', 'black'))
-            log_message(f"Using fallback banner due to error: {fallback_banner_path}", "BANNER")
-            
-            # Wait a moment and refocus
-            time.sleep(0.5)
-            refocus_itgmania()
 
 
 if __name__ == "__main__":

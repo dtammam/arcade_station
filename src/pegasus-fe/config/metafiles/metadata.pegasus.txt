@@ -1,5 +1,5 @@
-collection: 1metadata
-shortname: 1metadata
+collection: arcade_station
+shortname: arcade_station
 
 game: ITGMania
 file: not\using\files\to\launch\games\ITGMania
@@ -19,27 +19,9 @@ launch:
     "not_itg"
 assets.box_front: ../../../../assets/images/banners/notitg.png
 
-game: StepMania 3
-file: not\using\files\to\launch\games\StepMania 3
-sortBy: c
-launch: 
-    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
-    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "stepmania_3"
-assets.box_front: ../../../../assets/images/banners/stepmania3.png
-
-game: In The Groove 3
-file: not\using\files\to\launch\games\In The Groove 3
-sortBy: d
-launch:
-    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
-    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "itg_3"
-assets.box_front: ../../../../assets/images/banners/itg3.png
-
 game: In The Groove 2
 file: not\using\files\to\launch\games\In The Groove 2
-sortBy: e
+sortBy: c
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
@@ -48,27 +30,81 @@ assets.box_front: ../../../../assets/images/banners/itg2.png
 
 game: In The Groove
 file: not\using\files\to\launch\games\In The Groove
-sortBy: f
+sortBy: d
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
     "itg_1"
 assets.box_front: ../../../../assets/images/banners/itg1.png
 
-game: Mungyodance 3
-file: not\using\files\to\launch\games\Mungyodance 3
+game: DDR Omnimix
+file: not\using\files\to\launch\games\DDR Omnimix
+sortBy: e
+launch:
+    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "ddr_omnimix"
+assets.box_front: ../../../../assets/images/banners/omni-custom.png
+
+game: DDR A3
+file: not\using\files\to\launch\games\DDR A3
+sortBy: f
+launch:
+    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "ddr_a3"
+assets.box_front: ../../../../assets/images/banners/a3-custom.png
+
+game: EXTREME Pro Clarity
+file: not\using\files\to\launch\games\EXTREME Pro Clarity
 sortBy: g
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "mungyodance_3"
-assets.box_front: ../../../../assets/images/banners/mungyodance3.png
+    "ddr_extreme_proclarity"
+assets.box_front: ../../../../assets/images/banners/extreme.png
 
-game: STARLiGHT TWOpointZERO
-file: not\using\files\to\launch\games\STARLiGHT TWOpointZERO
+game: DDRMAX2
+file: not\using\files\to\launch\games\DDRMAX2
 sortBy: h
 launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_starlight"
-assets.box_front: ../../../../assets/images/banners/starlight.png
+    "ddr_max_2"
+assets.box_front: ../../../../assets/images/banners/ddrmax2.png
+
+game: DDRMAX
+file: not\using\files\to\launch\games\DDRMAX
+sortBy: i
+launch:
+    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "ddr_max_1"
+assets.box_front: ../../../../assets/images/banners/ddrmax.png
+
+game: Disney's Rave
+file: not\using\files\to\launch\games\Disney's Rave
+sortBy: j
+launch:
+    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "ds_disneys_rave"
+assets.box_front: ../../../../assets/images/banners/disney.png
+
+game: True Kiss Destination
+file: not\using\files\to\launch\games\True Kiss Destination
+sortBy: k
+launch:
+    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "ds_true_kiss_destination"
+assets.box_front: ../../../../assets/images/banners/dstkd.png
+
+game: Dreams Come True
+file: not\using\files\to\launch\games\Dreams Come True
+sortBy: l
+launch:
+    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
+    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
+    "ds_dreams_come_true"
+assets.box_front: ../../../../assets/images/banners/dsdct.png
