@@ -138,17 +138,17 @@ def copy_shim_files(itgmania_path):
     
     Returns:
         bool: True if successful, False otherwise.
-        tuple: (dest_file, is_portable) - The destination file path and whether ITGMania is in portable mode
+        tuple: (dest_file, dest_image, is_portable) - Destination file paths and portable mode status
     """
     try:
-        # Source paths for the module files (now directly in the parent directory)
+        # Source paths for the module files
         source_lua = SCRIPT_DIR / "ArcadeStationMarquee.lua"
         source_png = SCRIPT_DIR / "simply-love.png"
         
         if not source_lua.exists():
             log_message(f"Module file {source_lua} does not exist.", "SETUP")
             log_message(f"Error: Module file {source_lua} not found.", "ERROR")
-            return False, (None, False)
+            return False, (None, None, False)
             
         if not source_png.exists():
             log_message(f"Fallback image {source_png} does not exist.", "SETUP")
@@ -195,18 +195,25 @@ def copy_shim_files(itgmania_path):
         shutil.copy2(source_lua, dest_lua)
         log_message(f"Copied module file to {dest_lua}", "SETUP")
         
-        # Copy the fallback image if it exists
+        # Copy the banner image if it exists
+        dest_png = None
         if source_png.exists():
             dest_png = dest_dir / "simply-love.png"
             shutil.copy2(source_png, dest_png)
-            log_message(f"Copied fallback image to {dest_png}", "SETUP")
+            log_message(f"Copied banner image to {dest_png}", "SETUP")
+            
+            # Create a config file with the banner path for the Lua script
+            config_path = dest_dir / "ArcadeStationMarquee.config"
+            with open(config_path, 'w') as f:
+                f.write(str(dest_png).replace('\\', '\\\\'))
+            log_message(f"Created config file with banner path at {config_path}", "SETUP")
         
-        return True, (dest_lua, is_portable)
+        return True, (dest_lua, dest_png, is_portable)
     
     except Exception as e:
         log_message(f"Error copying module files: {str(e)}", "SETUP")
         log_message(f"Error: Failed to copy module files: {str(e)}", "ERROR")
-        return False, (None, False)
+        return False, (None, None, False)
 
 
 def determine_log_file_path(itgmania_path, dest_file=None, is_portable=False):
@@ -260,13 +267,14 @@ def determine_log_file_path(itgmania_path, dest_file=None, is_portable=False):
     return str(log_file_path)
 
 
-def update_config(log_file_path, itgmania_path=None):
+def update_config(log_file_path, itgmania_path=None, banner_image_path=None):
     """
     Update the display_config.toml with the ITGMania log file path.
     
     Args:
         log_file_path (str): The path to the ITGMania log file.
         itgmania_path (Path, optional): The path to the ITGMania installation.
+        banner_image_path (Path, optional): The path to the banner image.
     
     Returns:
         bool: True if successful, False otherwise.
@@ -296,6 +304,12 @@ def update_config(log_file_path, itgmania_path=None):
         config["dynamic_marquee"]["itgmania_display_enabled"] = True
         config["dynamic_marquee"]["itgmania_display_file_path"] = log_file_path
         
+        # Add the banner image path if provided
+        if banner_image_path:
+            banner_path_str = str(banner_image_path).replace('\\', '/')
+            config["dynamic_marquee"]["itgmania_banner_path"] = banner_path_str
+            log_message(f"Added ITGMania banner path: {banner_path_str}", "SETUP")
+        
         # Add the ITGMania base path if provided
         if itgmania_path:
             # Convert backslashes to forward slashes for TOML-friendliness
@@ -323,7 +337,7 @@ def update_config(log_file_path, itgmania_path=None):
                 if section_idx < len(config) - 1:
                     f.write("\n")
         
-        log_message(f"Updated display_config.toml with log file path: {log_file_path}", "SETUP")
+        log_message(f"Updated display_config.toml with log file path and banner path", "SETUP")
         return True
     
     except Exception as e:
@@ -346,7 +360,7 @@ def main():
         
         # Step 2: Copy module file
         log_message("Step 1: Copying module file to ITGMania installation...", "SETUP")
-        success, (dest_file, is_portable) = copy_shim_files(itgmania_path)
+        success, (dest_file, dest_image, is_portable) = copy_shim_files(itgmania_path)
         if not success:
             sys.exit(1)
         
@@ -356,7 +370,7 @@ def main():
         
         # Step 4: Update config
         log_message("Step 3: Updating configuration...", "SETUP")
-        if not update_config(log_file_path, itgmania_path):
+        if not update_config(log_file_path, itgmania_path, dest_image):
             sys.exit(1)
         
         log_message("==================================================", "SETUP")
@@ -364,6 +378,8 @@ def main():
         log_message("==================================================", "SETUP")
         log_message("ITGMania is now configured to work with Arcade Station's dynamic marquee.", "SETUP")
         log_message(f"Log file path: {log_file_path}", "SETUP")
+        if dest_image:
+            log_message(f"Banner image path: {dest_image}", "SETUP")
         log_message("\nTo use this feature:", "SETUP")
         log_message("1. Make sure Arcade Station is running", "SETUP")
         log_message("2. Launch ITGMania", "SETUP")

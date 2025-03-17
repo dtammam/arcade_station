@@ -7,6 +7,34 @@ local t = {}
 
 -- Put the log file next to this module in the Modules directory for simplicity
 local LOG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.log"
+local CONFIG_FILE_PATH = "Themes/Simply Love/Modules/ArcadeStationMarquee.config"
+
+-- Default banner path if config file can't be read
+local DEFAULT_BANNER_PATH = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
+local SONG_SELECT_BANNER = DEFAULT_BANNER_PATH
+
+-- Try to read the banner path from the config file
+local function LoadBannerPath()
+    -- Attempt to open the config file
+    local f = RageFileUtil.CreateRageFile()
+    if f:Open(CONFIG_FILE_PATH, 1) then -- 1 = read mode
+        local path = f:Read()
+        f:Close()
+        
+        if path and path ~= "" then
+            Trace("ArcadeStationMarquee: Loaded banner path from config: " .. path)
+            SONG_SELECT_BANNER = path
+        else
+            Trace("ArcadeStationMarquee: Config file is empty, using default banner")
+        end
+    else
+        Trace("ArcadeStationMarquee: Could not read config file, using default banner")
+    end
+    f:destroy()
+end
+
+-- Load the banner path at startup
+LoadBannerPath()
 
 -- Debug mode - set to true to output more details
 local DEBUG = true
@@ -144,12 +172,10 @@ end
 local function InitializeModule()
     Trace("ArcadeStationMarquee: Initializing module...")
     
-    -- Create an initial log file with our specific image path
-    local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
-    
+    -- Use the configured banner path
     local f = RageFileUtil.CreateRageFile()
     if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-        f:Write("Event: Init\nBanner: " .. songSelectImage .. "\n")
+        f:Write("Event: Init\nBanner: " .. SONG_SELECT_BANNER .. "\n")
         f:Close()
         Trace("ArcadeStationMarquee: Created log file with initial image path")
     else
@@ -168,13 +194,10 @@ t["ScreenSelectMusic"] = Def.Actor {
         currentScreen = "ScreenSelectMusic"
         Trace("ArcadeStationMarquee: ScreenSelectMusic BeginCommand")
         
-        -- Write specific image path to log file for song selection screen
-        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
-        
-        -- Open, write, close as quickly as possible
+        -- Use the configured banner path
         local f = RageFileUtil.CreateRageFile()
         if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-            f:Write("Event: ScreenSelectMusic\nBanner: " .. songSelectImage .. "\n")
+            f:Write("Event: ScreenSelectMusic\nBanner: " .. SONG_SELECT_BANNER .. "\n")
             f:Close()
             Trace("ArcadeStationMarquee: Wrote song selection screen image path to log")
         else
@@ -189,13 +212,10 @@ t["ScreenSelectMusic"] = Def.Actor {
     ModuleCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenSelectMusic ModuleCommand")
         
-        -- Also write the image path in ModuleCommand to ensure it's shown
-        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
-        
-        -- Open, write, close as quickly as possible
+        -- Use the configured banner path
         local f = RageFileUtil.CreateRageFile()
         if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-            f:Write("Event: ScreenSelectMusic\nBanner: " .. songSelectImage .. "\n")
+            f:Write("Event: ScreenSelectMusic\nBanner: " .. SONG_SELECT_BANNER .. "\n")
             f:Close()
             Trace("ArcadeStationMarquee: Wrote song selection screen image path to log (ModuleCommand)")
         else
@@ -258,13 +278,10 @@ t["ScreenGameplay"] = Def.Actor {
     OffCommand = function(self)
         Trace("ArcadeStationMarquee: ScreenGameplay OffCommand - song ended")
         
-        -- Write specific image path to log file when song ends
-        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
-        
-        -- Open, write, close as quickly as possible
+        -- Use the configured banner path
         local f = RageFileUtil.CreateRageFile()
         if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-            f:Write("Event: SongEnd\nBanner: " .. songSelectImage .. "\n")
+            f:Write("Event: SongEnd\nBanner: " .. SONG_SELECT_BANNER .. "\n")
             f:Close()
             Trace("ArcadeStationMarquee: Wrote song end image path to log")
         else
@@ -284,13 +301,10 @@ t["ScreenEvaluation"] = Def.Actor {
         currentScreen = "ScreenEvaluation"
         Trace("ArcadeStationMarquee: ScreenEvaluation BeginCommand")
         
-        -- Write specific image path to log file for evaluation screen
-        local songSelectImage = "C:\\Users\\dean\\AppData\\Roaming\\ITGmania\\Themes\\Simply Love\\Modules\\simply-love.png"
-        
-        -- Open, write, close as quickly as possible
+        -- Use the configured banner path
         local f = RageFileUtil.CreateRageFile()
         if f:Open(LOG_FILE_PATH, 2) then  -- 2 = write mode
-            f:Write("Event: ScreenEvaluation\nBanner: " .. songSelectImage .. "\n")
+            f:Write("Event: ScreenEvaluation\nBanner: " .. SONG_SELECT_BANNER .. "\n")
             f:Close()
             Trace("ArcadeStationMarquee: Wrote evaluation screen image path to log")
         else

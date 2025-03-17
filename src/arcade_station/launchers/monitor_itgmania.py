@@ -140,6 +140,10 @@ def monitor_itgmania_log(config_path='display_config.toml'):
         
         log_message(f"Using resolved ITGMania log file path: {log_file}", "BANNER")
         
+        # Initialize debounce variables
+        last_content = ""
+        last_update_time = 0
+        
         if not log_file.parent.exists():
             log_message(f"Directory for ITGMania log file does not exist: {log_file.parent}", "BANNER")
             log_message(f"Will attempt to create directory: {log_file.parent}", "BANNER")
@@ -171,10 +175,24 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                     # If the file has been modified
                     if current_mod_time > last_mod_time:
                         log_message(f"ITGMania log file updated: {log_file}", "BANNER")
-                        update_marquee_from_file(str(log_file), config)
+                        
+                        # Read the file content
+                        with open(log_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        
+                        # Only process if content has changed and not too soon after last update
+                        current_time = time.time()
+                        if (content != last_content and 
+                            current_time - last_update_time > 0.5):  # debounce for 500ms
+                            
+                            update_marquee_from_file(str(log_file), config)
+                            last_content = content
+                            last_update_time = current_time
+                        else:
+                            log_message("Debouncing rapid updates", "BANNER")
                         
                         # Small delay to ensure the file is not being written to
-                        time.sleep(1)
+                        time.sleep(0.2)
                         
                         # Update last modification time
                         last_mod_time = current_mod_time
@@ -191,7 +209,7 @@ def monitor_itgmania_log(config_path='display_config.toml'):
                 log_message(f"Error monitoring ITGMania log file: {str(e)}", "BANNER")
             
             # Sleep to prevent high CPU usage
-            time.sleep(1)
+            time.sleep(0.5)
             
     except Exception as e:
         log_message(f"Failed to monitor ITGMania log file: {str(e)}", "BANNER")
