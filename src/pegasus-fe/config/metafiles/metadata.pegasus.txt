@@ -63,12 +63,3 @@ launch:
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
     "mungyodance_3"
 assets.box_front: ../../../../assets/images/banners/mungyodance3.png
-
-game: STARLiGHT TWOpointZERO
-file: not\using\files\to\launch\games\STARLiGHT TWOpointZERO
-sortBy: h
-launch:
-    "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
-    "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
-    "ddr_starlight"
-assets.box_front: ../../../../assets/images/banners/starlight.png

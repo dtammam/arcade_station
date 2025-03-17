@@ -6,7 +6,6 @@ itg_3 = { path = "C:/Games/In The Groove 3/Program/OpenITG-PC.exe", banner = "C:
 itg_2 = { path = "C:/Games/In The Groove 2/Program/OpenITG.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/itg2.png" }
 itg_1 = { path = "C:/Games/In The Groove/Program/In The Groove.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/itg1.png" }
 mungyodance_3 = { path = "C:/Games/Mungyodance 3/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/mungyodance3.png" }
-ddr_starlight = { path = "C:/Games/StepMania 5.3 Outfox STARLiGHT TWOpointZERO/Program/StepMania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/starlight.png" }
 ddr_omnimix = { path = "C:/Games/DDR-JAO-2022052400/spice.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/omni.png" }
 ddr_a3 = { path = "C:/Games/DDR-A3_20230704/contents/spice.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/a3.png" }
 ddr_a20 = { path = "C:/Games/MDX-001-2020020300/contents/spice.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/ddr-a20.png" }
