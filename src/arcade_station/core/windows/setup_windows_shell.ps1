@@ -27,7 +27,7 @@ $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 $shellValue = "`"$batchFileAbsPath`""
 
 # Window flicker management
-$foregroundLockTimeout = 2000
+$foregroundLockTimeout = 3000
 $foregroundFlashCount = 5
 
 try {
