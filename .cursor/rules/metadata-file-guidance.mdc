@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Metadata Files Guidelines
+globs: 
+  - "src/pegasus-fe/config/metafiles/*.txt"
+language: plaintext
+---
+
+# Metadata Files Guidelines
+
+## Formatting
+- Trim trailing whitespace from all lines.
+- Ensure there is a final newline at the end of the file.

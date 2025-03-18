@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Image Display Functions Guidelines
+globs: 
+  - "src/arcade_station/core/common/display_image.py"
+language: python
+---
+
+# Image Display Functions Guidelines
+
+## Function Updates
+- Update image-related elements using functions within this file.

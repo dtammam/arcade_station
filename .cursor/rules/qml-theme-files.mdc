@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: QML Theme Files Guidelines
+globs: 
+  - "src/pegasus-fe/themes/**/*.qml"
+language: qml
+---
+
+# QML Theme Files Guidelines
+
+## Formatting
+- Use an indent size of 4 spaces.
+- Use double quotes for strings.
