@@ -15,30 +15,33 @@ Import-Module -Name $coreFunctionsModule -Force
 
 # Ensure the batch file exists
 if (-not (Test-Path -Path $batchFilePath)) {
-    Write-Error "The arcade_station_start.bat file was not found in the directory: $scriptDir"
+    Write-Error "The arcade_station_start.bat file was not found in the directory: [$scriptDir]"
     exit 1
 }
 
 # Convert to absolute path and ensure proper quoting
 $batchFileAbsPath = (Resolve-Path -Path $batchFilePath).Path
-$shellCommand = "`"$batchFileAbsPath`""
 
 # Registry key for the Windows shell
 $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$shellValue = "`"$batchFileAbsPath`""
 
-# Set new shell value
+# Window flicker management
+$foregroundLockTimeout = 2000
+$foregroundFlashCount = 5
+
 try {
-    # Save current shell as backup
-    $currentShell = Get-ItemProperty -Path $shellKey -Name "Shell" | Select-Object -ExpandProperty "Shell"
-    Set-ItemProperty -Path $shellKey -Name "OriginalShell" -Value $currentShell -Type String
-    
-    # Set new shell
-    Set-ItemProperty -Path $shellKey -Name "Shell" -Value $shellCommand -Type String
-    Write-Host "Successfully set Arcade Station as the shell replacement."
-    Write-Host "The new shell command is: $shellCommand"
+    # Set shell value
+    Set-ItemProperty -Path $shellKey -Name "Shell" -Value $shellValue -Type String
+    Write-Host "Set Shell to [$shellValue]"
+
+    # Set registry values for default foreground window behavior
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "ForegroundLockTimeout" -Value $foregroundLockTimeout -Type DWord
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "ForegroundFlashCount" -Value $foregroundFlashCount -Type DWord
+    Write-Host "Set ForegroundLockTimeout to [$foregroundLockTimeout] and ForegroundFlashCount to [$foregroundFlashCount]"
 }
 catch {
-    Write-Error "Failed to set new shell: $_"
+    Write-Error "Failed to restore original shell: [$_]"
     exit 1
 }
 
