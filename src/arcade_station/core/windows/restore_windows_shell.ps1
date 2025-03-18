@@ -14,25 +14,24 @@ Import-Module -Name $coreFunctionsModule -Force
 
 # Registry key for the Windows shell
 $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+$shellValue = "explorer.exe"
 
-# Try to get the original shell value from registry
+# Window flicker management
+$foregroundLockTimeout = 200000
+$foregroundFlashCount = 7
+
 try {
-    # Windows Explorer back to normal
-    $originalShell = "explorer.exe"
-    Write-Host "Using default Windows shell: $originalShell"
-    
-    # Set original shell value
-    Set-ItemProperty -Path $shellKey -Name "Shell" -Value $originalShell -Type String
-    Write-Host "Successfully restored shell to: $originalShell"
-    
-    # Clean up the backup registry key if it exists
-    if (Get-ItemProperty -Path $shellKey -Name "OriginalShell" -ErrorAction SilentlyContinue) {
-        Remove-ItemProperty -Path $shellKey -Name "OriginalShell"
-        Write-Host "Removed OriginalShell registry backup."
-    }
+    # Set shell value
+    Set-ItemProperty -Path $shellKey -Name "Shell" -Value $shellValue -Type String
+    Write-Host "Set Shell to [$shellValue]"
+
+    # Set registry values for default foreground window behavior
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "ForegroundLockTimeout" -Value $foregroundLockTimeout -Type DWord
+    Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "ForegroundFlashCount" -Value $foregroundFlashCount -Type DWord
+    Write-Host "Set ForegroundLockTimeout to [$foregroundLockTimeout] and ForegroundFlashCount to [$foregroundFlashCount]"
 }
 catch {
-    Write-Error "Failed to restore original shell: $_"
+    Write-Error "Failed to restore original shell: [$_]"
     exit 1
 }
 

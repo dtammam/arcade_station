@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: PowerShell Scripts Guidelines
+globs: 
+  - "src/arcade_station/core/windows/*.ps1"
+language: powershell
+---
+
+# PowerShell Scripts Guidelines
+
+## Formatting
+- Use an indent size of 4 spaces.
+- Ensure there is a newline at the end of the file.

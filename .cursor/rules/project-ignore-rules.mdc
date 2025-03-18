@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Project Ignore Rules
+ignore:
+  - ".venv/**"
+  - "__pycache__/**"
+  - "*.pyc"
+  - "temp/**"
+  - "build/**"
+  - "dist/**"
+---
+
+# Project Ignore Rules
+
+## Ignored Directories and Files
+The following files and directories should be ignored:
+- `.venv/**` – Exclude virtual environment files.
+- `__pycache__/**` – Ignore compiled Python cache files.
+- `*.pyc` – Exclude Python bytecode files.
+- `temp/**` – Ignore temporary files.
+- `build/**` – Exclude build artifacts.
+- `dist/**` – Ignore distribution packages.

@@ -60,7 +60,7 @@ Arcade Station can display song banners from ITGMania on your marquee display in
 1. Make sure Arcade Station is installed and configured
 2. Run the setup script from the arcade_station root directory:
    ```
-   python setup_itgmania_dynamic_marquee_for_song_banners.py
+   python installer/itgmania_dynamic_marquee/setup.py
    ```
 3. Follow the prompts to specify your ITGMania installation path
 4. The setup script will automatically:

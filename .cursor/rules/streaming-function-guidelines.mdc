@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Streaming Functions Guidelines
+globs: 
+  - "src/arcade_station/core/common/start_streaming.py"
+language: python
+---
+
+# Streaming Functions Guidelines
+
+## Line Length
+Ensure that all lines do not exceed 79 characters, following the PEP 8 standard.
+
+## Docstring Style
+Use the Google docstring style for documentation.
+
+## Utilize Core Utilities
+Use `core_functions.py` utilities for logging and configuration.
+
+## Cross-Platform Compatibility
+Ensure compatibility across Windows, Linux, and Mac.
+
+## Process Handling
+Handle process creation with appropriate flags for each operating system.

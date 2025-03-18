@@ -1,0 +1,17 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Configuration Files Guidelines
+globs: 
+  - "config/**/*.toml"
+language: toml
+---
+
+# Configuration Files Guidelines
+
+## Formatting
+- Use an indent size of 2 spaces.
+- Ensure arrays include a trailing comma for consistency.

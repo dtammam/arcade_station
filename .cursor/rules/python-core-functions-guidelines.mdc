@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Python Core Functions Guidelines
+globs: 
+  - "src/arcade_station/core/common/core_functions.py"
+language: python
+---
+
+# Python Core Functions Guidelines
+
+## Line Length
+Ensure that all lines do not exceed 79 characters, following the PEP 8 standard.
+
+## Docstring Style
+Use the Google docstring style for documentation, as referenced in PLAN.MD.
+
+## TOML Parsing
+Use `tomllib` for parsing TOML files instead of the `toml` library.
+
+## Function Placement
+- Define new utility functions in this file unless they are truly specific to another file.
+- Maintain consistency by always placing new utility functions in this file.
