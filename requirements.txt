@@ -9,6 +9,9 @@ keyboard>=0.13.5  # For key bindings and hotkeys
 psutil>=5.9.0  # For process management
 PyQt5>=5.15.0  # For GUI elements and image display
 
+# Installer dependencies
+Pillow>=9.0.0  # For image processing in the installer
+
 # Optional dependencies
 # Uncomment as needed for your specific setup
 
@@ -19,3 +22,6 @@ PyQt5>=5.15.0  # For GUI elements and image display
 # black>=23.0.0  # Code formatting
 # flake8>=6.0.0  # Linting
 # mypy>=1.0.0  # Type checking 
+
+# For building executables
+# pyinstaller>=5.6.2  # For creating standalone executables 
