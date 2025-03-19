@@ -114,27 +114,6 @@ class ITGManiaSetupPage(BasePage):
         )
         use_default_image.pack(anchor="w", pady=5)
         
-        # Noteskin options
-        noteskin_frame = ttk.Frame(self.itgmania_frame)
-        noteskin_frame.pack(fill="x", pady=10)
-        
-        noteskin_label = ttk.Label(
-            noteskin_frame,
-            text="Default Noteskin:",
-            width=15
-        )
-        noteskin_label.pack(side="left", padx=(0, 5))
-        
-        self.noteskin_var = tk.StringVar(value="default")
-        noteskin_options = ttk.Combobox(
-            noteskin_frame,
-            textvariable=self.noteskin_var,
-            values=["default", "cel", "cyber", "lambda", "cmd-funky", "rhythm"],
-            width=15,
-            state="readonly"
-        )
-        noteskin_options.pack(side="left")
-        
         # Dynamic marquee integration
         self.marquee_frame = ttk.LabelFrame(
             main_frame,
@@ -249,62 +228,51 @@ class ITGManiaSetupPage(BasePage):
         itgmania_path = self.path_var.get().strip()
         if not itgmania_path:
             messagebox.showerror(
-                "Invalid Path", 
-                "Please enter the path to ITGMania."
+                "ITGMania Path Required", 
+                "Please specify the path to the ITGMania executable or directory."
             )
             return False
         
-        # Check if the path exists
         if not os.path.exists(itgmania_path):
             messagebox.showerror(
-                "Invalid Path", 
+                "Invalid ITGMania Path", 
                 "The specified ITGMania path does not exist."
             )
             return False
         
-        # For Windows, check if it's an executable
-        if self.app.install_manager.is_windows and not itgmania_path.lower().endswith(".exe"):
-            messagebox.showerror(
-                "Invalid Path", 
-                "Please select the ITGMania executable (.exe) file."
-            )
-            return False
-        
-        # Validate image path if custom image is selected
+        # Validate image path if not using default
         if not self.use_default_image_var.get():
             image_path = self.image_var.get().strip()
             if image_path and not os.path.isfile(image_path):
                 messagebox.showerror(
                     "Invalid Image", 
-                    "The specified banner image file does not exist."
+                    "The specified image file does not exist."
                 )
                 return False
+        elif not self.default_image_path:
+            # If using default but no default was found
+            messagebox.showwarning(
+                "Default Image Not Found", 
+                "Could not find the default Simply Love theme image. "
+                "You can continue, but no banner will be displayed."
+            )
         
         return True
     
     def save_data(self):
         """Save ITGMania settings."""
-        self.app.user_config["use_itgmania"] = self.use_itgmania_var.get()
+        self.app.user_config["itgmania"] = {
+            "enabled": self.use_itgmania_var.get()
+        }
         
         if self.use_itgmania_var.get():
-            self.app.user_config["itgmania_path"] = self.path_var.get().strip()
+            self.app.user_config["itgmania"].update({
+                "path": self.path_var.get().strip(),
+                "use_default_image": self.use_default_image_var.get(),
+                "install_marquee_module": self.install_module_var.get()
+            })
             
-            if self.use_default_image_var.get():
-                # Use default Simply Love image
-                itg_dir = os.path.dirname(self.path_var.get().strip())
-                if self.app.install_manager.is_windows:
-                    theme_dir = os.path.join(itg_dir, "Themes", "Simply Love")
-                else:
-                    theme_dir = os.path.join(self.path_var.get().strip(), "Themes", "Simply Love")
-                
-                default_image = os.path.join(theme_dir, "Graphics", "Banner.png")
-                if os.path.isfile(default_image):
-                    self.app.user_config["itgmania_image"] = default_image
-                elif self.default_image_path and os.path.isfile(self.default_image_path):
-                    self.app.user_config["itgmania_image"] = self.default_image_path
-            else:
-                # Use custom image
-                self.app.user_config["itgmania_image"] = self.image_var.get().strip()
-            
-            self.app.user_config["itgmania_noteskin"] = self.noteskin_var.get()
-            self.app.user_config["install_itgmania_module"] = self.install_module_var.get() 
+            if self.use_default_image_var.get() and self.default_image_path:
+                self.app.user_config["itgmania"]["default_image_path"] = self.default_image_path
+            elif not self.use_default_image_var.get() and self.image_var.get().strip():
+                self.app.user_config["itgmania"]["custom_image"] = self.image_var.get().strip() 
