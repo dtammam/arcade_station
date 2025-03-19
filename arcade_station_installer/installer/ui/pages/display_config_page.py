@@ -149,7 +149,7 @@ class DisplayConfigPage(BasePage):
         color_options = ttk.Combobox(
             color_frame,
             textvariable=self.color_var,
-            values=["black", "white", "gray", "blue", "red", "green"],
+            values=["black", "white", "gray", "blue", "red", "green", "transparent"],
             width=10,
             state="readonly"
         )
