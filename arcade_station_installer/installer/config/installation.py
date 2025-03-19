@@ -1,0 +1,688 @@
+"""
+Installation manager for handling the Arcade Station installation process
+"""
+import os
+import shutil
+import platform
+import logging
+from pathlib import Path
+import tomllib
+from typing import Dict, Any, Optional, List, Tuple
+
+# Try to import tomli_w for writing TOML files
+try:
+    import tomli_w
+except ImportError:
+    # If tomli_w is not available, we'll handle it when writing TOML files
+    pass
+
+from .. import IS_WINDOWS, IS_LINUX, IS_MAC, INSTALLER_DIR, RESOURCES_DIR
+
+class InstallationManager:
+    """Manages the Arcade Station installation process."""
+    
+    def __init__(self):
+        """Initialize the installation manager."""
+        self.is_windows = IS_WINDOWS
+        self.is_linux = IS_LINUX
+        self.is_mac = IS_MAC
+        self.resources_dir = RESOURCES_DIR
+        
+        # Set up logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.StreamHandler(),
+                logging.FileHandler(os.path.join(os.path.dirname(INSTALLER_DIR), "installation.log"))
+            ]
+        )
+        self.logger = logging.getLogger("InstallationManager")
+    
+    def check_if_installed(self) -> bool:
+        """Check if Arcade Station is already installed.
+        
+        Returns:
+            bool: True if installed, False otherwise
+        """
+        # Check for common installation markers
+        markers = [
+            self._find_existing_config_dir(),
+            self._find_startup_entry() if self.is_windows else False
+        ]
+        
+        return any(markers)
+    
+    def _find_existing_config_dir(self) -> bool:
+        """Check for existing configuration directory.
+        
+        Returns:
+            bool: True if found, False otherwise
+        """
+        # Check common locations
+        possible_locations = [
+            os.path.expanduser("~/arcade_station"),
+            os.path.expanduser("~/Arcade Station"),
+            "C:/arcade_station",
+            "C:/Arcade Station",
+            "/opt/arcade_station",
+            "/usr/local/arcade_station",
+            os.path.expanduser("~/Applications/Arcade Station.app"),
+            "/Applications/Arcade Station.app"
+        ]
+        
+        for location in possible_locations:
+            config_dir = os.path.join(location, "config")
+            if os.path.isdir(config_dir) and self._check_config_files(config_dir):
+                return True
+        
+        return False
+    
+    def _check_config_files(self, config_dir: str) -> bool:
+        """Check if a directory contains Arcade Station config files.
+        
+        Args:
+            config_dir: Directory to check
+            
+        Returns:
+            bool: True if it contains expected config files
+        """
+        expected_files = [
+            "default_config.toml",
+            "display_config.toml",
+            "installed_games.toml"
+        ]
+        
+        return any(os.path.isfile(os.path.join(config_dir, f)) for f in expected_files)
+    
+    def _find_startup_entry(self) -> bool:
+        """Check for Windows startup entry.
+        
+        Returns:
+            bool: True if found, False otherwise
+        """
+        if not self.is_windows:
+            return False
+            
+        try:
+            import winreg
+            startup_key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+            )
+            
+            try:
+                value, _ = winreg.QueryValueEx(startup_key, "ArcadeStation")
+                return "arcade_station" in value.lower()
+            except FileNotFoundError:
+                return False
+            finally:
+                winreg.CloseKey(startup_key)
+        except Exception:
+            return False
+    
+    def get_current_install_path(self) -> str:
+        """Get the current installation path if it exists.
+        
+        Returns:
+            str: Current install path or empty string if not found
+        """
+        # Check common locations from _find_existing_config_dir
+        possible_locations = [
+            os.path.expanduser("~/arcade_station"),
+            os.path.expanduser("~/Arcade Station"),
+            "C:/arcade_station",
+            "C:/Arcade Station",
+            "/opt/arcade_station",
+            "/usr/local/arcade_station"
+        ]
+        
+        if self.is_mac:
+            possible_locations.extend([
+                os.path.expanduser("~/Applications/Arcade Station.app/Contents/Resources"),
+                "/Applications/Arcade Station.app/Contents/Resources"
+            ])
+        
+        for location in possible_locations:
+            config_dir = os.path.join(location, "config")
+            if os.path.isdir(config_dir) and self._check_config_files(config_dir):
+                return location
+        
+        return ""
+    
+    def get_suggested_install_path(self) -> str:
+        """Get a suggested installation path for a new installation.
+        
+        Returns:
+            str: Suggested install path
+        """
+        if self.is_windows:
+            return os.path.join(os.path.expanduser("~"), "Arcade Station")
+        elif self.is_linux:
+            return os.path.join(os.path.expanduser("~"), "arcade_station")
+        elif self.is_mac:
+            return os.path.join(os.path.expanduser("~"), "Applications", "Arcade Station")
+        else:
+            return os.path.join(os.path.expanduser("~"), "arcade_station")
+    
+    def get_monitor_count(self) -> int:
+        """Get the number of monitors.
+        
+        Returns:
+            int: Number of detected monitors, defaults to 1
+        """
+        try:
+            if self.is_windows:
+                import ctypes
+                user32 = ctypes.windll.user32
+                return user32.GetSystemMetrics(80)  # SM_CMONITORS
+            else:
+                # For Linux/Mac, try using screeninfo if available
+                try:
+                    import screeninfo
+                    return len(screeninfo.get_monitors())
+                except (ImportError, Exception):
+                    # Default to 1 if detection fails
+                    return 1
+        except Exception:
+            return 1
+    
+    def perform_installation(self, config: Dict[str, Any]) -> bool:
+        """Perform the Arcade Station installation.
+        
+        Args:
+            config: User configuration from the wizard
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            self.logger.info("Starting Arcade Station installation")
+            
+            # Get the installation path
+            install_path = config.get("install_path")
+            if not install_path:
+                self.logger.error("No installation path specified")
+                return False
+            
+            # Create the installation directory if it doesn't exist
+            if not os.path.isdir(install_path):
+                os.makedirs(install_path, exist_ok=True)
+                self.logger.info(f"Created installation directory: {install_path}")
+            
+            # Create the config directory
+            config_dir = os.path.join(install_path, "config")
+            os.makedirs(config_dir, exist_ok=True)
+            
+            # Create the source structure
+            src_dir = os.path.join(install_path, "src")
+            os.makedirs(src_dir, exist_ok=True)
+            
+            arcade_station_dir = os.path.join(src_dir, "arcade_station")
+            os.makedirs(arcade_station_dir, exist_ok=True)
+            
+            pegasus_dir = os.path.join(src_dir, "pegasus-fe")
+            os.makedirs(pegasus_dir, exist_ok=True)
+            
+            pegasus_config_dir = os.path.join(pegasus_dir, "config")
+            os.makedirs(pegasus_config_dir, exist_ok=True)
+            
+            pegasus_metafiles_dir = os.path.join(pegasus_config_dir, "metafiles")
+            os.makedirs(pegasus_metafiles_dir, exist_ok=True)
+            
+            # Create the assets directory
+            assets_dir = os.path.join(install_path, "assets")
+            os.makedirs(os.path.join(assets_dir, "images", "banners"), exist_ok=True)
+            
+            # Generate configuration files
+            self._generate_config_files(config, config_dir)
+            
+            # Generate Pegasus metadata
+            self._generate_pegasus_metadata(config, pegasus_metafiles_dir)
+            
+            # Setup platform-specific items
+            if self.is_windows:
+                self._setup_windows_specific(config, install_path)
+            elif self.is_linux:
+                self._setup_linux_specific(config, install_path)
+            elif self.is_mac:
+                self._setup_mac_specific(config, install_path)
+            
+            self.logger.info(f"Arcade Station installation completed successfully to {install_path}")
+            return True
+        
+        except Exception as e:
+            self.logger.error(f"Error during installation: {str(e)}", exc_info=True)
+            return False
+    
+    def _generate_config_files(self, config: Dict[str, Any], config_dir: str) -> None:
+        """Generate the configuration files.
+        
+        Args:
+            config: User configuration from the wizard
+            config_dir: Directory to write the configuration files
+        """
+        # Generate default_config.toml
+        default_config = {
+            "default": {
+                "log_dir": os.path.join(config_dir, "logs")
+            }
+        }
+        self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)
+        
+        # Generate display_config.toml
+        display_config = {
+            "display": {
+                "image_path": os.path.join(config["install_path"], "assets", "images", "banners", "arcade_station.png"),
+                "default_image_path": config.get("default_marquee_image", ""),
+                "background_color": config.get("marquee_background_color", "black"),
+                "monitor_index": config.get("marquee_monitor", 1)
+            },
+            "dynamic_marquee": {
+                "enabled": config.get("use_dynamic_marquee", True),
+                "itgmania_display_enabled": config.get("enable_itgmania_display", True),
+                "itgmania_display_file_path": "",
+                "itgmania_base_path": "",
+                "itgmania_banner_path": ""
+            }
+        }
+        
+        # Update ITGMania paths if configured
+        if config.get("itgmania_path"):
+            display_config["dynamic_marquee"]["itgmania_base_path"] = config["itgmania_path"]
+            display_config["dynamic_marquee"]["itgmania_display_file_path"] = os.path.join(
+                config["itgmania_path"], "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log"
+            )
+            display_config["dynamic_marquee"]["itgmania_banner_path"] = os.path.join(
+                config["itgmania_path"], "Themes", "Simply Love", "Modules", "simply-love.png"
+            )
+        
+        self._write_toml(os.path.join(config_dir, "display_config.toml"), display_config)
+        
+        # Generate installed_games.toml
+        installed_games = {
+            "games": {}
+        }
+        
+        # Add ITGMania if configured
+        if config.get("itgmania_path"):
+            itg_image = config.get("itgmania_image", "")
+            installed_games["games"]["itgmania"] = {
+                "path": os.path.join(config["itgmania_path"], "ITGmania.exe"),
+                "banner": itg_image
+            }
+        
+        # Add other binary games if configured
+        if config.get("binary_games"):
+            for game_id, game_info in config["binary_games"].items():
+                installed_games["games"][game_id] = {
+                    "path": game_info["path"],
+                    "banner": game_info.get("banner", "")
+                }
+        
+        # Add MAME games if configured
+        if config.get("mame_games"):
+            for game_id, game_info in config["mame_games"].items():
+                installed_games["games"][game_id] = {
+                    "rom": game_info["rom"],
+                    "state": game_info.get("state", "o"),
+                    "banner": game_info.get("banner", "")
+                }
+        
+        self._write_toml(os.path.join(config_dir, "installed_games.toml"), installed_games)
+        
+        # Generate key_listener.toml
+        key_listener = {
+            "keys": {
+                "kill_all_and_reset_pegasus": config.get("key_kill_all", "ctrl+q"),
+                "take_screenshot": config.get("key_screenshot", "ctrl+p"),
+                "start_streaming": config.get("key_streaming", "ctrl+b")
+            }
+        }
+        self._write_toml(os.path.join(config_dir, "key_listener.toml"), key_listener)
+        
+        # Generate processes_to_kill.toml
+        processes_to_kill = {
+            "process_names": [
+                "ITGmania.exe",
+                "OpenITG.exe",
+                "In The Groove.exe",
+                "NotITG-v4.2.0.exe",
+                "spice.exe",
+                "mame.exe",
+                "obs64.exe",
+                "i_view64.exe"
+            ]
+        }
+        self._write_toml(os.path.join(config_dir, "processes_to_kill.toml"), processes_to_kill)
+        
+        # Generate MAME config if MAME games are configured
+        if config.get("mame_path"):
+            mame_config = {
+                "mame": {
+                    "path": config["mame_path"],
+                    "exe": "mame.exe" if self.is_windows else "mame",
+                    "inipath": config.get("mame_inipath", "")
+                }
+            }
+            self._write_toml(os.path.join(config_dir, "mame_config.toml"), mame_config)
+        
+        # Generate screenshot config
+        screenshot_config = {
+            "screenshot": {
+                "monitor_index": config.get("screenshot_monitor", 0),
+                "save_path": os.path.join(config["install_path"], "screenshots"),
+                "play_sound": config.get("screenshot_sound", True),
+                "sound_path": os.path.join(config["install_path"], "assets", "sounds", "camera.wav")
+            },
+            "icloud": {
+                "enabled": config.get("use_icloud", False),
+                "restart_service": config.get("restart_icloud_service", False)
+            }
+        }
+        self._write_toml(os.path.join(config_dir, "screenshot_config.toml"), screenshot_config)
+        
+        # Generate utility config
+        utility_config = {
+            "lights": {
+                "enabled": config.get("enable_lights", False),
+                "litboard_path": config.get("litboard_path", ""),
+                "mame2lit_path": config.get("mame2lit_path", "")
+            },
+            "streaming": {
+                "enabled": config.get("enable_streaming", False),
+                "obs_path": config.get("obs_path", "")
+            },
+            "vpn": {
+                "enabled": config.get("enable_vpn", False),
+                "vpn_path": config.get("vpn_path", "")
+            },
+            "volume_control": {
+                "enabled": config.get("enable_volume_control", False) and self.is_windows,
+                "audio_switcher_path": config.get("audio_switcher_path", "")
+            }
+        }
+        self._write_toml(os.path.join(config_dir, "utility_config.toml"), utility_config)
+        
+        # Generate Pegasus binaries config
+        pegasus_binaries = {
+            "pegasus": {
+                "binary": "pegasus-fe.exe" if self.is_windows else "pegasus-fe"
+            }
+        }
+        self._write_toml(os.path.join(config_dir, "pegasus_binaries.toml"), pegasus_binaries)
+    
+    def _generate_pegasus_metadata(self, config: Dict[str, Any], metadata_dir: str) -> None:
+        """Generate the Pegasus metadata files.
+        
+        Args:
+            config: User configuration from the wizard
+            metadata_dir: Directory to write the metadata files
+        """
+        # Basic template for metadata.pegasus.txt
+        metadata_content = """collection: arcade_station
+shortname: arcade_station
+
+"""
+        
+        # Add ITGMania if configured
+        if config.get("itgmania_path"):
+            launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
+            python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
+            
+            metadata_content += """game: ITGMania
+file: not\\using\\files\\to\\launch\\games\\ITGMania
+sortBy: a
+launch: 
+    "{}" 
+    "{}" 
+    "itgmania"
+assets.box_front: ../../../../assets/images/banners/simply-love.png
+
+""".format(python_path, launcher_path)
+        
+        # Add other binary games if configured
+        if config.get("binary_games"):
+            launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
+            python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
+            
+            for idx, (game_id, game_info) in enumerate(config["binary_games"].items()):
+                display_name = game_info.get("display_name", game_id.replace("_", " ").title())
+                asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
+                if not asset_path:
+                    asset_path = "../../../../assets/images/banners/arcade_station.png"
+                
+                sort_char = chr(ord('b') + idx)  # start with 'b' for binary games
+                
+                metadata_content += """game: {}
+file: not\\using\\files\\to\\launch\\games\\{}
+sortBy: {}
+launch: 
+    "{}" 
+    "{}" 
+    "{}"
+assets.box_front: {}
+
+""".format(display_name, display_name, sort_char, python_path, launcher_path, game_id, asset_path)
+        
+        # Add MAME games if configured
+        if config.get("mame_games"):
+            launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
+            python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
+            
+            for idx, (game_id, game_info) in enumerate(config["mame_games"].items()):
+                display_name = game_info.get("display_name", game_id.replace("_", " ").title())
+                asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
+                if not asset_path:
+                    asset_path = "../../../../assets/images/banners/arcade_station.png"
+                
+                sort_char = chr(ord('m') + idx)  # start with 'm' for MAME games
+                
+                metadata_content += """game: {}
+file: not\\using\\files\\to\\launch\\games\\{}
+sortBy: {}
+launch: 
+    "{}" 
+    "{}" 
+    "{}"
+assets.box_front: {}
+
+""".format(display_name, display_name, sort_char, python_path, launcher_path, game_id, asset_path)
+        
+        # Write the metadata file
+        metadata_path = os.path.join(metadata_dir, "metadata.pegasus.txt")
+        with open(metadata_path, "w", encoding="utf-8") as f:
+            f.write(metadata_content)
+    
+    def _setup_windows_specific(self, config: Dict[str, Any], install_path: str) -> None:
+        """Set up Windows-specific components.
+        
+        Args:
+            config: User configuration from the wizard
+            install_path: Installation directory
+        """
+        # Set up auto-logon if kiosk mode is enabled
+        if config.get("enable_kiosk_mode"):
+            self._setup_windows_autologon(
+                config.get("kiosk_username", ""),
+                config.get("kiosk_password", "")
+            )
+            
+            # Replace explorer.exe with Arcade Station if requested
+            if config.get("kiosk_replace_shell"):
+                self._setup_windows_shell_replacement(install_path)
+    
+    def _setup_windows_autologon(self, username: str, password: str) -> None:
+        """Set up Windows auto-logon.
+        
+        Args:
+            username: Username for auto-logon
+            password: Password for auto-logon
+        """
+        if not (username and self.is_windows):
+            return
+            
+        try:
+            import winreg
+            reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+            
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, reg_path, 0, 
+                               winreg.KEY_WRITE) as key:
+                winreg.SetValueEx(key, "DefaultUserName", 0, winreg.REG_SZ, username)
+                winreg.SetValueEx(key, "DefaultPassword", 0, winreg.REG_SZ, password)
+                winreg.SetValueEx(key, "AutoAdminLogon", 0, winreg.REG_SZ, "1")
+            
+            self.logger.info(f"Configured Windows auto-logon for user '{username}'")
+        except Exception as e:
+            self.logger.error(f"Error setting up auto-logon: {str(e)}")
+    
+    def _setup_windows_shell_replacement(self, install_path: str) -> None:
+        """Set up Windows shell replacement.
+        
+        Args:
+            install_path: Installation directory
+        """
+        if not self.is_windows:
+            return
+            
+        try:
+            import winreg
+            
+            # Create a startup script
+            startup_path = os.path.join(install_path, "start_arcade_station.bat")
+            startup_content = f"""@echo off
+cd /d "{install_path}"
+start "" ".venv\\Scripts\\pythonw.exe" "src\\arcade_station\\core\\common\\start_pegasus.py"
+"""
+            with open(startup_path, "w") as f:
+                f.write(startup_content)
+                
+            # Register as shell replacement
+            shell_reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, shell_reg_path, 0, 
+                               winreg.KEY_WRITE) as key:
+                winreg.SetValueEx(key, "Shell", 0, winreg.REG_SZ, startup_path)
+            
+            # Also add to startup for non-shell replacement mode
+            startup_reg_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, startup_reg_path, 0, 
+                               winreg.KEY_WRITE) as key:
+                winreg.SetValueEx(key, "ArcadeStation", 0, winreg.REG_SZ, startup_path)
+                
+            self.logger.info("Configured Windows shell replacement")
+        except Exception as e:
+            self.logger.error(f"Error setting up shell replacement: {str(e)}")
+    
+    def _setup_linux_specific(self, config: Dict[str, Any], install_path: str) -> None:
+        """Set up Linux-specific components.
+        
+        Args:
+            config: User configuration from the wizard
+            install_path: Installation directory
+        """
+        # Create a desktop entry for autostart
+        autostart_dir = os.path.expanduser("~/.config/autostart")
+        os.makedirs(autostart_dir, exist_ok=True)
+        
+        desktop_entry = os.path.join(autostart_dir, "arcade_station.desktop")
+        entry_content = f"""[Desktop Entry]
+Type=Application
+Name=Arcade Station
+Comment=Arcade Station Frontend
+Exec=bash -c "cd {install_path} && .venv/bin/python src/arcade_station/core/common/start_pegasus.py"
+Terminal=false
+Categories=Game;
+"""
+        
+        with open(desktop_entry, "w") as f:
+            f.write(entry_content)
+            
+        # Make the file executable
+        os.chmod(desktop_entry, 0o755)
+        
+        self.logger.info("Created Linux autostart entry")
+    
+    def _setup_mac_specific(self, config: Dict[str, Any], install_path: str) -> None:
+        """Set up Mac-specific components.
+        
+        Args:
+            config: User configuration from the wizard
+            install_path: Installation directory
+        """
+        # Create a launch agent for autostart
+        launch_agents_dir = os.path.expanduser("~/Library/LaunchAgents")
+        os.makedirs(launch_agents_dir, exist_ok=True)
+        
+        plist_file = os.path.join(launch_agents_dir, "com.arcadestation.startup.plist")
+        plist_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.arcadestation.startup</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>bash</string>
+        <string>-c</string>
+        <string>cd {install_path} && .venv/bin/python src/arcade_station/core/common/start_pegasus.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
+"""
+        
+        with open(plist_file, "w") as f:
+            f.write(plist_content)
+            
+        self.logger.info("Created macOS launch agent")
+    
+    def _write_toml(self, file_path: str, data: Dict[str, Any]) -> None:
+        """Write a TOML file.
+        
+        Args:
+            file_path: Path to write the file
+            data: Data to write
+        """
+        try:
+            # Try to use tomli_w if available
+            import tomli_w
+            with open(file_path, "wb") as f:
+                tomli_w.dump(data, f)
+        except ImportError:
+            # Fallback to manual TOML writing
+            self._write_toml_manually(file_path, data)
+    
+    def _write_toml_manually(self, file_path: str, data: Dict[str, Any], indent: int = 0) -> None:
+        """Write a TOML file manually if tomli_w is not available.
+        
+        Args:
+            file_path: Path to write the file
+            data: Data to write
+            indent: Current indentation level
+        """
+        with open(file_path, "w", encoding="utf-8") as f:
+            self._write_toml_section(f, data, indent)
+    
+    def _write_toml_section(self, file, data: Dict[str, Any], indent: int = 0) -> None:
+        """Write a section of a TOML file.
+        
+        Args:
+            file: File to write to
+            data: Data to write
+            indent: Current indentation level
+        """
+        for key, value in data.items():
+            if isinstance(value, dict):
+                # Write a table header
+                file.write(f"[{key}]\n")
+                self._write_toml_section(file, value, indent + 2)
+                file.write("\n")
+            else:
+                # Write a key-value pair
+                if isinstance(value, str):
+                    file.write(f'{key} = "{value}"\n')
+                elif isinstance(value, bool):
+                    file.write(f"{key} = {str(value).lower()}\n")
+                else:
+                    file.write(f"{key} = {value}\n") 

@@ -1,0 +1,535 @@
+"""
+MAME games setup page for the Arcade Station Installer
+"""
+import os
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+import uuid
+
+from .base_page import BasePage
+
+class MameGameEntry:
+    """A class representing a MAME game entry in the UI."""
+    
+    def __init__(self, parent, container, app, on_delete_callback):
+        """Initialize a MAME game entry.
+        
+        Args:
+            parent: The parent widget (ScrolledFrame)
+            container: The container frame for this entry
+            app: The main application instance
+            on_delete_callback: Callback function when the delete button is clicked
+        """
+        self.parent = parent
+        self.container = container
+        self.app = app
+        self.on_delete = on_delete_callback
+        self.id = str(uuid.uuid4())[:8]  # Generate a unique ID for this entry
+        
+        self.frame = ttk.Frame(container)
+        self.frame.pack(fill="x", padx=5, pady=5)
+        
+        # Add a separator line
+        separator = ttk.Separator(self.frame, orient="horizontal")
+        separator.pack(fill="x", pady=5)
+        
+        # Game name
+        name_frame = ttk.Frame(self.frame)
+        name_frame.pack(fill="x", pady=2)
+        
+        name_label = ttk.Label(
+            name_frame,
+            text="Game Name:",
+            width=15
+        )
+        name_label.pack(side="left", padx=(0, 5))
+        
+        self.name_var = tk.StringVar()
+        name_entry = ttk.Entry(
+            name_frame,
+            textvariable=self.name_var,
+            width=30
+        )
+        name_entry.pack(side="left", fill="x", expand=True)
+        
+        # Delete button
+        delete_button = ttk.Button(
+            name_frame,
+            text="Delete",
+            command=self.delete,
+            width=10
+        )
+        delete_button.pack(side="right", padx=5)
+        
+        # Unique ID
+        id_frame = ttk.Frame(self.frame)
+        id_frame.pack(fill="x", pady=2)
+        
+        id_label = ttk.Label(
+            id_frame,
+            text="Unique ID:",
+            width=15
+        )
+        id_label.pack(side="left", padx=(0, 5))
+        
+        self.id_var = tk.StringVar(value=self.id)
+        id_entry = ttk.Entry(
+            id_frame,
+            textvariable=self.id_var,
+            width=30
+        )
+        id_entry.pack(side="left", fill="x", expand=True)
+        
+        # ROM name
+        rom_frame = ttk.Frame(self.frame)
+        rom_frame.pack(fill="x", pady=2)
+        
+        rom_label = ttk.Label(
+            rom_frame,
+            text="ROM Name:",
+            width=15
+        )
+        rom_label.pack(side="left", padx=(0, 5))
+        
+        self.rom_var = tk.StringVar()
+        rom_entry = ttk.Entry(
+            rom_frame,
+            textvariable=self.rom_var,
+            width=30
+        )
+        rom_entry.pack(side="left", fill="x", expand=True)
+        
+        # State (save state) - often 'o' for most MAME games
+        state_frame = ttk.Frame(self.frame)
+        state_frame.pack(fill="x", pady=2)
+        
+        state_label = ttk.Label(
+            state_frame,
+            text="Save State:",
+            width=15
+        )
+        state_label.pack(side="left", padx=(0, 5))
+        
+        self.state_var = tk.StringVar(value="o")
+        state_entry = ttk.Entry(
+            state_frame,
+            textvariable=self.state_var,
+            width=10
+        )
+        state_entry.pack(side="left")
+        
+        # Help for save state
+        state_help = ttk.Label(
+            state_frame,
+            text="(Default: 'o' for standard save state)",
+            font=("Arial", 9),
+            foreground="#555555"
+        )
+        state_help.pack(side="left", padx=5)
+        
+        # Game banner
+        banner_frame = ttk.Frame(self.frame)
+        banner_frame.pack(fill="x", pady=2)
+        
+        banner_label = ttk.Label(
+            banner_frame,
+            text="Banner Image:",
+            width=15
+        )
+        banner_label.pack(side="left", padx=(0, 5))
+        
+        self.banner_var = tk.StringVar()
+        banner_entry = ttk.Entry(
+            banner_frame,
+            textvariable=self.banner_var,
+            width=40
+        )
+        banner_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_image_button = ttk.Button(
+            banner_frame,
+            text="Browse...",
+            command=self.browse_banner,
+            width=10
+        )
+        browse_image_button.pack(side="right")
+    
+    def delete(self):
+        """Delete this game entry."""
+        self.frame.destroy()
+        self.on_delete(self)
+    
+    def browse_banner(self):
+        """Browse for a banner image."""
+        filetypes = [
+            ("Image files", "*.png *.jpg *.jpeg *.gif *.bmp"),
+            ("All files", "*.*")
+        ]
+        
+        initial_dir = os.path.dirname(self.banner_var.get()) if self.banner_var.get() else os.path.expanduser("~")
+        
+        file_path = filedialog.askopenfilename(
+            title="Select Banner Image",
+            filetypes=filetypes,
+            initialdir=initial_dir
+        )
+        
+        if file_path:
+            self.banner_var.set(file_path)
+    
+    def get_data(self):
+        """Get the data for this MAME game entry.
+        
+        Returns:
+            dict: Game data
+        """
+        return {
+            "id": self.id_var.get(),
+            "display_name": self.name_var.get(),
+            "rom": self.rom_var.get(),
+            "state": self.state_var.get(),
+            "banner": self.banner_var.get()
+        }
+    
+    def validate(self):
+        """Validate the MAME game entry.
+        
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        # Check if name is set
+        if not self.name_var.get().strip():
+            messagebox.showerror(
+                "Invalid Name", 
+                "Please enter a name for the game."
+            )
+            return False
+        
+        # Check if ID is set
+        if not self.id_var.get().strip():
+            messagebox.showerror(
+                "Invalid ID", 
+                "Please enter a unique ID for the game."
+            )
+            return False
+        
+        # Check if ROM name is set
+        if not self.rom_var.get().strip():
+            messagebox.showerror(
+                "Invalid ROM", 
+                "Please enter the ROM name for the game."
+            )
+            return False
+        
+        # Check if state is set
+        if not self.state_var.get().strip():
+            messagebox.showerror(
+                "Invalid State", 
+                "Please enter a save state for the game."
+            )
+            return False
+        
+        # Check if banner is set and exists (if provided)
+        banner_path = self.banner_var.get().strip()
+        if banner_path and not os.path.isfile(banner_path):
+            messagebox.showerror(
+                "Invalid Banner", 
+                "The specified banner image file does not exist."
+            )
+            return False
+        
+        return True
+
+
+class MAMEGamesPage(BasePage):
+    """Page for configuring MAME games."""
+    
+    def __init__(self, container, app):
+        """Initialize the MAME games page."""
+        super().__init__(container, app)
+        self.set_title(
+            "MAME Games Setup",
+            "Configure MAME-based arcade games"
+        )
+        self.game_entries = []
+    
+    def create_widgets(self):
+        """Create page-specific widgets."""
+        main_frame = ttk.Frame(self.content_frame)
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Introduction
+        intro_text = ttk.Label(
+            main_frame,
+            text="Add arcade games that run using the MAME emulator. "
+                 "You'll need to provide the ROM name and save state for each game.",
+            wraplength=500,
+            justify="left"
+        )
+        intro_text.pack(anchor="w", pady=(0, 10))
+        
+        # MAME configuration frame
+        mame_config_frame = ttk.LabelFrame(
+            main_frame,
+            text="MAME Configuration",
+            padding=(10, 5)
+        )
+        mame_config_frame.pack(fill="x", pady=10)
+        
+        # Use MAME checkbox
+        self.use_mame_var = tk.BooleanVar(value=True)
+        use_mame = ttk.Checkbutton(
+            mame_config_frame,
+            text="I want to use MAME games with Arcade Station",
+            variable=self.use_mame_var,
+            command=self.toggle_mame_settings
+        )
+        use_mame.pack(anchor="w", pady=5)
+        
+        # MAME path
+        path_frame = ttk.Frame(mame_config_frame)
+        path_frame.pack(fill="x", pady=5)
+        
+        path_label = ttk.Label(
+            path_frame,
+            text="MAME Path:",
+            width=15
+        )
+        path_label.pack(side="left", padx=(0, 5))
+        
+        self.path_var = tk.StringVar()
+        path_entry = ttk.Entry(
+            path_frame,
+            textvariable=self.path_var,
+            width=40
+        )
+        path_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_button = ttk.Button(
+            path_frame,
+            text="Browse...",
+            command=self.browse_mame
+        )
+        browse_button.pack(side="right")
+        
+        # MAME inipath
+        inipath_frame = ttk.Frame(mame_config_frame)
+        inipath_frame.pack(fill="x", pady=5)
+        
+        inipath_label = ttk.Label(
+            inipath_frame,
+            text="INI Path:",
+            width=15
+        )
+        inipath_label.pack(side="left", padx=(0, 5))
+        
+        self.inipath_var = tk.StringVar()
+        inipath_entry = ttk.Entry(
+            inipath_frame,
+            textvariable=self.inipath_var,
+            width=40
+        )
+        inipath_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_ini_button = ttk.Button(
+            inipath_frame,
+            text="Browse...",
+            command=self.browse_inipath
+        )
+        browse_ini_button.pack(side="right")
+        
+        # Create a frame with scrollbar for the game entries
+        self.entries_frame = ttk.LabelFrame(
+            main_frame,
+            text="Game Entries",
+            padding=(10, 5)
+        )
+        
+        self.entries_canvas = tk.Canvas(self.entries_frame, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self.entries_frame, orient="vertical", command=self.entries_canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.entries_canvas)
+        
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.entries_canvas.configure(
+                scrollregion=self.entries_canvas.bbox("all")
+            )
+        )
+        
+        self.entries_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.entries_canvas.configure(yscrollcommand=scrollbar.set)
+        
+        self.entries_canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Add games frame (container for game entries)
+        self.games_frame = ttk.Frame(self.scrollable_frame)
+        self.games_frame.pack(fill="both", expand=True)
+        
+        # Add button
+        add_button = ttk.Button(
+            main_frame,
+            text="Add MAME Game",
+            command=self.add_game
+        )
+        add_button.pack(anchor="center", pady=10)
+        
+        # Configure canvas scroll region when frame changes size
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.entries_canvas.configure(scrollregion=self.entries_canvas.bbox("all"))
+        )
+        
+        # Configure canvas to expand with window
+        main_frame.bind(
+            "<Configure>",
+            lambda e: self.entries_canvas.configure(width=e.width - 40)
+        )
+        
+        # Set initial state
+        self.toggle_mame_settings()
+        
+        # Add a default empty game entry if MAME is enabled
+        if self.use_mame_var.get():
+            self.add_game()
+    
+    def toggle_mame_settings(self):
+        """Show or hide MAME settings based on checkbox state."""
+        if self.use_mame_var.get():
+            self.entries_frame.pack(fill="both", expand=True, pady=10)
+        else:
+            self.entries_frame.pack_forget()
+    
+    def browse_mame(self):
+        """Browse for the MAME executable."""
+        filetypes = [
+            ("Executable files", "*.exe")
+        ] if self.app.install_manager.is_windows else [
+            ("All files", "*")
+        ]
+        
+        initial_dir = os.path.dirname(self.path_var.get()) if self.path_var.get() else os.path.expanduser("~")
+        
+        if self.app.install_manager.is_windows:
+            file_path = filedialog.askopenfilename(
+                title="Select MAME Executable",
+                filetypes=filetypes,
+                initialdir=initial_dir
+            )
+        else:
+            # For Linux/Mac, let's select the directory
+            file_path = filedialog.askdirectory(
+                title="Select MAME Directory",
+                initialdir=initial_dir
+            )
+        
+        if file_path:
+            self.path_var.set(file_path)
+            
+            # Try to auto-fill the inipath
+            mame_dir = os.path.dirname(file_path) if self.app.install_manager.is_windows else file_path
+            ini_dir = os.path.join(mame_dir, "ini")
+            if os.path.isdir(ini_dir):
+                self.inipath_var.set(ini_dir)
+    
+    def browse_inipath(self):
+        """Browse for the MAME inipath directory."""
+        initial_dir = self.inipath_var.get() if self.inipath_var.get() else os.path.expanduser("~")
+        
+        dir_path = filedialog.askdirectory(
+            title="Select MAME INI Directory",
+            initialdir=initial_dir
+        )
+        
+        if dir_path:
+            self.inipath_var.set(dir_path)
+    
+    def add_game(self):
+        """Add a new MAME game entry."""
+        entry = MameGameEntry(self, self.games_frame, self.app, self.remove_game)
+        self.game_entries.append(entry)
+        
+        # Update the canvas scroll region
+        self.scrollable_frame.update_idletasks()
+        self.entries_canvas.configure(scrollregion=self.entries_canvas.bbox("all"))
+    
+    def remove_game(self, entry):
+        """Remove a MAME game entry.
+        
+        Args:
+            entry: The MameGameEntry to remove
+        """
+        if entry in self.game_entries:
+            self.game_entries.remove(entry)
+        
+        # Update the canvas scroll region
+        self.scrollable_frame.update_idletasks()
+        self.entries_canvas.configure(scrollregion=self.entries_canvas.bbox("all"))
+    
+    def validate(self):
+        """Validate MAME configuration and game entries."""
+        if not self.use_mame_var.get():
+            return True
+        
+        # Validate MAME path
+        mame_path = self.path_var.get().strip()
+        if not mame_path:
+            messagebox.showerror(
+                "Invalid MAME Path", 
+                "Please enter the path to the MAME executable or directory."
+            )
+            return False
+        
+        if not os.path.exists(mame_path):
+            messagebox.showerror(
+                "Invalid MAME Path", 
+                "The specified MAME path does not exist."
+            )
+            return False
+        
+        # Validate inipath if provided
+        inipath = self.inipath_var.get().strip()
+        if inipath and not os.path.exists(inipath):
+            messagebox.showerror(
+                "Invalid INI Path", 
+                "The specified MAME INI path does not exist."
+            )
+            return False
+        
+        # If no games, that's fine
+        if not self.game_entries:
+            return True
+        
+        # Check for duplicate IDs
+        ids = [entry.id_var.get() for entry in self.game_entries]
+        if len(ids) != len(set(ids)):
+            messagebox.showerror(
+                "Duplicate IDs", 
+                "Each game must have a unique ID. Please fix any duplicates."
+            )
+            return False
+        
+        # Validate each entry
+        for entry in self.game_entries:
+            if not entry.validate():
+                return False
+        
+        return True
+    
+    def save_data(self):
+        """Save the MAME configuration and game entries."""
+        if self.use_mame_var.get():
+            self.app.user_config["mame_path"] = self.path_var.get().strip()
+            
+            if self.inipath_var.get().strip():
+                self.app.user_config["mame_inipath"] = self.inipath_var.get().strip()
+            
+            # Save game entries
+            mame_games = {}
+            for entry in self.game_entries:
+                game_data = entry.get_data()
+                if game_data["rom"]:  # Only save games with a ROM
+                    mame_games[game_data["id"]] = game_data
+            
+            if mame_games:
+                self.app.user_config["mame_games"] = mame_games 
