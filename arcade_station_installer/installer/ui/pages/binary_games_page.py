@@ -274,7 +274,7 @@ class BinaryGamesPage(BasePage):
         intro_text = ttk.Label(
             main_frame,
             text="Add games that are launched directly from executable files. "
-                 "These can include OpenITG, NotITG, DDR A/A20, or any other "
+                 "These can include OpenITG, NotITG, DDR Grand Prix, or any other "
                  "standalone game.",
             wraplength=500,
             justify="left"
