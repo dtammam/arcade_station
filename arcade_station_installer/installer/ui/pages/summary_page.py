@@ -171,16 +171,7 @@ class SummaryPage(BasePage):
         self.summary_text.insert(tk.END, f"Platform: {platform}\n")
         
         if self.app.install_manager.is_windows:
-            self.summary_text.insert(tk.END, f"Kiosk Mode: {'Enabled' if self.app.user_config.get('enable_kiosk_mode', False) else 'Disabled'}\n")
-            
-            if self.app.user_config.get('enable_kiosk_mode', False):
-                self.summary_text.insert(tk.END, "Kiosk Mode Settings:\n")
-                self.summary_text.insert(tk.END, f"  - Username: {self.app.user_config.get('kiosk_username', '')}\n")
-                self.summary_text.insert(tk.END, f"  - Auto Login: {'Yes' if self.app.user_config.get('kiosk_auto_login', False) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Replace Shell: {'Yes' if self.app.user_config.get('kiosk_replace_shell', False) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Disable Task Manager: {'Yes' if self.app.user_config.get('kiosk_disable_task_manager', False) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Hide Cursor: {'Yes' if self.app.user_config.get('kiosk_hide_cursor', False) else 'No'}\n")
-                self.summary_text.insert(tk.END, "\n")
+            self.summary_text.insert(tk.END, f"Kiosk Mode: {'Enabled' if self.app.user_config.get('kiosk_mode', False) else 'Disabled'}\n")
             
             startup_options = []
             if self.app.user_config.get("add_to_startup", False):
@@ -456,24 +447,6 @@ class SummaryPage(BasePage):
                 
                 if "maintenance_password" in advanced:
                     self.summary_text.insert(tk.END, "  - Maintenance Password: [Set]\n")
-                
-                if "maintenance_hotkey" in advanced:
-                    self.summary_text.insert(tk.END, f"  - Maintenance Hotkey: {advanced['maintenance_hotkey']}\n")
-                
-                if "exit_hotkey" in advanced:
-                    self.summary_text.insert(tk.END, f"  - Exit Hotkey: {advanced['exit_hotkey']}\n")
-                
-                if "frontend_timeout" in advanced:
-                    self.summary_text.insert(tk.END, f"  - Frontend Timeout: {advanced['frontend_timeout']} seconds\n")
-                
-                if "maintenance_password_hash" in advanced:
-                    self.summary_text.insert(tk.END, "  - Maintenance Password: [Securely Stored]\n")
-                
-                if "custom_scripts_enabled" in advanced and advanced["custom_scripts_enabled"]:
-                    self.summary_text.insert(tk.END, "  - Custom Scripts: Enabled\n")
-                
-                if "scripts_directory" in advanced:
-                    self.summary_text.insert(tk.END, f"  - Scripts Directory: {advanced['scripts_directory']}\n")
                 
                 self.summary_text.insert(tk.END, "\n")
             

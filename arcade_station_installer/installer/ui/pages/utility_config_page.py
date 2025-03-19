@@ -4,7 +4,6 @@ Utility configuration page for the Arcade Station Installer
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-import hashlib
 
 from .base_page import BasePage
 
@@ -527,14 +526,7 @@ class UtilityConfigPage(BasePage):
         
         # Add password if enabled
         if self.use_password_var.get():
-            # Generate a salt and hash the password
-            salt = os.urandom(16).hex()
-            password = self.password_var.get()
-            hashed_pw = hashlib.sha256((password + salt).encode()).hexdigest()
-            
-            # Store the salt and hash, not the plaintext password
-            utilities_config["advanced"]["maintenance_password_hash"] = hashed_pw
-            utilities_config["advanced"]["maintenance_password_salt"] = salt
+            utilities_config["advanced"]["maintenance_password"] = self.password_var.get()
         
         # Add custom scripts if enabled
         if self.use_scripts_var.get():

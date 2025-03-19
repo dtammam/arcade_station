@@ -5,7 +5,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import os
 import platform
-import hashlib
 
 from .base_page import BasePage
 
@@ -68,14 +67,6 @@ class KioskModePage(BasePage):
         autologin_frame = ttk.Frame(self.kiosk_settings)
         autologin_frame.pack(fill="x", pady=5)
         
-        self.auto_login_var = tk.BooleanVar(value=True)
-        auto_login = ttk.Checkbutton(
-            autologin_frame,
-            text="Enable Auto-login",
-            variable=self.auto_login_var
-        )
-        auto_login.pack(anchor="w")
-        
         username_label = ttk.Label(
             autologin_frame,
             text="Username:",
@@ -111,26 +102,6 @@ class KioskModePage(BasePage):
         )
         password_entry.pack(side="left", fill="x", expand=True)
         
-        # Additional kiosk options
-        options_frame = ttk.Frame(self.kiosk_settings)
-        options_frame.pack(fill="x", pady=5)
-        
-        self.disable_task_manager_var = tk.BooleanVar(value=True)
-        disable_task_manager = ttk.Checkbutton(
-            options_frame,
-            text="Disable Task Manager",
-            variable=self.disable_task_manager_var
-        )
-        disable_task_manager.pack(anchor="w")
-        
-        self.hide_cursor_var = tk.BooleanVar(value=True)
-        hide_cursor = ttk.Checkbutton(
-            options_frame,
-            text="Hide Mouse Cursor",
-            variable=self.hide_cursor_var
-        )
-        hide_cursor.pack(anchor="w")
-        
         # Explorer shell options
         shell_frame = ttk.Frame(self.kiosk_settings)
         shell_frame.pack(fill="x", pady=10)
@@ -160,8 +131,7 @@ class KioskModePage(BasePage):
         
         security_warning = ttk.Label(
             warning_frame,
-            text="Warning: Enabling auto-login will use your password to configure the Windows registry. "
-                 "The password is used only during installation and is not stored in the application. "
+            text="Warning: Enabling auto-login will store your password in the Windows registry. "
                  "For security, consider using a dedicated account for your arcade system.",
             wraplength=500,
             foreground="red",
@@ -209,15 +179,5 @@ class KioskModePage(BasePage):
         
         if self.enable_kiosk_var.get():
             self.app.user_config["kiosk_username"] = self.username_var.get().strip()
-            
-            # Temporarily store password for Windows registry setup during installation
-            # This will be used once during installation and then discarded
-            if self.password_var.get() and self.auto_login_var.get():
-                self.app.user_config["kiosk_password"] = self.password_var.get()
-            
-            self.app.user_config["kiosk_auto_login"] = self.auto_login_var.get()
-            self.app.user_config["kiosk_disable_task_manager"] = self.disable_task_manager_var.get()
-            self.app.user_config["kiosk_hide_cursor"] = self.hide_cursor_var.get()
-            self.app.user_config["kiosk_replace_shell"] = self.replace_shell_var.get()
-            
-        return True 
+            self.app.user_config["kiosk_password"] = self.password_var.get()
+            self.app.user_config["kiosk_replace_shell"] = self.replace_shell_var.get() 
