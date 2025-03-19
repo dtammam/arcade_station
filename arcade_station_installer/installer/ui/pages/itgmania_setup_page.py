@@ -27,7 +27,7 @@ class ITGManiaSetupPage(BasePage):
         # Introduction
         intro_text = ttk.Label(
             main_frame,
-            text="ITGMania is a popular dance game simulator. Arcade Station can integrate "
+            text="ITGMania is a popular rhythm game simulator. Arcade Station can integrate "
                  "deeply with ITGMania to provide enhanced features, such as displaying "
                  "song-specific information on the marquee display.",
             wraplength=500,
@@ -113,27 +113,6 @@ class ITGManiaSetupPage(BasePage):
             command=self.toggle_default_image
         )
         use_default_image.pack(anchor="w", pady=5)
-        
-        # Noteskin options
-        noteskin_frame = ttk.Frame(self.itgmania_frame)
-        noteskin_frame.pack(fill="x", pady=10)
-        
-        noteskin_label = ttk.Label(
-            noteskin_frame,
-            text="Default Noteskin:",
-            width=15
-        )
-        noteskin_label.pack(side="left", padx=(0, 5))
-        
-        self.noteskin_var = tk.StringVar(value="default")
-        noteskin_options = ttk.Combobox(
-            noteskin_frame,
-            textvariable=self.noteskin_var,
-            values=["default", "cel", "cyber", "lambda", "cmd-funky", "rhythm"],
-            width=15,
-            state="readonly"
-        )
-        noteskin_options.pack(side="left")
         
         # Dynamic marquee integration
         self.marquee_frame = ttk.LabelFrame(
@@ -306,5 +285,4 @@ class ITGManiaSetupPage(BasePage):
                 # Use custom image
                 self.app.user_config["itgmania_image"] = self.image_var.get().strip()
             
-            self.app.user_config["itgmania_noteskin"] = self.noteskin_var.get()
             self.app.user_config["install_itgmania_module"] = self.install_module_var.get() 

@@ -12,14 +12,34 @@ class DisplayConfigPage(BasePage):
     
     def __init__(self, container, app):
         """Initialize the display configuration page."""
+        # Initialize monitor count before calling super().__init__
+        # because the base class will call create_widgets()
+        self.monitor_count = self.get_monitor_count_safe(app)
+        
+        # Now call the parent constructor which will call create_widgets()
         super().__init__(container, app)
         self.set_title(
             "Display Configuration",
             "Configure dynamic marquee and display settings"
         )
-        
-        # Store available monitors
-        self.monitor_count = self.get_monitor_count()
+    
+    def get_monitor_count_safe(self, app):
+        """Get the number of monitors connected to the system safely.
+        This method is called before __init__ is completed, so we pass app as a parameter.
+        """
+        try:
+            # Try more advanced detection if available
+            try:
+                import screeninfo
+                monitors = screeninfo.get_monitors()
+                return len(monitors)
+            except (ImportError, AttributeError):
+                # Fallback: assume at least one monitor
+                return max(1, app.install_manager.get_monitor_count())
+                
+        except Exception:
+            # Default to 1 if detection fails
+            return 1
     
     def get_monitor_count(self):
         """Get the number of monitors connected to the system."""
@@ -44,6 +64,10 @@ class DisplayConfigPage(BasePage):
     
     def create_widgets(self):
         """Create page-specific widgets."""
+        # Make absolutely sure monitor_count is set
+        if not hasattr(self, 'monitor_count') or self.monitor_count < 1:
+            self.monitor_count = 1
+            
         main_frame = ttk.Frame(self.content_frame)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
@@ -87,10 +111,15 @@ class DisplayConfigPage(BasePage):
         
         self.monitor_var = tk.StringVar(value="1")
         
+        # Generate monitor values
+        monitor_values = [str(i+1) for i in range(self.monitor_count)]
+        if not monitor_values:  # Ensure there's at least one value
+            monitor_values = ["1"]
+            
         monitor_options = ttk.Combobox(
             monitor_frame,
             textvariable=self.monitor_var,
-            values=[str(i+1) for i in range(self.monitor_count)],
+            values=monitor_values,
             width=5,
             state="readonly"
         )
@@ -120,7 +149,7 @@ class DisplayConfigPage(BasePage):
         color_options = ttk.Combobox(
             color_frame,
             textvariable=self.color_var,
-            values=["black", "white", "gray", "blue", "red", "green"],
+            values=["black", "white", "gray", "blue", "red", "green", "transparent"],
             width=10,
             state="readonly"
         )

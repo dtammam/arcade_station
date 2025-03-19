@@ -246,12 +246,15 @@ class MAMEGamesPage(BasePage):
     
     def __init__(self, container, app):
         """Initialize the MAME games page."""
+        # Initialize game_entries before calling super().__init__
+        # because the base class will call create_widgets()
+        self.game_entries = []
+        
         super().__init__(container, app)
         self.set_title(
             "MAME Games Setup",
             "Configure MAME-based arcade games"
         )
-        self.game_entries = []
     
     def create_widgets(self):
         """Create page-specific widgets."""

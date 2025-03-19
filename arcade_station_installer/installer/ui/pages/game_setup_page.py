@@ -118,14 +118,14 @@ class GameSetupPage(BasePage):
         )
         process_text.pack(fill="x", pady=10)
         
-        # Does the user have games already?
-        self.has_games_var = tk.BooleanVar(value=True)
-        has_games = ttk.Checkbutton(
+        # Configuration checkbox
+        self.configure_games_var = tk.BooleanVar(value=True)
+        configure_games_check = ttk.Checkbutton(
             main_frame,
             text="I have games to configure now",
-            variable=self.has_games_var
+            variable=self.configure_games_var
         )
-        has_games.pack(anchor="w", pady=10)
+        configure_games_check.pack(anchor="w", pady=10)
         
         # Help text
         help_text = ttk.Label(
@@ -141,7 +141,7 @@ class GameSetupPage(BasePage):
     def on_next(self):
         """Handle next button click."""
         # If the user doesn't have games to configure now, skip the game setup pages
-        if not self.has_games_var.get():
+        if not self.configure_games_var.get():
             # Find the control config page index
             control_index = self.find_control_config_page_index()
             if control_index != -1:
@@ -166,4 +166,4 @@ class GameSetupPage(BasePage):
     
     def save_data(self):
         """Save game setup data."""
-        self.app.user_config["configure_games"] = self.has_games_var.get() 
+        self.app.user_config["configure_games"] = self.configure_games_var.get() 

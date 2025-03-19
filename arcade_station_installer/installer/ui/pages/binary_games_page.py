@@ -255,12 +255,15 @@ class BinaryGamesPage(BasePage):
     
     def __init__(self, container, app):
         """Initialize the binary games page."""
+        # Initialize game_entries before calling super().__init__
+        # because the base class will call create_widgets()
+        self.game_entries = []
+        
         super().__init__(container, app)
         self.set_title(
             "Binary Games Setup",
             "Configure executable-based games"
         )
-        self.game_entries = []
     
     def create_widgets(self):
         """Create page-specific widgets."""
