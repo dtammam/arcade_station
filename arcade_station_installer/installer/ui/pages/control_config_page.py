@@ -23,19 +23,44 @@ class ControlConfigPage(BasePage):
         main_frame = ttk.Frame(self.content_frame)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
+        # Create notebook for tabs
+        control_notebook = ttk.Notebook(main_frame)
+        control_notebook.pack(fill="both", expand=True)
+        
+        # Create tabs
+        self.devices_tab = ttk.Frame(control_notebook)
+        self.key_bindings_tab = ttk.Frame(control_notebook)
+        self.process_tab = ttk.Frame(control_notebook)
+        
+        # Add tabs to notebook
+        control_notebook.add(self.devices_tab, text="Input Devices")
+        control_notebook.add(self.key_bindings_tab, text="Key Bindings")
+        control_notebook.add(self.process_tab, text="Process Management")
+        
+        # Set up the devices tab
+        self._setup_devices_tab()
+        
+        # Set up the key bindings tab
+        self._setup_key_bindings_tab()
+        
+        # Set up the process management tab
+        self._setup_process_tab()
+    
+    def _setup_devices_tab(self):
+        """Set up the input devices tab."""
         # Introduction
         intro_text = ttk.Label(
-            main_frame,
+            self.devices_tab,
             text="Configure control options for Arcade Station. "
                  "This includes arcade controls, gamepads, and keyboard mapping.",
             wraplength=500,
             justify="left"
         )
-        intro_text.pack(anchor="w", pady=(0, 15))
+        intro_text.pack(anchor="w", pady=(10, 15))
         
         # Controls configuration frame
         controls_frame = ttk.LabelFrame(
-            main_frame,
+            self.devices_tab,
             text="Input Devices",
             padding=(10, 5)
         )
@@ -49,9 +74,8 @@ class ControlConfigPage(BasePage):
             device_types_frame,
             text="I will use:",
             font=("Arial", 10, "bold"),
-            anchor="w"
         )
-        device_label.pack(fill="x", padx=5, pady=5)
+        device_label.pack(anchor="w", pady=(0, 5))
         
         # Arcade controls
         self.use_arcade_var = tk.BooleanVar(value=True)
@@ -85,7 +109,7 @@ class ControlConfigPage(BasePage):
         
         # Arcade controls configuration frame
         self.arcade_frame = ttk.LabelFrame(
-            main_frame,
+            self.devices_tab,
             text="Arcade Controls Configuration",
             padding=(10, 5)
         )
@@ -209,7 +233,7 @@ class ControlConfigPage(BasePage):
         
         # Gamepad configuration frame
         self.gamepad_frame = ttk.LabelFrame(
-            main_frame,
+            self.devices_tab,
             text="Gamepad Configuration",
             padding=(10, 5)
         )
@@ -258,7 +282,7 @@ class ControlConfigPage(BasePage):
         
         # Keyboard configuration frame
         self.keyboard_frame = ttk.LabelFrame(
-            main_frame,
+            self.devices_tab,
             text="Keyboard Configuration",
             padding=(10, 5)
         )
@@ -332,6 +356,186 @@ class ControlConfigPage(BasePage):
         self.toggle_advanced_options()
         self.toggle_standard_mappings()
     
+    def _setup_key_bindings_tab(self):
+        """Set up the key bindings tab."""
+        # Introduction
+        intro_text = ttk.Label(
+            self.key_bindings_tab,
+            text="Configure global hotkeys for Arcade Station. These keys will work from anywhere "
+                 "in the system, including during gameplay.",
+            wraplength=500,
+            justify="left"
+        )
+        intro_text.pack(anchor="w", pady=(10, 15))
+        
+        # Keybindings frame
+        keybindings_frame = ttk.LabelFrame(
+            self.key_bindings_tab,
+            text="Global Hotkeys",
+            padding=(10, 5)
+        )
+        keybindings_frame.pack(fill="x", pady=10)
+        
+        # Reset to Pegasus key binding
+        reset_frame = ttk.Frame(keybindings_frame)
+        reset_frame.pack(fill="x", pady=5)
+        
+        reset_label = ttk.Label(
+            reset_frame,
+            text="Kill all games and reset to Pegasus:",
+            width=30,
+            anchor="w"
+        )
+        reset_label.pack(side="left", padx=(0, 5))
+        
+        self.kill_key_var = tk.StringVar(value="ctrl+q")
+        reset_entry = ttk.Entry(
+            reset_frame,
+            textvariable=self.kill_key_var,
+            width=15
+        )
+        reset_entry.pack(side="left")
+        
+        # Screenshot key binding
+        screenshot_frame = ttk.Frame(keybindings_frame)
+        screenshot_frame.pack(fill="x", pady=5)
+        
+        screenshot_label = ttk.Label(
+            screenshot_frame,
+            text="Take screenshot:",
+            width=30,
+            anchor="w"
+        )
+        screenshot_label.pack(side="left", padx=(0, 5))
+        
+        self.screenshot_key_var = tk.StringVar(value="ctrl+p")
+        screenshot_entry = ttk.Entry(
+            screenshot_frame,
+            textvariable=self.screenshot_key_var,
+            width=15
+        )
+        screenshot_entry.pack(side="left")
+        
+        # Streaming key binding
+        streaming_frame = ttk.Frame(keybindings_frame)
+        streaming_frame.pack(fill="x", pady=5)
+        
+        streaming_label = ttk.Label(
+            streaming_frame,
+            text="Start/stop streaming:",
+            width=30,
+            anchor="w"
+        )
+        streaming_label.pack(side="left", padx=(0, 5))
+        
+        self.streaming_key_var = tk.StringVar(value="ctrl+b")
+        streaming_entry = ttk.Entry(
+            streaming_frame,
+            textvariable=self.streaming_key_var,
+            width=15
+        )
+        streaming_entry.pack(side="left")
+        
+        # Key format help
+        help_text = ttk.Label(
+            keybindings_frame,
+            text="Format: 'ctrl+key', 'alt+key', 'shift+key', or just 'key'.",
+            font=("Arial", 9),
+            foreground="#555555"
+        )
+        help_text.pack(anchor="w", pady=5)
+    
+    def _setup_process_tab(self):
+        """Set up the process management tab."""
+        # Introduction
+        intro_text = ttk.Label(
+            self.process_tab,
+            text="Configure which processes should be automatically terminated when returning to "
+                 "the Pegasus frontend.",
+            wraplength=500,
+            justify="left"
+        )
+        intro_text.pack(anchor="w", pady=(10, 15))
+        
+        # Process management frame
+        process_frame = ttk.LabelFrame(
+            self.process_tab,
+            text="Processes to Kill",
+            padding=(10, 5)
+        )
+        process_frame.pack(fill="x", pady=10)
+        
+        # Text area for process names
+        processes_label = ttk.Label(
+            process_frame,
+            text="Enter process names to kill (one per line):",
+            anchor="w"
+        )
+        processes_label.pack(anchor="w", pady=(5, 0))
+        
+        # Default process list
+        default_processes = """ITGmania.exe
+OpenITG.exe
+In The Groove.exe
+NotITG-v4.2.0.exe
+spice.exe
+mame.exe
+obs64.exe
+i_view64.exe"""
+        
+        # Create a text widget with scrollbar
+        text_frame = ttk.Frame(process_frame)
+        text_frame.pack(fill="both", expand=True, pady=5)
+        
+        scrollbar = ttk.Scrollbar(text_frame)
+        scrollbar.pack(side="right", fill="y")
+        
+        self.processes_text = tk.Text(
+            text_frame,
+            height=10,
+            width=50,
+            yscrollcommand=scrollbar.set
+        )
+        self.processes_text.pack(side="left", fill="both", expand=True)
+        self.processes_text.insert("1.0", default_processes)
+        
+        scrollbar.config(command=self.processes_text.yview)
+        
+        # Help text
+        help_text = ttk.Label(
+            process_frame,
+            text="These processes will be terminated when returning to Pegasus or when using the "
+                 "kill hotkey.",
+            font=("Arial", 9),
+            foreground="#555555",
+            wraplength=450
+        )
+        help_text.pack(anchor="w", pady=5)
+
+    def on_enter(self):
+        """Called when the page is shown."""
+        # Pre-populate fields if in reconfiguration mode
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            # Load key bindings if available
+            if 'key_listener' in self.app.user_config:
+                key_config = self.app.user_config['key_listener']
+                if 'keys' in key_config:
+                    keys = key_config['keys']
+                    if 'kill_all_and_reset_pegasus' in keys:
+                        self.kill_key_var.set(keys['kill_all_and_reset_pegasus'])
+                    if 'take_screenshot' in keys:
+                        self.screenshot_key_var.set(keys['take_screenshot'])
+                    if 'start_streaming' in keys:
+                        self.streaming_key_var.set(keys['start_streaming'])
+            
+            # Load processes to kill
+            if 'processes_to_kill' in self.app.user_config:
+                proc_config = self.app.user_config['processes_to_kill']
+                if 'process_names' in proc_config:
+                    process_names = proc_config['process_names']
+                    self.processes_text.delete("1.0", tk.END)
+                    self.processes_text.insert("1.0", "\n".join(process_names))
+
     def toggle_arcade_options(self):
         """Show or hide arcade control options based on checkbox state."""
         if self.use_arcade_var.get():
@@ -479,4 +683,23 @@ class ControlConfigPage(BasePage):
             controls_config["keyboard"] = keyboard_config
         
         # Save to user config
-        self.app.user_config["controls"] = controls_config 
+        self.app.user_config["controls"] = controls_config
+        
+        # Save key bindings
+        key_config = {
+            "keys": {
+                "kill_all_and_reset_pegasus": self.kill_key_var.get().strip(),
+                "take_screenshot": self.screenshot_key_var.get().strip(),
+                "start_streaming": self.streaming_key_var.get().strip()
+            }
+        }
+        self.app.user_config["key_listener"] = key_config
+        
+        # Save processes to kill
+        process_text = self.processes_text.get("1.0", tk.END).strip()
+        process_names = [p.strip() for p in process_text.split("\n") if p.strip()]
+        
+        process_config = {
+            "process_names": process_names
+        }
+        self.app.user_config["processes_to_kill"] = process_config 

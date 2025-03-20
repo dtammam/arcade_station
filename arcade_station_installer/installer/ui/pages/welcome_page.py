@@ -74,17 +74,30 @@ class WelcomePage(BasePage):
         # Installation mode radio buttons
         self.install_mode_var = tk.StringVar(value="new")
         
-        self.new_install_radio = ttk.Radiobutton(
+        self.install_options_frame = ttk.LabelFrame(
             self.status_frame,
+            text="Installation Options",
+            padding=10
+        )
+        
+        self.new_install_radio = ttk.Radiobutton(
+            self.install_options_frame,
             text="New Installation",
             value="new",
             variable=self.install_mode_var
         )
         
         self.reset_install_radio = ttk.Radiobutton(
-            self.status_frame,
+            self.install_options_frame,
             text="Reset Existing Installation",
             value="reset",
+            variable=self.install_mode_var
+        )
+        
+        self.reconfigure_install_radio = ttk.Radiobutton(
+            self.install_options_frame,
+            text="Reconfigure Existing Installation",
+            value="reconfigure",
             variable=self.install_mode_var
         )
         
@@ -94,36 +107,59 @@ class WelcomePage(BasePage):
         """Called when the page is shown."""
         # Check if Arcade Station is already installed
         is_installed = self.app.is_installed
+        install_path = self.app.install_manager.get_current_install_path() if is_installed else None
         
         if is_installed:
             self.status_label.config(
-                text="Arcade Station is already installed on this system. "
-                     "You can either reset specific settings or perform a new installation."
+                text=f"Arcade Station is already installed at:\n{install_path}\n\n"
+                     f"Please select one of the following options:"
             )
             
-            # Show installation mode options
-            self.new_install_radio.pack(anchor="w", padx=100, pady=5)
-            self.reset_install_radio.pack(anchor="w", padx=100, pady=5)
+            # Show installation options frame
+            self.install_options_frame.pack(fill="x", pady=10)
             
-            # Default to reset mode
-            self.install_mode_var.set("reset")
+            # Show installation mode options
+            self.new_install_radio.pack(anchor="w", pady=5)
+            self.reset_install_radio.pack(anchor="w", pady=5)
+            self.reconfigure_install_radio.pack(anchor="w", pady=5)
+            
+            # Default to reconfigure mode
+            self.install_mode_var.set("reconfigure")
         else:
             self.status_label.config(
                 text="Arcade Station is not currently installed on this system. "
                      "This wizard will guide you through the installation process."
             )
             
-            # Hide installation mode options
-            self.new_install_radio.pack_forget()
-            self.reset_install_radio.pack_forget()
+            # Hide installation options frame
+            self.install_options_frame.pack_forget()
+            
+            # Set to new installation
+            self.install_mode_var.set("new")
     
     def on_next(self):
         """Handle next button click."""
-        # Set reset mode based on selection
-        if self.app.is_installed and self.install_mode_var.get() == "reset":
-            self.app.set_reset_mode(True)
+        # Set application mode based on selection
+        selected_mode = self.install_mode_var.get()
+        
+        if self.app.is_installed:
+            if selected_mode == "reset":
+                self.app.set_reset_mode(True)
+                # Pre-fill the install path with existing installation
+                self.app.user_config["install_path"] = self.app.install_manager.get_current_install_path()
+            elif selected_mode == "reconfigure":
+                self.app.set_reset_mode(False)
+                # Set reconfigure mode (added to app)
+                self.app.is_reconfigure_mode = True
+                # Pre-fill the install path with existing installation
+                self.app.user_config["install_path"] = self.app.install_manager.get_current_install_path()
+            else:  # new installation
+                self.app.set_reset_mode(False)
+                self.app.is_reconfigure_mode = False
         else:
+            # New installation
             self.app.set_reset_mode(False)
+            self.app.is_reconfigure_mode = False
         
         # Decide which pages to include in the flow
         self.app.decide_next_page_flow()

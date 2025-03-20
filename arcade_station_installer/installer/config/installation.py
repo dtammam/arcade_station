@@ -188,36 +188,38 @@ class InstallationManager:
             return 1
     
     def perform_installation(self, config: Dict[str, Any]) -> bool:
-        """Perform the Arcade Station installation.
+        """Perform the installation.
         
         Args:
             config: User configuration from the wizard
             
         Returns:
-            bool: True if successful, False otherwise
+            bool: True if installation successful, False otherwise
         """
         try:
-            self.logger.info("Starting Arcade Station installation")
-            
-            # Get the installation path
             install_path = config.get("install_path")
             if not install_path:
                 self.logger.error("No installation path specified")
                 return False
             
-            # Create the installation directory if it doesn't exist
-            if not os.path.isdir(install_path):
-                os.makedirs(install_path, exist_ok=True)
-                self.logger.info(f"Created installation directory: {install_path}")
+            self.logger.info(f"Starting installation to {install_path}")
             
-            # Create the config directory
-            config_dir = os.path.join(install_path, "config")
-            os.makedirs(config_dir, exist_ok=True)
+            # Create installation directory structure
+            os.makedirs(install_path, exist_ok=True)
             
-            # Create the source structure
+            # Get source directory (where our project files are)
             src_dir = os.path.join(install_path, "src")
             os.makedirs(src_dir, exist_ok=True)
             
+            # Create config directory
+            config_dir = os.path.join(install_path, "config")
+            os.makedirs(config_dir, exist_ok=True)
+            
+            # Create venv directory
+            venv_dir = os.path.join(install_path, ".venv")
+            os.makedirs(venv_dir, exist_ok=True)
+            
+            # Create core directories
             arcade_station_dir = os.path.join(src_dir, "arcade_station")
             os.makedirs(arcade_station_dir, exist_ok=True)
             
@@ -233,6 +235,9 @@ class InstallationManager:
             # Create the assets directory
             assets_dir = os.path.join(install_path, "assets")
             os.makedirs(os.path.join(assets_dir, "images", "banners"), exist_ok=True)
+            
+            # Copy project files to installation directory
+            self._copy_project_files(install_path)
             
             # Generate configuration files
             self._generate_config_files(config, config_dir)
@@ -254,6 +259,72 @@ class InstallationManager:
         except Exception as e:
             self.logger.error(f"Error during installation: {str(e)}", exc_info=True)
             return False
+
+    def _copy_project_files(self, install_path: str) -> None:
+        """Copy project files to the installation directory.
+        
+        Args:
+            install_path: Path to install directory
+        """
+        try:
+            import shutil
+            from pathlib import Path
+            
+            # Get the current directory (where the installer is running from)
+            current_dir = Path(__file__).resolve().parent.parent.parent.parent
+            
+            # Define directories to copy
+            dirs_to_copy = [
+                "src/arcade_station",
+                "config",
+                "assets"
+            ]
+            
+            # Copy each directory
+            for dir_path in dirs_to_copy:
+                src_path = current_dir / dir_path
+                dst_path = Path(install_path) / dir_path
+                
+                if src_path.exists():
+                    self.logger.info(f"Copying {dir_path} to {dst_path}")
+                    
+                    # Make sure the destination parent directory exists
+                    dst_path.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    # Remove destination if it exists
+                    if dst_path.exists() and dst_path.is_dir():
+                        shutil.rmtree(dst_path)
+                    
+                    # Copy directory
+                    shutil.copytree(src_path, dst_path)
+                else:
+                    self.logger.warning(f"Source directory not found: {src_path}")
+            
+            # Copy pegasus-fe directory if it exists
+            pegasus_src = current_dir / "src/pegasus-fe"
+            pegasus_dst = Path(install_path) / "src/pegasus-fe"
+            
+            if pegasus_src.exists():
+                self.logger.info(f"Copying pegasus-fe to {pegasus_dst}")
+                
+                # Make sure the destination parent directory exists
+                pegasus_dst.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Remove destination if it exists
+                if pegasus_dst.exists() and pegasus_dst.is_dir():
+                    shutil.rmtree(pegasus_dst)
+                
+                # Copy directory
+                shutil.copytree(pegasus_src, pegasus_dst)
+            else:
+                # Create the directory structure if source doesn't exist
+                pegasus_dst.mkdir(parents=True, exist_ok=True)
+                (pegasus_dst / "config" / "metafiles").mkdir(parents=True, exist_ok=True)
+                
+            self.logger.info("Project files copied successfully")
+        except Exception as e:
+            self.logger.error(f"Error copying project files: {str(e)}", exc_info=True)
+            raise
     
     def _generate_config_files(self, config: Dict[str, Any], config_dir: str) -> None:
         """Generate the configuration files.
@@ -263,9 +334,17 @@ class InstallationManager:
             config_dir: Directory to write the configuration files
         """
         # Generate default_config.toml
+        log_dir = os.path.join(config_dir, "logs")
+        if config.get("log_dir"):
+            log_dir = config.get("log_dir")
+            
+        # Create the log directory if it doesn't exist
+        os.makedirs(log_dir, exist_ok=True)
+            
         default_config = {
             "default": {
-                "log_dir": os.path.join(config_dir, "logs")
+                "log_dir": log_dir,
+                "log_level": config.get("log_level", "INFO")
             }
         }
         self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)

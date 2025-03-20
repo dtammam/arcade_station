@@ -259,6 +259,36 @@ class ITGManiaSetupPage(BasePage):
         
         return True
     
+    def on_enter(self):
+        """Called when the page is shown."""
+        # Pre-populate fields if in reconfiguration mode
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            if 'installed_games' in self.app.user_config:
+                # Check if ITGMania is in installed games
+                installed_games = self.app.user_config['installed_games']
+                if 'games' in installed_games and 'itgmania' in installed_games['games']:
+                    itgmania_config = installed_games['games']['itgmania']
+                    
+                    # Enable ITGMania checkbox
+                    self.use_itgmania_var.set(True)
+                    
+                    # Set path
+                    if 'path' in itgmania_config:
+                        self.path_var.set(itgmania_config['path'])
+                    
+                    # Set banner image
+                    if 'banner' in itgmania_config:
+                        self.use_default_image_var.set(False)
+                        self.image_var.set(itgmania_config['banner'])
+                    
+                    # Set module installation
+                    if 'display_module_installed' in itgmania_config:
+                        self.install_module_var.set(itgmania_config['display_module_installed'])
+                    
+                    # Update UI state
+                    self.toggle_itgmania_settings()
+                    self.toggle_default_image()
+
     def save_data(self):
         """Save ITGMania settings."""
         self.app.user_config["itgmania"] = {
@@ -266,13 +296,33 @@ class ITGManiaSetupPage(BasePage):
         }
         
         if self.use_itgmania_var.get():
+            # Store basic ITGMania config for internal use
             self.app.user_config["itgmania"].update({
                 "path": self.path_var.get().strip(),
                 "use_default_image": self.use_default_image_var.get(),
                 "install_marquee_module": self.install_module_var.get()
             })
             
+            # Determine which image to use
+            image_path = ""
             if self.use_default_image_var.get() and self.default_image_path:
+                image_path = self.default_image_path
                 self.app.user_config["itgmania"]["default_image_path"] = self.default_image_path
             elif not self.use_default_image_var.get() and self.image_var.get().strip():
-                self.app.user_config["itgmania"]["custom_image"] = self.image_var.get().strip() 
+                image_path = self.image_var.get().strip()
+                self.app.user_config["itgmania"]["custom_image"] = image_path
+            
+            # Create/update installed_games.toml structure
+            if "installed_games" not in self.app.user_config:
+                self.app.user_config["installed_games"] = {"games": {}}
+            
+            # Add ITGMania to installed games
+            self.app.user_config["installed_games"]["games"]["itgmania"] = {
+                "display_name": "ITGMania",
+                "path": self.path_var.get().strip(),
+                "type": "binary",
+                "launch_args": "",
+                "banner": image_path,
+                "display_module_installed": self.install_module_var.get(),
+                "enabled": True
+            } 

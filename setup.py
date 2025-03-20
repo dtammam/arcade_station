@@ -20,5 +20,5 @@ setup(
     author_email="info@arcadestation.example.com",
     description="Installer for Arcade Station game launcher",
     keywords="arcade, games, installer",
-    python_requires=">=3.12.9",
+    python_requires=">=3.8",
 ) 

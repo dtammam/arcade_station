@@ -265,6 +265,36 @@ class DisplayConfigPage(BasePage):
         
         return True
     
+    def on_enter(self):
+        """Called when the page is shown."""
+        # Pre-populate fields if in reconfiguration mode
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            if 'display_config' in self.app.user_config:
+                config = self.app.user_config['display_config']
+                
+                # Set dynamic marquee state
+                if 'marquee' in config and 'enabled' in config['marquee']:
+                    self.enable_marquee_var.set(config['marquee']['enabled'])
+                    
+                    # Set monitor number
+                    if 'monitor' in config['marquee']:
+                        self.monitor_var.set(str(config['marquee']['monitor']))
+                    
+                    # Set background color
+                    if 'background_color' in config['marquee']:
+                        self.color_var.set(config['marquee']['background_color'])
+                    
+                    # Set default image
+                    if 'default_image' in config['marquee']:
+                        self.image_var.set(config['marquee']['default_image'])
+                
+                # Set ITGMania display state
+                if 'itgmania_display' in config and 'enabled' in config['itgmania_display']:
+                    self.enable_itgmania_var.set(config['itgmania_display']['enabled'])
+                
+                # Update UI based on marquee state
+                self.toggle_marquee_options()
+
     def save_data(self):
         """Save display configuration settings."""
         self.app.user_config["use_dynamic_marquee"] = self.enable_marquee_var.get()
@@ -276,4 +306,22 @@ class DisplayConfigPage(BasePage):
             if self.image_var.get().strip():
                 self.app.user_config["default_marquee_image"] = self.image_var.get().strip()
             
-            self.app.user_config["enable_itgmania_display"] = self.enable_itgmania_var.get() 
+            self.app.user_config["enable_itgmania_display"] = self.enable_itgmania_var.get()
+        
+        # Create the display_config structure for the TOML file
+        display_config = {
+            "marquee": {
+                "enabled": self.enable_marquee_var.get(),
+                "monitor": int(self.monitor_var.get()) if self.enable_marquee_var.get() else 0,
+                "background_color": self.color_var.get(),
+                "default_image": self.image_var.get().strip() if self.enable_marquee_var.get() and self.image_var.get().strip() else ""
+            },
+            "itgmania_display": {
+                "enabled": self.enable_itgmania_var.get() if self.enable_marquee_var.get() else False,
+                "simfile_banner_enabled": True,
+                "song_background_enabled": True
+            }
+        }
+        
+        # Store the complete configuration
+        self.app.user_config["display_config"] = display_config 

@@ -173,6 +173,29 @@ class KioskModePage(BasePage):
         
         return True
     
+    def on_enter(self):
+        """Called when the page is shown."""
+        # Only load settings if on Windows
+        if platform.system().lower() != "windows":
+            return
+            
+        # Pre-populate fields if in reconfiguration mode
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            # Check for kiosk mode settings
+            if 'enable_kiosk_mode' in self.app.user_config:
+                self.enable_kiosk_var.set(self.app.user_config['enable_kiosk_mode'])
+                
+            if 'kiosk_username' in self.app.user_config:
+                self.username_var.set(self.app.user_config['kiosk_username'])
+            
+            # Don't pre-populate password for security reasons
+            
+            if 'kiosk_replace_shell' in self.app.user_config:
+                self.replace_shell_var.set(self.app.user_config['kiosk_replace_shell'])
+            
+            # Update UI state
+            self.toggle_kiosk_options()
+    
     def save_data(self):
         """Save kiosk mode settings."""
         self.app.user_config["enable_kiosk_mode"] = self.enable_kiosk_var.get()
