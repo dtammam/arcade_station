@@ -292,8 +292,9 @@ class ITGManiaSetupPage(BasePage):
         
         if self.use_itgmania_var.get():
             # Store basic ITGMania config for internal use
+            itgmania_path = self.path_var.get().strip()
             self.app.user_config["itgmania"].update({
-                "path": self.path_var.get().strip(),
+                "path": itgmania_path,
                 "use_default_image": self.use_default_image_var.get(),
                 "install_marquee_module": self.install_module_var.get()
             })
@@ -303,15 +304,54 @@ class ITGManiaSetupPage(BasePage):
             if self.use_default_image_var.get():
                 # Make sure we're using the asset in the installation directory
                 if "install_path" in self.app.user_config:
+                    # Define the path to the Simply Love banner in the assets directory
                     asset_path = os.path.join(
                         self.app.user_config["install_path"],
                         "assets", "images", "banners", "simply-love.png"
                     )
                     image_path = asset_path
                     self.app.user_config["itgmania"]["default_image_path"] = asset_path
+                    
+                    # Make sure the directory exists
+                    asset_dir = os.path.dirname(asset_path)
+                    os.makedirs(asset_dir, exist_ok=True)
+                    
+                    # If the default image doesn't exist yet, create an empty file 
+                    # (it will be properly copied during the installation process)
+                    if not os.path.exists(asset_path):
+                        try:
+                            with open(asset_path, 'w') as f:
+                                f.write("")
+                        except:
+                            pass
             elif not self.use_default_image_var.get() and self.image_var.get().strip():
-                image_path = self.image_var.get().strip()
-                self.app.user_config["itgmania"]["custom_image"] = image_path
+                custom_path = self.image_var.get().strip()
+                image_path = custom_path
+                self.app.user_config["itgmania"]["custom_image"] = custom_path
+                
+                # If custom image is selected, copy it to the assets directory for future use
+                if "install_path" in self.app.user_config and os.path.exists(custom_path):
+                    try:
+                        # Extract filename and create destination path
+                        filename = os.path.basename(custom_path)
+                        dest_path = os.path.join(
+                            self.app.user_config["install_path"],
+                            "assets", "images", "banners", filename
+                        )
+                        
+                        # Create directory if needed
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        
+                        # Copy the file if it's not already in the assets directory
+                        if custom_path != dest_path and not os.path.exists(dest_path):
+                            import shutil
+                            shutil.copy2(custom_path, dest_path)
+                            
+                            # Update the path to point to the copied file
+                            image_path = dest_path
+                            self.app.user_config["itgmania"]["custom_image"] = dest_path
+                    except Exception as e:
+                        print(f"Error copying custom image: {str(e)}")
             
             # Create/update installed_games.toml structure
             if "installed_games" not in self.app.user_config:
@@ -320,10 +360,22 @@ class ITGManiaSetupPage(BasePage):
             # Add ITGMania to installed games
             self.app.user_config["installed_games"]["games"]["itgmania"] = {
                 "display_name": "ITGMania",
-                "path": self.path_var.get().strip(),
+                "path": itgmania_path,
                 "type": "binary",
                 "launch_args": "",
                 "banner": image_path,
                 "display_module_installed": self.install_module_var.get(),
                 "enabled": True
+            }
+            
+            # IMPORTANT: Also add to binary_games which is used for metadata.pegasus.txt generation
+            if "binary_games" not in self.app.user_config:
+                self.app.user_config["binary_games"] = {}
+                
+            # Add ITGMania to binary games with the same format as other binary games
+            self.app.user_config["binary_games"]["itgmania"] = {
+                "id": "itgmania",
+                "display_name": "ITGMania",
+                "path": itgmania_path,
+                "banner": image_path
             } 

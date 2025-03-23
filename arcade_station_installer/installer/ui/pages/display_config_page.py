@@ -22,6 +22,15 @@ class DisplayConfigPage(BasePage):
             "Display Configuration",
             "Configure dynamic marquee and display settings"
         )
+        
+        # Set the default image path to the standard asset location
+        self.default_image_path = ""
+        if "install_path" in self.app.user_config:
+            asset_path = os.path.join(
+                self.app.user_config["install_path"],
+                "assets", "images", "banners", "arcade_station.png"
+            )
+            self.default_image_path = asset_path
     
     def get_monitor_count_safe(self, app):
         """Get the number of monitors connected to the system safely.
@@ -168,19 +177,29 @@ class DisplayConfigPage(BasePage):
         
         self.image_var = tk.StringVar()
         
-        image_entry = ttk.Entry(
+        self.image_entry = ttk.Entry(
             image_frame,
             textvariable=self.image_var,
             width=30
         )
-        image_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.image_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
         
-        browse_button = ttk.Button(
+        self.browse_button = ttk.Button(
             image_frame,
             text="Browse...",
             command=self.browse_image
         )
-        browse_button.pack(side="right")
+        self.browse_button.pack(side="right")
+        
+        # Use default image checkbox
+        self.use_default_image_var = tk.BooleanVar(value=True)
+        use_default_image = ttk.Checkbutton(
+            self.marquee_settings,
+            text="Use default Arcade Station image",
+            variable=self.use_default_image_var,
+            command=self.toggle_default_image
+        )
+        use_default_image.pack(anchor="w", pady=5)
         
         # ITGMania integration
         self.itgmania_frame = ttk.LabelFrame(
@@ -208,6 +227,7 @@ class DisplayConfigPage(BasePage):
         
         # Set initial state
         self.toggle_marquee_options()
+        self.toggle_default_image()
     
     def toggle_marquee_options(self):
         """Show or hide marquee options based on checkbox state."""
@@ -241,6 +261,16 @@ class DisplayConfigPage(BasePage):
             if self.app.user_config.get("install_path"):
                 self.update_installed_config("display.default_image_path", image_path)
     
+    def toggle_default_image(self):
+        """Enable or disable the image entry based on default image checkbox."""
+        if self.use_default_image_var.get():
+            self.image_var.set("")
+            self.image_entry.config(state="disabled")
+            self.browse_button.config(state="disabled")
+        else:
+            self.image_entry.config(state="normal")
+            self.browse_button.config(state="normal")
+    
     def validate(self):
         """Validate display configuration settings."""
         if not self.enable_marquee_var.get():
@@ -262,19 +292,28 @@ class DisplayConfigPage(BasePage):
             )
             return False
         
-        # Validate image path if provided
-        image_path = self.image_var.get().strip()
-        if image_path and not os.path.isfile(image_path):
-            messagebox.showerror(
-                "Invalid Image", 
-                "The specified default image file does not exist."
-            )
-            return False
+        # Validate image path if provided and not using default
+        if not self.use_default_image_var.get():
+            image_path = self.image_var.get().strip()
+            if image_path and not os.path.isfile(image_path):
+                messagebox.showerror(
+                    "Invalid Image", 
+                    "The specified default image file does not exist."
+                )
+                return False
         
         return True
     
     def on_enter(self):
         """Called when the page is shown."""
+        # Update the default image path based on the current installation path
+        if "install_path" in self.app.user_config:
+            asset_path = os.path.join(
+                self.app.user_config["install_path"],
+                "assets", "images", "banners", "arcade_station.png"
+            )
+            self.default_image_path = asset_path
+        
         # Pre-populate fields if in reconfiguration mode
         if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
             if 'display_config' in self.app.user_config:
@@ -292,8 +331,12 @@ class DisplayConfigPage(BasePage):
                     if 'background_color' in config['marquee']:
                         self.color_var.set(config['marquee']['background_color'])
                     
-                    # Set default image
-                    if 'default_image' in config['marquee']:
+                    # Set default image checkbox and custom image path
+                    if 'use_default_image' in config['marquee']:
+                        self.use_default_image_var.set(config['marquee']['use_default_image'])
+                    
+                    # Set custom image path if not using default
+                    if not self.use_default_image_var.get() and 'default_image' in config['marquee']:
                         self.image_var.set(config['marquee']['default_image'])
                 
                 # Set ITGMania display state
@@ -302,6 +345,7 @@ class DisplayConfigPage(BasePage):
                 
                 # Update UI based on marquee state
                 self.toggle_marquee_options()
+                self.toggle_default_image()
 
     def save_data(self):
         """Save the display configuration data."""
@@ -309,13 +353,42 @@ class DisplayConfigPage(BasePage):
         self.app.user_config["use_dynamic_marquee"] = self.enable_marquee_var.get()
         self.app.user_config["marquee_monitor"] = int(self.monitor_var.get())
         self.app.user_config["marquee_background_color"] = self.color_var.get()
-        self.app.user_config["default_marquee_image"] = self.image_var.get()
+        self.app.user_config["use_default_marquee_image"] = self.use_default_image_var.get()
+        
+        # Determine which image to use
+        if self.use_default_image_var.get():
+            # Use the default image from installation directory
+            if "install_path" in self.app.user_config:
+                image_path = os.path.join(
+                    self.app.user_config["install_path"],
+                    "assets", "images", "banners", "arcade_station.png"
+                )
+                self.app.user_config["default_marquee_image"] = image_path
+                
+                # Make sure the directory exists
+                asset_dir = os.path.dirname(image_path)
+                os.makedirs(asset_dir, exist_ok=True)
+        else:
+            # Use custom image
+            image_path = self.image_var.get().strip()
+            self.app.user_config["default_marquee_image"] = image_path
+        
         self.app.user_config["enable_itgmania_display"] = self.enable_itgmania_var.get()
         
         # Also update the installed configuration directly
         if self.app.user_config.get("install_path"):
             self.update_installed_config("display.monitor_index", int(self.monitor_var.get()))
             self.update_installed_config("display.background_color", self.color_var.get())
-            self.update_installed_config("display.default_image_path", self.image_var.get())
+            self.update_installed_config("display.use_default_image", self.use_default_image_var.get())
+            
+            if self.use_default_image_var.get():
+                image_path = os.path.join(
+                    self.app.user_config["install_path"],
+                    "assets", "images", "banners", "arcade_station.png"
+                )
+                self.update_installed_config("display.default_image_path", image_path)
+            else:
+                self.update_installed_config("display.default_image_path", self.image_var.get())
+                
             self.update_installed_config("dynamic_marquee.enabled", self.enable_marquee_var.get())
             self.update_installed_config("dynamic_marquee.itgmania_display_enabled", self.enable_itgmania_var.get()) 

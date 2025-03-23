@@ -439,7 +439,8 @@ class InstallationManager:
                 "image_path": os.path.join(config["install_path"], "assets", "images", "banners", "arcade_station.png"),
                 "default_image_path": config.get("default_marquee_image", ""),
                 "background_color": config.get("marquee_background_color", "black"),
-                "monitor_index": config.get("marquee_monitor", 1)
+                "monitor_index": config.get("marquee_monitor", 1),
+                "use_default_image": config.get("use_default_marquee_image", True)
             },
             "dynamic_marquee": {
                 "enabled": config.get("use_dynamic_marquee", True),
@@ -450,15 +451,26 @@ class InstallationManager:
             }
         }
         
+        # If using default image, make sure the path is set to the standard location
+        if config.get("use_default_marquee_image", True):
+            display_config["display"]["default_image_path"] = os.path.join(
+                config["install_path"], "assets", "images", "banners", "arcade_station.png"
+            )
+        
         # Update ITGMania paths if configured
-        if config.get("itgmania_path"):
-            display_config["dynamic_marquee"]["itgmania_base_path"] = config["itgmania_path"]
+        if config.get("itgmania", {}).get("enabled", False):
+            display_config["dynamic_marquee"]["itgmania_base_path"] = config["itgmania"]["path"]
             display_config["dynamic_marquee"]["itgmania_display_file_path"] = os.path.join(
-                config["itgmania_path"], "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log"
+                config["itgmania"]["path"], "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log"
             )
-            display_config["dynamic_marquee"]["itgmania_banner_path"] = os.path.join(
-                config["itgmania_path"], "Themes", "Simply Love", "Modules", "simply-love.png"
-            )
+            
+            # Set banner path based on whether using default or custom
+            if config["itgmania"].get("use_default_image", True):
+                display_config["dynamic_marquee"]["itgmania_banner_path"] = os.path.join(
+                    config["install_path"], "assets", "images", "banners", "simply-love.png"
+                )
+            elif config["itgmania"].get("custom_image"):
+                display_config["dynamic_marquee"]["itgmania_banner_path"] = config["itgmania"]["custom_image"]
         
         self._write_toml(os.path.join(config_dir, "display_config.toml"), display_config)
         
@@ -467,20 +479,55 @@ class InstallationManager:
             "games": {}
         }
         
-        # Add ITGMania if configured
-        if config.get("itgmania_path"):
-            itg_image = config.get("itgmania_image", "")
+        # Add ITGMania if configured from either source
+        if config.get("itgmania", {}).get("enabled", False):
+            itg_path = config["itgmania"]["path"]
+            
+            # Determine image path
+            itg_image = ""
+            if config["itgmania"].get("use_default_image", True):
+                itg_image = os.path.join(config["install_path"], "assets", "images", "banners", "simply-love.png")
+            elif config["itgmania"].get("custom_image"):
+                itg_image = config["itgmania"]["custom_image"]
+                
             installed_games["games"]["itgmania"] = {
-                "path": os.path.join(config["itgmania_path"], "ITGmania.exe"),
-                "banner": itg_image
+                "display_name": "ITGMania",
+                "path": itg_path,
+                "type": "binary",
+                "launch_args": "",
+                "banner": itg_image,
+                "enabled": True
+            }
+            
+            # Add display module status if available
+            if "install_marquee_module" in config["itgmania"]:
+                installed_games["games"]["itgmania"]["display_module_installed"] = config["itgmania"]["install_marquee_module"]
+        # Also check binary_games for ITGMania as a fallback
+        elif config.get("binary_games", {}).get("itgmania"):
+            game_info = config["binary_games"]["itgmania"]
+            installed_games["games"]["itgmania"] = {
+                "display_name": game_info.get("display_name", "ITGMania"),
+                "path": game_info["path"],
+                "type": "binary",
+                "launch_args": "",
+                "banner": game_info.get("banner", ""),
+                "enabled": True
             }
         
         # Add other binary games if configured
         if config.get("binary_games"):
             for game_id, game_info in config["binary_games"].items():
+                # Skip ITGMania as it was already handled above
+                if game_id == "itgmania":
+                    continue
+                    
                 installed_games["games"][game_id] = {
+                    "display_name": game_info.get("display_name", game_id.replace("_", " ").title()),
                     "path": game_info["path"],
-                    "banner": game_info.get("banner", "")
+                    "type": "binary",
+                    "launch_args": "",
+                    "banner": game_info.get("banner", ""),
+                    "enabled": True
                 }
         
         # Add MAME games if configured
@@ -589,20 +636,57 @@ shortname: arcade_station
 """
         
         # Add ITGMania if configured
-        if config.get("itgmania_path"):
-            launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
-            python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
+        # Check first in itgmania config, then in binary_games as fallback
+        itgmania_configured = False
+        if config.get("itgmania", {}).get("enabled", False):
+            itgmania_path = config["itgmania"].get("path", "")
             
-            metadata_content += """game: ITGMania
+            if itgmania_path:
+                launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
+                python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
+                
+                # Determine banner image path
+                banner_path = "../../../../assets/images/banners/simply-love.png"
+                if config["itgmania"].get("custom_image"):
+                    custom_banner = config["itgmania"].get("custom_image", "").replace(config["install_path"], "../..")
+                    if custom_banner:
+                        banner_path = custom_banner
+                
+                metadata_content += """game: ITGMania
 file: not\\using\\files\\to\\launch\\games\\ITGMania
 sortBy: a
 launch: 
     "{}" 
     "{}" 
     "itgmania"
-assets.box_front: ../../../../assets/images/banners/simply-love.png
+assets.box_front: {}
 
-""".format(python_path, launcher_path)
+""".format(python_path, launcher_path, banner_path)
+                itgmania_configured = True
+        
+        # Add ITGMania from binary_games if not already added
+        if not itgmania_configured and config.get("binary_games", {}).get("itgmania"):
+            game_id = "itgmania"
+            game_info = config["binary_games"]["itgmania"]
+            display_name = game_info.get("display_name", "ITGMania")
+            
+            launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
+            python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
+            
+            asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
+            if not asset_path:
+                asset_path = "../../../../assets/images/banners/simply-love.png"
+            
+            metadata_content += """game: {}
+file: not\\using\\files\\to\\launch\\games\\{}
+sortBy: {}
+launch: 
+    "{}" 
+    "{}" 
+    "{}"
+assets.box_front: {}
+
+""".format(display_name, display_name, "a", python_path, launcher_path, game_id, asset_path)
         
         # Add other binary games if configured
         if config.get("binary_games"):
@@ -610,6 +694,10 @@ assets.box_front: ../../../../assets/images/banners/simply-love.png
             python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
             
             for idx, (game_id, game_info) in enumerate(config["binary_games"].items()):
+                # Skip ITGMania as it was already added above
+                if game_id == "itgmania":
+                    continue
+                    
                 display_name = game_info.get("display_name", game_id.replace("_", " ").title())
                 asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
                 if not asset_path:
