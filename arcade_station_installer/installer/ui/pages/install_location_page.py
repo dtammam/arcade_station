@@ -159,6 +159,41 @@ class InstallLocationPage(BasePage):
             )
             return False
         
+        # Pre-check if Arcade Station is installed here
+        self.app.user_config["install_path"] = path
+        is_installed = self.app.check_installation_status()
+        
+        if is_installed:
+            # Show options dialog
+            result = messagebox.askyesnocancel(
+                "Installation Detected",
+                f"Arcade Station is already installed at:\n{path}\n\n"
+                "Would you like to reconfigure the existing installation?\n\n"
+                "Yes: Reconfigure existing installation\n"
+                "No: Reset and reinstall at this location\n"
+                "Cancel: Choose a different location"
+            )
+            
+            if result is None:  # Cancel was pressed
+                return False
+            
+            # Set appropriate installation mode
+            if result:  # Yes was pressed
+                self.app.is_reconfigure_mode = True
+                self.app.install_manager.files_copied = True
+            else:  # No was pressed
+                self.app.is_reset_mode = True
+                self.app.install_manager.files_copied = False
+            
+            # Update page flow based on the selected mode
+            self.app.decide_next_page_flow()
+            
+            # Hide current page and refresh the UI to prevent splitting
+            current_page_index = self.app.current_page
+            for page in self.app.pages:
+                page.hide()
+            self.app.show_page(current_page_index)
+        
         return True
     
     def save_data(self):

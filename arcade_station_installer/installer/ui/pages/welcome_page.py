@@ -105,72 +105,29 @@ class WelcomePage(BasePage):
     
     def on_enter(self):
         """Called when the page is shown."""
-        # Check if Arcade Station is already installed
-        is_installed = self.app.is_installed
-        install_path = self.app.install_manager.get_current_install_path() if is_installed else None
+        # Since installation status will be checked after the user selects an installation location,
+        # we'll display a generic welcome message and hide installation options
+        self.status_label.config(
+            text="Welcome to the Arcade Station installer. Please proceed to select "
+                 "an installation location."
+        )
         
-        if is_installed:
-            self.status_label.config(
-                text=f"Arcade Station is already installed at:\n{install_path}\n\n"
-                     f"Please select one of the following options:"
-            )
-            
-            # Show installation options frame
-            self.install_options_frame.pack(fill="x", pady=10)
-            
-            # Show installation mode options
-            self.new_install_radio.pack(anchor="w", pady=5)
-            self.reset_install_radio.pack(anchor="w", pady=5)
-            self.reconfigure_install_radio.pack(anchor="w", pady=5)
-            
-            # Default to reconfigure mode
-            self.install_mode_var.set("reconfigure")
-        else:
-            self.status_label.config(
-                text="Arcade Station is not currently installed on this system. "
-                     "This wizard will guide you through the installation process."
-            )
-            
-            # Hide installation options frame
-            self.install_options_frame.pack_forget()
-            
-            # Set to new installation
-            self.install_mode_var.set("new")
+        # Hide installation options frame until we know if Arcade Station is installed
+        self.install_options_frame.pack_forget()
+        
+        # Default to new installation
+        self.install_mode_var.set("new")
     
     def on_next(self):
         """Handle next button click."""
-        # Set application mode based on selection
-        selected_mode = self.install_mode_var.get()
+        # Since we now check installation in the install location page,
+        # we can just proceed with a default new installation setup
         
-        if self.app.is_installed:
-            if selected_mode == "reset":
-                self.app.set_reset_mode(True)
-                # Pre-fill the install path with existing installation
-                self.app.user_config["install_path"] = self.app.install_manager.get_current_install_path()
-                # Reset the files_copied flag to ensure we copy files again
-                self.app.install_manager.files_copied = False
-            elif selected_mode == "reconfigure":
-                self.app.set_reset_mode(False)
-                # Set reconfigure mode (added to app)
-                self.app.is_reconfigure_mode = True
-                # Pre-fill the install path with existing installation
-                self.app.user_config["install_path"] = self.app.install_manager.get_current_install_path()
-                # Don't need to copy files in reconfigure mode
-                self.app.install_manager.files_copied = True
-            else:  # new installation
-                self.app.set_reset_mode(False)
-                self.app.is_reconfigure_mode = False
-                # Reset the files_copied flag for new installation
-                self.app.install_manager.files_copied = False
-        else:
-            # New installation
-            self.app.set_reset_mode(False)
-            self.app.is_reconfigure_mode = False
-            # Reset the files_copied flag for new installation
-            self.app.install_manager.files_copied = False
-        
-        # Decide which pages to include in the flow
-        self.app.decide_next_page_flow()
+        # Reset all installation mode flags
+        self.app.is_reset_mode = False
+        self.app.is_reconfigure_mode = False
+        self.app.install_manager.files_copied = False
+        self.app.is_installed = False
         
         # Proceed to next page
         super().on_next() 

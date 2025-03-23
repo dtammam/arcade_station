@@ -54,6 +54,22 @@ class InstallationManager:
         
         return any(markers)
     
+    def check_if_installed_at_path(self, path: str) -> bool:
+        """Check if Arcade Station is installed at the specified path.
+        
+        Args:
+            path: Path to check
+            
+        Returns:
+            bool: True if installed at path, False otherwise
+        """
+        if not path or not os.path.isdir(path):
+            return False
+            
+        # Check for config directory and expected files
+        config_dir = os.path.join(path, "config")
+        return os.path.isdir(config_dir) and self._check_config_files(config_dir)
+    
     def _find_existing_config_dir(self) -> bool:
         """Check for existing configuration directory.
         

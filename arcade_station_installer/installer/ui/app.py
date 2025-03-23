@@ -41,8 +41,8 @@ class InstallerApp:
         # Installation manager
         self.install_manager = InstallationManager()
         
-        # Check if already installed
-        self.is_installed = self.install_manager.check_if_installed()
+        # Initialize installation status - will be checked later
+        self.is_installed = False
         self.is_reset_mode = False
         self.is_reconfigure_mode = False
         
@@ -177,66 +177,75 @@ class InstallerApp:
     
     def decide_next_page_flow(self):
         """Determine which pages to include based on user choices."""
-        # If in reset mode or reconfigure mode, load existing config
-        if self.is_installed and (self.is_reset_mode or self.is_reconfigure_mode):
-            # Load existing configuration to pre-populate fields
-            existing_install_path = self.install_manager.get_current_install_path()
-            self.user_config["install_path"] = existing_install_path
+        # Create temporary list of pages to include
+        new_page_flow = []
+        
+        # Always include welcome and installation location pages
+        new_page_flow.append(self.pages[0] if len(self.pages) > 0 else WelcomePage(self.content, self))
+        new_page_flow.append(self.pages[1] if len(self.pages) > 1 else InstallLocationPage(self.content, self))
+        
+        # Clear step indicators and recreate them
+        for indicator, label in self.step_labels:
+            indicator.destroy()
+            label.destroy()
+        self.step_labels = []
+        
+        # Add step indicators for initial pages
+        self.add_step_indicator("Welcome")
+        self.add_step_indicator("Install Location")
+        
+        # Determine which conditional pages to include
+        if not self.is_reconfigure_mode or self.user_config.get("reconfigure_games", True):
+            # Game setup pages
+            new_page_flow.append(self.conditional_pages["game_setup"])
+            self.add_step_indicator("Game Setup")
             
-            # Load existing configuration files
-            if self.is_reconfigure_mode:
-                self._load_existing_config(existing_install_path)
+            # Only include game pages if not skipping game configuration
+            if not self.user_config.get("skip_games", False):
+                new_page_flow.append(self.conditional_pages["itgmania"])
+                new_page_flow.append(self.conditional_pages["binary_games"])
+                new_page_flow.append(self.conditional_pages["mame_games"])
+                self.add_step_indicator("ITGMania Setup")
+                self.add_step_indicator("Binary Games")
+                self.add_step_indicator("MAME Games")
         
-        # Determine which pages to show based on the OS and options
-        page_flow = [0]  # Always start with welcome page
+        # Always include these configuration pages
+        new_page_flow.append(self.conditional_pages["control_config"])
+        new_page_flow.append(self.conditional_pages["display"])
+        self.add_step_indicator("Control Config")
+        self.add_step_indicator("Display Config")
         
-        # Always include installation location
-        page_flow.append(1)
-        
-        # Windows-specific pages
+        # Include Windows-specific kiosk mode page
         if self.install_manager.is_windows:
-            # Kiosk mode (Windows only)
-            page_flow.append("kiosk")
+            new_page_flow.append(self.conditional_pages["kiosk"])
+            self.add_step_indicator("Kiosk Mode")
         
-        # Display configuration
-        page_flow.append("display")
+        # Optional pages based on user choices
+        if not self.is_reconfigure_mode or self.user_config.get("reconfigure_utilities", True):
+            new_page_flow.append(self.conditional_pages["lights"])
+            new_page_flow.append(self.conditional_pages["utility"])
+            self.add_step_indicator("Lights Config")
+            self.add_step_indicator("Utilities")
         
-        # Game setup pages
-        page_flow.append("game_setup")
-        page_flow.append("itgmania")
-        page_flow.append("binary_games")
-        page_flow.append("mame_games")
+        # Always include summary page
+        new_page_flow.append(self.conditional_pages["summary"])
+        self.add_step_indicator("Summary")
         
-        # Control configuration
-        page_flow.append("control_config")
+        # Update the pages list - hide all current pages first
+        for page in self.pages:
+            page.hide()
+            
+        # Set the new page flow
+        self.pages = new_page_flow
         
-        # Lights configuration
-        page_flow.append("lights")
+        # Debug: print page count and names
+        page_names = [page.__class__.__name__ for page in self.pages]
+        print(f"Wizard flow: {len(self.pages)} pages - {', '.join(page_names)}")
         
-        # Utility configuration (VPN, streaming)
-        page_flow.append("utility")
-        
-        # Summary page (always last)
-        page_flow.append("summary")
-        
-        # IMPORTANT: Actually rebuild the pages list based on page_flow
-        # Keep the first two pages (welcome and install location)
-        new_pages = self.pages[:2]
-        
-        # Add the conditional pages based on our flow
-        for idx in page_flow[2:]:  # Skip the first two which are already in new_pages
-            if isinstance(idx, str):
-                # Add this conditional page to our sequence
-                new_pages.append(self.conditional_pages[idx])
-                
-                # Add step indicator if it doesn't exist yet
-                if len(self.step_labels) <= len(new_pages) - 1:
-                    page_name = idx.replace("_", " ").title()
-                    self.add_step_indicator(page_name)
-        
-        # Update the pages list
-        self.pages = new_pages
-        
+        # Make sure we update the current page's back button if it's the welcome page
+        if self.current_page == 0 and isinstance(self.pages[0], WelcomePage):
+            self.pages[0].set_back_button_state(False)
+            
         # Update step indicators
         self.update_step_indicators()
     
@@ -372,3 +381,17 @@ class InstallerApp:
         
         # Reconfigure page flow based on reset mode
         self.decide_next_page_flow() 
+
+    def check_installation_status(self):
+        """Check if Arcade Station is already installed at the selected location."""
+        if "install_path" in self.user_config and self.user_config["install_path"]:
+            # Check if installation exists at the selected path
+            install_path = self.user_config["install_path"]
+            self.is_installed = self.install_manager.check_if_installed_at_path(install_path)
+            
+            # If installation is found and we're in reconfigure mode, load existing config
+            if self.is_installed and self.is_reconfigure_mode:
+                self._load_existing_config(install_path)
+                
+            return self.is_installed
+        return False 
