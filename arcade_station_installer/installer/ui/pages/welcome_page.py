@@ -108,8 +108,7 @@ class WelcomePage(BasePage):
         # Since installation status will be checked after the user selects an installation location,
         # we'll display a generic welcome message and hide installation options
         self.status_label.config(
-            text="Welcome to the Arcade Station installer. Please proceed to select "
-                 "an installation location."
+            text="Please proceed to select an installation location."
         )
         
         # Hide installation options frame until we know if Arcade Station is installed

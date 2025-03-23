@@ -426,9 +426,11 @@ class InstallationManager:
         os.makedirs(log_dir, exist_ok=True)
             
         default_config = {
-            "default": {
-                "log_dir": log_dir,
-                "log_level": config.get("log_level", "INFO")
+            "logging": {
+                "logdirectory": log_dir
+            },
+            "paths": {
+                "pegasus_base_path": "../../../pegasus-fe"
             }
         }
         self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)
@@ -440,7 +442,7 @@ class InstallationManager:
                 "default_image_path": config.get("default_marquee_image", ""),
                 "background_color": config.get("marquee_background_color", "black"),
                 "monitor_index": config.get("marquee_monitor", 1),
-                "use_default_image": config.get("use_default_marquee_image", True)
+                "user_default_image": config.get("use_default_marquee_image", True)
             },
             "dynamic_marquee": {
                 "enabled": config.get("use_dynamic_marquee", True),
@@ -543,26 +545,42 @@ class InstallationManager:
         
         # Generate key_listener.toml
         key_listener = {
-            "keys": {
-                "kill_all_and_reset_pegasus": config.get("key_kill_all", "ctrl+q"),
-                "take_screenshot": config.get("key_screenshot", "ctrl+p"),
-                "start_streaming": config.get("key_streaming", "ctrl+b")
+            "key_mappings": {
+                "ctrl+space": "../arcade_station/core/common/kill_all_and_reset_pegasus.py"
             }
         }
         self._write_toml(os.path.join(config_dir, "key_listener.toml"), key_listener)
         
         # Generate processes_to_kill.toml
         processes_to_kill = {
-            "process_names": [
-                "ITGmania.exe",
-                "OpenITG.exe",
-                "In The Groove.exe",
-                "NotITG-v4.2.0.exe",
-                "spice.exe",
-                "mame.exe",
-                "obs64.exe",
-                "i_view64.exe"
-            ]
+            "processes": {
+                "names": [
+                    "cmd",
+                    "explorer",
+                    "gslauncher",
+                    "In The Groove",
+                    "ITGmania",
+                    "i_view64",
+                    "LightsTest",
+                    "mame",
+                    "mame2lit",
+                    "mame_lights",
+                    "mmc",
+                    "notepad",
+                    "notepad++",
+                    "NotITG-v4.2.0",
+                    "OpenITG",
+                    "OpenITG-PC",
+                    "outfox",
+                    "pegasus-fe_windows",
+                    "regedit",
+                    "spice",
+                    "StepMania",
+                    "Taskmgr",
+                    "timeout",
+                    "marquee_image"
+                ]
+            }
         }
         self._write_toml(os.path.join(config_dir, "processes_to_kill.toml"), processes_to_kill)
         
@@ -581,13 +599,21 @@ class InstallationManager:
         screenshot_config = {
             "screenshot": {
                 "monitor_index": config.get("screenshot_monitor", 0),
-                "save_path": os.path.join(config["install_path"], "screenshots"),
-                "play_sound": config.get("screenshot_sound", True),
-                "sound_path": os.path.join(config["install_path"], "assets", "sounds", "camera.wav")
+                "file_location": os.path.join(config["install_path"], "screenshots"),
+                "file_name": "",
+                "quality": "High",
+                "sound_file": os.path.join(config["install_path"], "assets", "sounds", "megatouch_yahoo.wav")
             },
-            "icloud": {
+            "icloud_upload": {
                 "enabled": config.get("use_icloud", False),
-                "restart_service": config.get("restart_icloud_service", False)
+                "interval_seconds": 360,
+                "delete_after_upload": True,
+                "upload_directory": os.path.join(config["install_path"], "screenshots"),
+                "apple_services_path": "C:/Program Files (x86)/Common Files/Apple/Internet Services/",
+                "processes_to_restart": [
+                    "iCloudServices",
+                    "iCloudPhotos"
+                ]
             }
         }
         self._write_toml(os.path.join(config_dir, "screenshot_config.toml"), screenshot_config)
@@ -596,20 +622,26 @@ class InstallationManager:
         utility_config = {
             "lights": {
                 "enabled": config.get("enable_lights", False),
-                "litboard_path": config.get("litboard_path", ""),
-                "mame2lit_path": config.get("mame2lit_path", "")
+                "light_reset_executable_path": config.get("litboard_path", ""),
+                "light_mame_executable_path": config.get("mame2lit_path", "")
             },
             "streaming": {
-                "enabled": config.get("enable_streaming", False),
-                "obs_path": config.get("obs_path", "")
+                "webcam_management_enabled": False,
+                "webcam_management_executable": "",
+                "obs_executable": config.get("obs_path", ""),
+                "obs_arguments": "--startstreaming --disable-shutdown-check"
             },
             "vpn": {
                 "enabled": config.get("enable_vpn", False),
-                "vpn_path": config.get("vpn_path", "")
+                "vpn_application_directory": config.get("vpn_path", ""),
+                "vpn_application": "openvpn-gui.exe",
+                "vpn_process": "openvpn",
+                "vpn_config_profile": "",
+                "seconds_to_wait": 10
             },
-            "volume_control": {
+            "osd": {
                 "enabled": config.get("enable_volume_control", False) and self.is_windows,
-                "audio_switcher_path": config.get("audio_switcher_path", "")
+                "sound_osd_executable": config.get("audio_switcher_path", "")
             }
         }
         self._write_toml(os.path.join(config_dir, "utility_config.toml"), utility_config)
@@ -617,7 +649,9 @@ class InstallationManager:
         # Generate Pegasus binaries config
         pegasus_binaries = {
             "pegasus": {
-                "binary": "pegasus-fe.exe" if self.is_windows else "pegasus-fe"
+                "windows_binary": "pegasus-fe_windows.exe",
+                "mac_binary": "pegasus-fe_mac",
+                "linux_binary": "pegasus-fe_linux"
             }
         }
         self._write_toml(os.path.join(config_dir, "pegasus_binaries.toml"), pegasus_binaries)
