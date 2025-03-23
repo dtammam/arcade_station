@@ -441,8 +441,7 @@ class InstallationManager:
                 "image_path": os.path.join(config["install_path"], "assets", "images", "banners", "arcade_station.png"),
                 "default_image_path": config.get("default_marquee_image", ""),
                 "background_color": config.get("marquee_background_color", "black"),
-                "monitor_index": config.get("marquee_monitor", 1),
-                "user_default_image": config.get("use_default_marquee_image", True)
+                "monitor_index": config.get("marquee_monitor", 1)
             },
             "dynamic_marquee": {
                 "enabled": config.get("use_dynamic_marquee", True),
