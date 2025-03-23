@@ -199,16 +199,81 @@ class BasePage:
             # Set the value
             current[key_parts[-1]] = value
             
-            # Write back to file
+            # Write back to file safely
             try:
+                # Try to use tomli_w if available
                 import tomli_w
                 with open(config_file, 'wb') as f:
                     tomli_w.dump(config_data, f)
-            except ImportError:
-                # Fallback to manual writing
-                self.app.install_manager._write_toml_manually(config_file, config_data)
+            except (ImportError, Exception) as e:
+                # Use the more reliable _write_toml method from install_manager
+                try:
+                    self.app.install_manager._write_toml(config_file, config_data)
+                except Exception as e2:
+                    print(f"Error writing TOML with installation manager: {str(e2)}")
+                    # Ultimate fallback - write directly
+                    temp_file = f"{config_file}.tmp"
+                    try:
+                        with open(temp_file, 'w', encoding='utf-8') as f:
+                            self._write_toml_section(f, config_data)
+                        os.replace(temp_file, config_file)
+                    except Exception as e3:
+                        print(f"All TOML writing methods failed: {str(e3)}")
+                        return False
                 
             return True
         except Exception as e:
             print(f"Error updating config: {str(e)}")
-            return False 
+            return False
+    
+    def _write_toml_section(self, file, data, prefix=""):
+        """Write a section of a TOML file.
+        
+        Args:
+            file: File to write to
+            data: Data to write
+            prefix: Current key prefix
+        """
+        # First write non-table items
+        for key, value in data.items():
+            if not isinstance(value, dict):
+                self._write_toml_value(file, key, value)
+        
+        # Then write tables
+        for key, value in data.items():
+            if isinstance(value, dict):
+                new_prefix = f"{prefix}.{key}" if prefix else key
+                file.write(f"\n[{new_prefix}]\n")
+                for k, v in value.items():
+                    if isinstance(v, dict):
+                        sub_prefix = f"{new_prefix}.{k}"
+                        file.write(f"\n[{sub_prefix}]\n")
+                        self._write_toml_section(file, v, "")
+                    else:
+                        self._write_toml_value(file, k, v)
+    
+    def _write_toml_value(self, file, key, value):
+        """Write a single TOML key-value pair.
+        
+        Args:
+            file: File to write to
+            key: Key to write
+            value: Value to write
+        """
+        if isinstance(value, str):
+            # Properly escape string
+            escaped_value = value.replace('\\', '\\\\').replace('"', '\\"')
+            file.write(f'{key} = "{escaped_value}"\n')
+        elif isinstance(value, bool):
+            file.write(f"{key} = {str(value).lower()}\n")
+        elif isinstance(value, (list, tuple)):
+            # Handle arrays
+            file.write(f"{key} = [\n")
+            for item in value:
+                if isinstance(item, str):
+                    file.write(f'  "{item}",\n')
+                else:
+                    file.write(f"  {item},\n")
+            file.write("]\n")
+        else:
+            file.write(f"{key} = {value}\n") 
