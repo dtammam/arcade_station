@@ -620,9 +620,9 @@ class InstallationManager:
         # Generate utility config
         utility_config = {
             "lights": {
-                "enabled": config.get("enable_lights", False),
-                "light_reset_executable_path": config.get("litboard_path", ""),
-                "light_mame_executable_path": config.get("mame2lit_path", "")
+                "enabled": False,
+                "light_reset_executable_path": "",
+                "light_mame_executable_path": ""
             },
             "streaming": {
                 "webcam_management_enabled": False,

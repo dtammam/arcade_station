@@ -16,7 +16,6 @@ from .pages import (
     BinaryGamesPage,
     MAMEGamesPage,
     ControlConfigPage,
-    LightsConfigPage,
     UtilityConfigPage,
     SummaryPage,
 )
@@ -163,7 +162,6 @@ class InstallerApp:
             "binary_games": BinaryGamesPage(self.content, self),
             "mame_games": MAMEGamesPage(self.content, self),
             "control_config": ControlConfigPage(self.content, self),
-            "lights": LightsConfigPage(self.content, self),
             "utility": UtilityConfigPage(self.content, self),
             "summary": SummaryPage(self.content, self),
         }
@@ -222,9 +220,7 @@ class InstallerApp:
         
         # Optional pages based on user choices
         if not self.is_reconfigure_mode or self.user_config.get("reconfigure_utilities", True):
-            new_page_flow.append(self.conditional_pages["lights"])
             new_page_flow.append(self.conditional_pages["utility"])
-            self.add_step_indicator("Lights Config")
             self.add_step_indicator("Utilities")
         
         # Always include summary page
