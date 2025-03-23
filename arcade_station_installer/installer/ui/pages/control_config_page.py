@@ -513,28 +513,43 @@ i_view64.exe"""
         help_text.pack(anchor="w", pady=5)
 
     def on_enter(self):
-        """Called when the page is shown."""
-        # Pre-populate fields if in reconfiguration mode
-        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
-            # Load key bindings if available
-            if 'key_listener' in self.app.user_config:
-                key_config = self.app.user_config['key_listener']
-                if 'keys' in key_config:
-                    keys = key_config['keys']
-                    if 'kill_all_and_reset_pegasus' in keys:
-                        self.kill_key_var.set(keys['kill_all_and_reset_pegasus'])
-                    if 'take_screenshot' in keys:
-                        self.screenshot_key_var.set(keys['take_screenshot'])
-                    if 'start_streaming' in keys:
-                        self.streaming_key_var.set(keys['start_streaming'])
+        """Override base class method for page-specific actions when entering the page."""
+        # Check if there are existing key bindings
+        key_bindings = self.app.user_config.get("key_listener", {})
+        
+        # Set key bindings from existing config if available
+        key_mapping = key_bindings.get("key_mappings", {})
+        if key_mapping:
+            # Map the stored paths back to function keys
+            for key, path in key_mapping.items():
+                if "kill_all_and_reset_pegasus.py" in path:
+                    self.kill_key_var.set(key)
+                elif "take_screenshot" in path:
+                    self.screenshot_key_var.set(key)
+                elif "start_streaming.py" in path:
+                    self.streaming_key_var.set(key)
+        
+        # Check if there are existing process settings
+        process_config = self.app.user_config.get("processes_to_kill", {})
+        process_names = process_config.get("processes", {}).get("names", [])
+        
+        if process_names:
+            # Clear existing text and set from configuration
+            self.processes_text.delete("1.0", tk.END)
+            self.processes_text.insert("1.0", "\n".join(process_names))
+        
+        # Get Monitors in system and update UI
+        self.monitor_count = self.app.install_manager.get_monitor_count()
+        
+        # Update configuration from installed version
+        if self.app.is_reconfigure_mode and "install_path" in self.app.user_config:
+            config_dir = os.path.join(self.app.user_config["install_path"], "config")
             
-            # Load processes to kill
-            if 'processes_to_kill' in self.app.user_config:
-                proc_config = self.app.user_config['processes_to_kill']
-                if 'process_names' in proc_config:
-                    process_names = proc_config['process_names']
-                    self.processes_text.delete("1.0", tk.END)
-                    self.processes_text.insert("1.0", "\n".join(process_names))
+            # Update key listener configuration
+            self.update_installed_config("key_mappings.ctrl+space", "../arcade_station/core/common/kill_all_and_reset_pegasus.py")
+            
+            # Update processes to kill configuration
+            self.update_installed_config("processes.names", [name.strip() for name in self.processes_text.get("1.0", tk.END).strip().split("\n") if name.strip()])
 
     def toggle_arcade_options(self):
         """Show or hide arcade control options based on checkbox state."""
@@ -687,10 +702,11 @@ i_view64.exe"""
         
         # Save key bindings
         key_config = {
-            "keys": {
-                "kill_all_and_reset_pegasus": self.kill_key_var.get().strip(),
-                "take_screenshot": self.screenshot_key_var.get().strip(),
-                "start_streaming": self.streaming_key_var.get().strip()
+            "key_mappings": {
+                "ctrl+space": "../arcade_station/core/common/kill_all_and_reset_pegasus.py",
+                "ctrl+f4": "../arcade_station/core/common/start_streaming.py",
+                "+": "../../bin/windows/take_screenshot.vbs",
+                "/": "../../bin/windows/take_screenshot.vbs"
             }
         }
         self.app.user_config["key_listener"] = key_config
@@ -700,6 +716,8 @@ i_view64.exe"""
         process_names = [p.strip() for p in process_text.split("\n") if p.strip()]
         
         process_config = {
-            "process_names": process_names
+            "processes": {
+                "names": process_names
+            }
         }
         self.app.user_config["processes_to_kill"] = process_config 

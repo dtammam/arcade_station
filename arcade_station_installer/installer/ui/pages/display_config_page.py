@@ -379,7 +379,7 @@ class DisplayConfigPage(BasePage):
         if self.app.user_config.get("install_path"):
             self.update_installed_config("display.monitor_index", int(self.monitor_var.get()))
             self.update_installed_config("display.background_color", self.color_var.get())
-            self.update_installed_config("display.use_default_image", self.use_default_image_var.get())
+            self.update_installed_config("display.user_default_image", self.use_default_image_var.get())
             
             if self.use_default_image_var.get():
                 image_path = os.path.join(

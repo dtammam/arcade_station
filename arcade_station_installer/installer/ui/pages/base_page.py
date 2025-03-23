@@ -161,17 +161,17 @@ class BasePage:
         config_file = None
         if key.startswith("display.") or key.startswith("dynamic_marquee."):
             config_file = os.path.join(config_dir, "display_config.toml")
-        elif key.startswith("default."):
+        elif key.startswith("logging.") or key.startswith("paths."):
             config_file = os.path.join(config_dir, "default_config.toml")
-        elif key.startswith("keys."):
+        elif key.startswith("key_mappings."):
             config_file = os.path.join(config_dir, "key_listener.toml")
-        elif key.startswith("process_names."):
+        elif key.startswith("processes."):
             config_file = os.path.join(config_dir, "processes_to_kill.toml")
         elif key.startswith("mame."):
             config_file = os.path.join(config_dir, "mame_config.toml")
-        elif key.startswith("screenshot.") or key.startswith("icloud."):
+        elif key.startswith("screenshot.") or key.startswith("icloud_upload."):
             config_file = os.path.join(config_dir, "screenshot_config.toml")
-        elif key.startswith("lights.") or key.startswith("streaming.") or key.startswith("vpn.") or key.startswith("volume_control."):
+        elif key.startswith("lights.") or key.startswith("streaming.") or key.startswith("vpn.") or key.startswith("osd."):
             config_file = os.path.join(config_dir, "utility_config.toml")
         elif key.startswith("pegasus."):
             config_file = os.path.join(config_dir, "pegasus_binaries.toml")
