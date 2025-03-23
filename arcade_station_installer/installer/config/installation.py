@@ -27,6 +27,7 @@ class InstallationManager:
         self.is_linux = IS_LINUX
         self.is_mac = IS_MAC
         self.resources_dir = RESOURCES_DIR
+        self.files_copied = False  # Track if files have been copied
         
         # Set up logging
         logging.basicConfig(
@@ -236,8 +237,11 @@ class InstallationManager:
             assets_dir = os.path.join(install_path, "assets")
             os.makedirs(os.path.join(assets_dir, "images", "banners"), exist_ok=True)
             
-            # Copy project files to installation directory
-            self._copy_project_files(install_path)
+            # Copy project files to installation directory if not already done
+            if not self.files_copied:
+                self._copy_project_files(install_path)
+            else:
+                self.logger.info("Project files already copied, skipping copy step")
             
             # Generate configuration files
             self._generate_config_files(config, config_dir)
@@ -268,60 +272,124 @@ class InstallationManager:
         """
         try:
             import shutil
+            import os
             from pathlib import Path
             
             # Get the current directory (where the installer is running from)
-            current_dir = Path(__file__).resolve().parent.parent.parent.parent
+            current_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
             
-            # Define directories to copy
-            dirs_to_copy = [
-                "src/arcade_station",
-                "config",
-                "assets"
-            ]
+            # Log the process
+            self.logger.info(f"Starting to copy all project files from {current_dir} to {install_path}")
             
-            # Copy each directory
-            for dir_path in dirs_to_copy:
-                src_path = current_dir / dir_path
-                dst_path = Path(install_path) / dir_path
+            # Get all items in the current directory
+            all_items = list(current_dir.iterdir())
+            
+            # Tracking for logs
+            total_dirs_copied = 0
+            total_files_copied = 0
+            
+            # Copy each item
+            for item in all_items:
+                # Skip the installer for now to avoid copying it while it's running
+                if item.name == "arcade_station_installer":
+                    continue
+                    
+                dst_path = Path(install_path) / item.name
                 
-                if src_path.exists():
-                    self.logger.info(f"Copying {dir_path} to {dst_path}")
-                    
-                    # Make sure the destination parent directory exists
-                    dst_path.parent.mkdir(parents=True, exist_ok=True)
-                    
-                    # Remove destination if it exists
-                    if dst_path.exists() and dst_path.is_dir():
-                        shutil.rmtree(dst_path)
-                    
-                    # Copy directory
-                    shutil.copytree(src_path, dst_path)
-                else:
-                    self.logger.warning(f"Source directory not found: {src_path}")
-            
-            # Copy pegasus-fe directory if it exists
-            pegasus_src = current_dir / "src/pegasus-fe"
-            pegasus_dst = Path(install_path) / "src/pegasus-fe"
-            
-            if pegasus_src.exists():
-                self.logger.info(f"Copying pegasus-fe to {pegasus_dst}")
-                
-                # Make sure the destination parent directory exists
-                pegasus_dst.parent.mkdir(parents=True, exist_ok=True)
+                self.logger.info(f"Copying {item.name} to {dst_path}")
                 
                 # Remove destination if it exists
-                if pegasus_dst.exists() and pegasus_dst.is_dir():
-                    shutil.rmtree(pegasus_dst)
+                if dst_path.exists():
+                    if dst_path.is_dir():
+                        shutil.rmtree(dst_path)
+                    else:
+                        os.remove(dst_path)
                 
-                # Copy directory
-                shutil.copytree(pegasus_src, pegasus_dst)
-            else:
-                # Create the directory structure if source doesn't exist
-                pegasus_dst.mkdir(parents=True, exist_ok=True)
-                (pegasus_dst / "config" / "metafiles").mkdir(parents=True, exist_ok=True)
+                # Copy directory or file with detailed logging
+                if item.is_dir():
+                    # Create custom copy function for counting items
+                    def copy_dir_recursive(src, dst):
+                        nonlocal total_dirs_copied, total_files_copied
+                        if os.path.isdir(src):
+                            total_dirs_copied += 1
+                            os.makedirs(dst, exist_ok=True)
+                            self.logger.info(f"Copying directory: {os.path.basename(src)}")
+                            items = os.listdir(src)
+                            for item in items:
+                                s = os.path.join(src, item)
+                                d = os.path.join(dst, item)
+                                copy_dir_recursive(s, d)
+                        else:
+                            total_files_copied += 1
+                            shutil.copy2(src, dst)
+                    
+                    # Use our custom copy function
+                    copy_dir_recursive(str(item), str(dst_path))
+                else:
+                    shutil.copy2(item, dst_path)
+                    total_files_copied += 1
+            
+            # Now copy the installer directory without the running executable
+            installer_src = current_dir / "arcade_station_installer"
+            installer_dst = Path(install_path) / "arcade_station_installer"
+            
+            if installer_src.exists():
+                self.logger.info("Copying installer files...")
                 
-            self.logger.info("Project files copied successfully")
+                # Create the destination directory
+                os.makedirs(installer_dst, exist_ok=True)
+                
+                # Copy all files and subdirectories in installer
+                for item in installer_src.iterdir():
+                    dst_item = installer_dst / item.name
+                    try:
+                        if item.is_dir():
+                            # Custom function to copy installer directories
+                            def copy_installer_dir(src, dst):
+                                nonlocal total_dirs_copied, total_files_copied
+                                os.makedirs(dst, exist_ok=True)
+                                total_dirs_copied += 1
+                                
+                                for item in os.listdir(src):
+                                    s = os.path.join(src, item)
+                                    d = os.path.join(dst, item)
+                                    
+                                    if os.path.isdir(s):
+                                        copy_installer_dir(s, d)
+                                    else:
+                                        try:
+                                            shutil.copy2(s, d)
+                                            total_files_copied += 1
+                                        except (PermissionError, OSError) as e:
+                                            self.logger.warning(f"Skipping locked file: {os.path.basename(s)}")
+                            
+                            copy_installer_dir(str(item), str(dst_item))
+                        else:
+                            try:
+                                shutil.copy2(item, dst_item)
+                                total_files_copied += 1
+                            except (PermissionError, OSError):
+                                self.logger.warning(f"Skipping locked file: {item.name}")
+                    except Exception as e:
+                        self.logger.error(f"Error copying {item.name}: {str(e)}")
+            
+            # Ensure these specific directories exist even if not in source
+            required_dirs = [
+                "src/arcade_station",
+                "src/pegasus-fe/config/metafiles",
+                "config",
+                "assets/images/banners",
+                ".venv"
+            ]
+            
+            for dir_path in required_dirs:
+                dir_full_path = Path(install_path) / dir_path
+                if not dir_full_path.exists():
+                    self.logger.info(f"Creating required directory: {dir_path}")
+                    os.makedirs(dir_full_path, exist_ok=True)
+            
+            self.logger.info(f"Project files copied successfully: {total_dirs_copied} directories and {total_files_copied} files")
+            self.files_copied = True  # Mark files as copied
         except Exception as e:
             self.logger.error(f"Error copying project files: {str(e)}", exc_info=True)
             raise

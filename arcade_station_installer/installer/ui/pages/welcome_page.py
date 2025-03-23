@@ -147,19 +147,27 @@ class WelcomePage(BasePage):
                 self.app.set_reset_mode(True)
                 # Pre-fill the install path with existing installation
                 self.app.user_config["install_path"] = self.app.install_manager.get_current_install_path()
+                # Reset the files_copied flag to ensure we copy files again
+                self.app.install_manager.files_copied = False
             elif selected_mode == "reconfigure":
                 self.app.set_reset_mode(False)
                 # Set reconfigure mode (added to app)
                 self.app.is_reconfigure_mode = True
                 # Pre-fill the install path with existing installation
                 self.app.user_config["install_path"] = self.app.install_manager.get_current_install_path()
+                # Don't need to copy files in reconfigure mode
+                self.app.install_manager.files_copied = True
             else:  # new installation
                 self.app.set_reset_mode(False)
                 self.app.is_reconfigure_mode = False
+                # Reset the files_copied flag for new installation
+                self.app.install_manager.files_copied = False
         else:
             # New installation
             self.app.set_reset_mode(False)
             self.app.is_reconfigure_mode = False
+            # Reset the files_copied flag for new installation
+            self.app.install_manager.files_copied = False
         
         # Decide which pages to include in the flow
         self.app.decide_next_page_flow()

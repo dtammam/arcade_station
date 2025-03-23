@@ -19,10 +19,15 @@ class SummaryPage(BasePage):
             "Review your configuration before installation"
         )
     
-    def on_page_show(self):
-        """Called when the page is shown to the user."""
-        # Clear the current summary and rebuild it with the latest configuration
+    def on_enter(self):
+        """Called when the page is shown."""
         self.update_summary_text()
+        
+        # Update button text based on installation state
+        if self.app.install_manager.files_copied:
+            self.set_next_button_text("Finish")
+        else:
+            self.set_next_button_text("Install")
     
     def create_widgets(self):
         """Create page-specific widgets."""
@@ -117,344 +122,180 @@ class SummaryPage(BasePage):
     
     def update_summary_text(self):
         """Update the summary text with the current configuration."""
+        # Enable editing
         self.summary_text.config(state="normal")
-        self.summary_text.delete(1.0, tk.END)
         
-        # Helper function to add sections
-        def add_section(title, content, level=1):
-            if level == 1:
-                self.summary_text.insert(tk.END, f"\n{title}\n", "section1")
-                self.summary_text.insert(tk.END, "="*len(title) + "\n\n")
-            elif level == 2:
-                self.summary_text.insert(tk.END, f"\n{title}\n", "section2")
-                self.summary_text.insert(tk.END, "-"*len(title) + "\n\n")
-            else:
-                self.summary_text.insert(tk.END, f"\n{title}:\n\n", "section3")
-            
-            if isinstance(content, dict):
-                for key, value in content.items():
-                    if isinstance(value, dict):
-                        add_section(key, value, level+1)
-                    elif isinstance(value, list):
-                        self.summary_text.insert(tk.END, f"{key}: \n")
-                        for item in value:
-                            if isinstance(item, dict):
-                                for k, v in item.items():
-                                    self.summary_text.insert(tk.END, f"  - {k}: {v}\n")
-                            else:
-                                self.summary_text.insert(tk.END, f"  - {item}\n")
-                        self.summary_text.insert(tk.END, "\n")
-                    else:
-                        display_value = self._format_value(value)
-                        self.summary_text.insert(tk.END, f"{key}: {display_value}\n")
-            elif isinstance(content, list):
-                for item in content:
-                    self.summary_text.insert(tk.END, f"- {item}\n")
-            else:
-                self.summary_text.insert(tk.END, f"{content}\n")
+        # Clear any existing text
+        self.summary_text.delete(1.0, "end")
         
-        # Create tag configurations
-        self.summary_text.tag_configure("section1", font=("TkDefaultFont", 12, "bold"))
-        self.summary_text.tag_configure("section2", font=("TkDefaultFont", 11, "bold"))
-        self.summary_text.tag_configure("section3", font=("TkDefaultFont", 10, "bold"))
-        
-        # Add installation information
-        self.summary_text.insert(tk.END, "ARCADE STATION INSTALLATION SUMMARY\n", "section1")
-        self.summary_text.insert(tk.END, "="*35 + "\n\n")
+        # Insert summary header
+        self.summary_text.insert("end", "INSTALLATION SUMMARY\n", "header")
+        self.summary_text.insert("end", "===================\n\n")
         
         # Installation path
-        install_path = self.app.user_config.get("install_path", "")
-        self.summary_text.insert(tk.END, f"Installation Path: {install_path}\n\n")
+        self.summary_text.insert("end", "Installation Path:\n", "section")
+        self.summary_text.insert("end", f"{self.app.user_config.get('install_path', 'Not specified')}\n\n")
         
-        # Platform specific settings
-        platform = "Windows" if self.app.install_manager.is_windows else "Linux" if self.app.install_manager.is_linux else "MacOS"
-        self.summary_text.insert(tk.END, f"Platform: {platform}\n")
+        # Installation status
+        self.summary_text.insert("end", "Installation Status:\n", "section")
+        if self.app.install_manager.files_copied:
+            self.summary_text.insert("end", "Files have been copied to the installation location.\n")
+            self.summary_text.insert("end", "Configuration files are being updated as you make changes.\n\n")
+        else:
+            self.summary_text.insert("end", "Files will be copied when you click 'Install'.\n\n")
         
-        if self.app.install_manager.is_windows:
-            self.summary_text.insert(tk.END, f"Kiosk Mode: {'Enabled' if self.app.user_config.get('kiosk_mode', False) else 'Disabled'}\n")
+        # Display configuration
+        self.summary_text.insert("end", "Display Configuration:\n", "section")
+        self.summary_text.insert("end", f"Dynamic Marquee: {'Enabled' if self.app.user_config.get('use_dynamic_marquee', False) else 'Disabled'}\n")
+        
+        if self.app.user_config.get('use_dynamic_marquee', False):
+            self.summary_text.insert("end", f"Marquee Monitor: {self.app.user_config.get('marquee_monitor', 1)}\n")
+            self.summary_text.insert("end", f"Background Color: {self.app.user_config.get('marquee_background_color', 'black')}\n")
             
-            startup_options = []
-            if self.app.user_config.get("add_to_startup", False):
-                startup_options.append("Add to Windows Startup")
-            if self.app.user_config.get("create_desktop_shortcut", False):
-                startup_options.append("Create Desktop Shortcut")
-            if self.app.user_config.get("create_start_menu", False):
-                startup_options.append("Create Start Menu Entry")
+            default_image = self.app.user_config.get('default_marquee_image', '')
+            if default_image:
+                self.summary_text.insert("end", f"Default Image: {default_image}\n")
             
-            if startup_options:
-                self.summary_text.insert(tk.END, "Windows Options:\n")
-                for option in startup_options:
-                    self.summary_text.insert(tk.END, f"  - {option}\n")
+            self.summary_text.insert("end", f"ITGMania Integration: {'Enabled' if self.app.user_config.get('enable_itgmania_display', False) else 'Disabled'}\n")
         
-        # Display settings
-        self.summary_text.insert(tk.END, "\n")
-        display_settings = self.app.user_config.get("display", {})
-        if display_settings:
-            resolution = display_settings.get("resolution", "1920x1080")
-            fullscreen = display_settings.get("fullscreen", True)
-            vsync = display_settings.get("vsync", True)
-            multi_monitor = display_settings.get("use_multiple_monitors", False)
-            
-            self.summary_text.insert(tk.END, "Display Settings:\n")
-            self.summary_text.insert(tk.END, f"  - Resolution: {resolution}\n")
-            self.summary_text.insert(tk.END, f"  - Fullscreen: {'Yes' if fullscreen else 'No'}\n")
-            self.summary_text.insert(tk.END, f"  - VSync: {'Enabled' if vsync else 'Disabled'}\n")
-            self.summary_text.insert(tk.END, f"  - Multi-monitor: {'Yes' if multi_monitor else 'No'}\n")
-            
-            if multi_monitor:
-                monitor_config = display_settings.get("monitor_config", {})
-                if monitor_config:
-                    self.summary_text.insert(tk.END, "  - Monitor Configuration:\n")
-                    for monitor, config in monitor_config.items():
-                        self.summary_text.insert(tk.END, f"    - {monitor}: {config}\n")
+        self.summary_text.insert("end", "\n")
         
-        # Add sections for each major configuration component
-        self._add_game_configs()
-        self._add_controls_config()
-        self._add_lighting_config()
-        self._add_utilities_config()
+        # Game configuration
+        self.summary_text.insert("end", "Game Configuration:\n", "section")
         
-        # Set text to read-only
+        # ITGMania
+        itgmania_path = self.app.user_config.get('itgmania_path', '')
+        if itgmania_path:
+            self.summary_text.insert("end", f"ITGMania: {itgmania_path}\n")
+        
+        # Binary games
+        binary_games = self.app.user_config.get('binary_games', {})
+        if binary_games:
+            self.summary_text.insert("end", "\nBinary Games:\n")
+            for game_id, game_info in binary_games.items():
+                self.summary_text.insert("end", f"- {game_info.get('display_name', game_id)}: {game_info.get('path', 'No path')}\n")
+        
+        # MAME games
+        mame_games = self.app.user_config.get('mame_games', {})
+        if mame_games:
+            self.summary_text.insert("end", "\nMAME Games:\n")
+            for game_id, game_info in mame_games.items():
+                self.summary_text.insert("end", f"- {game_info.get('display_name', game_id)}: {game_info.get('rom', 'No ROM')}\n")
+        
+        self.summary_text.insert("end", "\n")
+        
+        # System configuration
+        self.summary_text.insert("end", "System Configuration:\n", "section")
+        
+        # Kiosk mode
+        kiosk_mode = self.app.user_config.get('enable_kiosk_mode', False)
+        self.summary_text.insert("end", f"Kiosk Mode: {'Enabled' if kiosk_mode else 'Disabled'}\n")
+        
+        if kiosk_mode:
+            self.summary_text.insert("end", f"Replace Shell: {'Yes' if self.app.user_config.get('kiosk_replace_shell', False) else 'No'}\n")
+        
+        # Add tag configuration
+        self.summary_text.insert("end", "\n")
+        
+        # Style the text
+        self.summary_text.tag_configure("header", font=("Arial", 12, "bold"))
+        self.summary_text.tag_configure("section", font=("Arial", 10, "bold"))
+        
+        # Disable editing
         self.summary_text.config(state="disabled")
     
-    def _format_value(self, value):
-        """Format a value for display in the summary."""
-        if isinstance(value, bool):
-            return "Yes" if value else "No"
-        return str(value)
+    def on_next(self):
+        """Handle the next button click."""
+        if not self.app.install_manager.files_copied:
+            # If files haven't been copied yet, install now
+            self.install()
+        else:
+            # Files already copied, just finish
+            messagebox.showinfo(
+                "Installation Complete",
+                "Arcade Station has been successfully installed and configured!\n\n"
+                "You can now start using it."
+            )
+            super().on_next()
     
-    def _add_game_configs(self):
-        """Add game configuration sections to the summary."""
-        # ITGMania
-        itgmania_config = self.app.user_config.get("itgmania", {})
-        if itgmania_config.get("enabled", False):
-            self.summary_text.insert(tk.END, "\nITGMania Integration\n", "section2")
-            self.summary_text.insert(tk.END, "-------------------\n\n")
-            
-            itg_path = itgmania_config.get("path", "")
-            self.summary_text.insert(tk.END, f"Path: {itg_path}\n")
-            
-            use_default_image = itgmania_config.get("use_default_image", True)
-            custom_image = itgmania_config.get("custom_image", "")
-            
-            self.summary_text.insert(tk.END, f"Banner: {'Default' if use_default_image else custom_image}\n")
-            
-            noteskins = itgmania_config.get("noteskins", [])
-            if noteskins:
-                self.summary_text.insert(tk.END, "Noteskins:\n")
-                for noteskin in noteskins:
-                    self.summary_text.insert(tk.END, f"  - {noteskin}\n")
+    def install(self):
+        """Perform the installation."""
+        # Show a progress dialog
+        progress_window = tk.Toplevel(self.app.root)
+        progress_window.title("Installing Arcade Station")
+        progress_window.geometry("400x150")
+        progress_window.transient(self.app.root)
+        progress_window.grab_set()
         
-        # Binary Games
-        binary_games = self.app.user_config.get("binary_games", {})
-        if binary_games:
-            self.summary_text.insert(tk.END, "\nBinary Games\n", "section2")
-            self.summary_text.insert(tk.END, "------------\n\n")
-            
-            for game_id, game in binary_games.items():
-                name = game.get("display_name", "")
-                executable = game.get("executable", "")
-                banner = game.get("banner", "")
-                
-                self.summary_text.insert(tk.END, f"Game: {name}\n")
-                self.summary_text.insert(tk.END, f"  - ID: {game_id}\n")
-                self.summary_text.insert(tk.END, f"  - Executable: {executable}\n")
-                if banner:
-                    self.summary_text.insert(tk.END, f"  - Banner: {banner}\n")
-                self.summary_text.insert(tk.END, "\n")
+        # Center the window
+        progress_window.update_idletasks()
+        width = progress_window.winfo_width()
+        height = progress_window.winfo_height()
+        x = (progress_window.winfo_screenwidth() // 2) - (width // 2)
+        y = (progress_window.winfo_screenheight() // 2) - (height // 2)
+        progress_window.geometry(f"{width}x{height}+{x}+{y}")
         
-        # MAME Games
-        mame_config = self.app.user_config.get("mame_path", "")
-        mame_games = self.app.user_config.get("mame_games", {})
+        # Add a header
+        header_label = ttk.Label(
+            progress_window,
+            text="Installing Arcade Station",
+            font=("Arial", 12, "bold")
+        )
+        header_label.pack(pady=(10, 5))
         
-        if mame_config or mame_games:
-            self.summary_text.insert(tk.END, "\nMAME Games\n", "section2")
-            self.summary_text.insert(tk.END, "----------\n\n")
+        # Status label
+        status_label = ttk.Label(
+            progress_window,
+            text="Please wait while the installation is completed...",
+            wraplength=380,
+            justify="center"
+        )
+        status_label.pack(pady=5)
+        
+        # Progress bar
+        progress_bar = ttk.Progressbar(
+            progress_window,
+            mode="indeterminate"
+        )
+        progress_bar.pack(fill="x", padx=20, pady=10)
+        progress_bar.start()
+        
+        # Update the UI
+        progress_window.update()
+        
+        # Perform the installation in a separate thread to keep the UI responsive
+        import threading
+        
+        def install_thread():
+            success = self.app.install_manager.perform_installation(self.app.user_config)
             
-            if mame_config:
-                self.summary_text.insert(tk.END, f"MAME Path: {mame_config}\n")
-                
-                mame_inipath = self.app.user_config.get("mame_inipath", "")
-                if mame_inipath:
-                    self.summary_text.insert(tk.END, f"MAME INI Path: {mame_inipath}\n")
-            
-            if mame_games:
-                self.summary_text.insert(tk.END, "\nConfigured MAME Games:\n")
-                for game_id, game in mame_games.items():
-                    name = game.get("display_name", "")
-                    rom = game.get("rom", "")
-                    state = game.get("state", "")
-                    
-                    self.summary_text.insert(tk.END, f"Game: {name}\n")
-                    self.summary_text.insert(tk.END, f"  - ROM: {rom}\n")
-                    self.summary_text.insert(tk.END, f"  - Save State: {state}\n")
-                    self.summary_text.insert(tk.END, "\n")
+            # Update the UI on the main thread
+            self.app.root.after(0, lambda: self.installation_complete(success, progress_window))
+        
+        threading.Thread(target=install_thread).start()
     
-    def _add_controls_config(self):
-        """Add controls configuration to the summary."""
-        controls_config = self.app.user_config.get("controls", {})
-        if controls_config:
-            self.summary_text.insert(tk.END, "\nControls Configuration\n", "section2")
-            self.summary_text.insert(tk.END, "---------------------\n\n")
-            
-            # Input types
-            input_types = []
-            if controls_config.get("use_arcade_controls", False):
-                input_types.append("Arcade Controls")
-            if controls_config.get("use_gamepad", False):
-                input_types.append("Gamepad")
-            if controls_config.get("use_keyboard", False):
-                input_types.append("Keyboard")
-            
-            if input_types:
-                self.summary_text.insert(tk.END, "Input Types: " + ", ".join(input_types) + "\n\n")
-            
-            # Arcade controls
-            arcade_config = controls_config.get("arcade", {})
-            if arcade_config:
-                self.summary_text.insert(tk.END, "Arcade Controls:\n")
-                self.summary_text.insert(tk.END, f"  - Players: {arcade_config.get('players', 2)}\n")
-                self.summary_text.insert(tk.END, f"  - Buttons per player: {arcade_config.get('buttons_per_player', 8)}\n")
-                self.summary_text.insert(tk.END, f"  - Interface: {arcade_config.get('interface', 'xinput')}\n")
-                
-                custom_mapping = arcade_config.get("custom_mapping_file", "")
-                if custom_mapping:
-                    self.summary_text.insert(tk.END, f"  - Custom mapping: {custom_mapping}\n")
-                
-                self.summary_text.insert(tk.END, "\n")
-            
-            # Gamepad
-            gamepad_config = controls_config.get("gamepad", {})
-            if gamepad_config:
-                self.summary_text.insert(tk.END, "Gamepad:\n")
-                self.summary_text.insert(tk.END, f"  - Maximum gamepads: {gamepad_config.get('max_gamepads', 4)}\n")
-                self.summary_text.insert(tk.END, f"  - Preferred type: {gamepad_config.get('preferred_type', 'xbox')}\n")
-                self.summary_text.insert(tk.END, "\n")
-            
-            # Keyboard
-            keyboard_config = controls_config.get("keyboard", {})
-            if keyboard_config:
-                self.summary_text.insert(tk.END, "Keyboard:\n")
-                self.summary_text.insert(tk.END, f"  - Layout: {keyboard_config.get('layout', 'us')}\n")
-                self.summary_text.insert(tk.END, f"  - Standard mappings: {'Yes' if keyboard_config.get('use_standard_mappings', True) else 'No'}\n")
-                
-                custom_mapping = keyboard_config.get("custom_mapping_file", "")
-                if custom_mapping:
-                    self.summary_text.insert(tk.END, f"  - Custom mapping: {custom_mapping}\n")
-    
-    def _add_lighting_config(self):
-        """Add lighting configuration to the summary."""
-        lighting_config = self.app.user_config.get("lighting", {})
-        if lighting_config and lighting_config.get("enabled", False):
-            self.summary_text.insert(tk.END, "\nLighting Configuration\n", "section2")
-            self.summary_text.insert(tk.END, "----------------------\n\n")
-            
-            self.summary_text.insert(tk.END, f"System: {lighting_config.get('system', 'arduino')}\n")
-            self.summary_text.insert(tk.END, f"Brightness: {lighting_config.get('brightness', 75)}%\n")
-            self.summary_text.insert(tk.END, f"Default Animation: {lighting_config.get('default_animation', 'rainbow')}\n")
-            
-            # Arduino settings
-            arduino_config = lighting_config.get("arduino", {})
-            if arduino_config:
-                self.summary_text.insert(tk.END, "\nArduino Settings:\n")
-                self.summary_text.insert(tk.END, f"  - Port: {arduino_config.get('port', '')}\n")
-                self.summary_text.insert(tk.END, f"  - Number of LEDs: {arduino_config.get('num_leds', 60)}\n")
-                
-                sketch = arduino_config.get("sketch", "")
-                if sketch:
-                    self.summary_text.insert(tk.END, f"  - Sketch: {sketch}\n")
-            
-            # Button lighting
-            button_lighting = lighting_config.get("button_lighting", {})
-            if button_lighting and button_lighting.get("enabled", False):
-                self.summary_text.insert(tk.END, "\nButton Lighting:\n")
-                player_colors = button_lighting.get("player_colors", [])
-                for i, color in enumerate(player_colors, 1):
-                    self.summary_text.insert(tk.END, f"  - Player {i}: {color}\n")
-            
-            # Cabinet layout
-            cabinet = lighting_config.get("cabinet", {})
-            if cabinet:
-                self.summary_text.insert(tk.END, "\nCabinet Layout:\n")
-                self.summary_text.insert(tk.END, f"  - Marquee: {'Yes' if cabinet.get('has_marquee', True) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Control Panel Lighting: {'Yes' if cabinet.get('has_cp_lighting', True) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Speaker Lighting: {'Yes' if cabinet.get('has_speaker_lighting', False) else 'No'}\n")
-            
-            # Custom config
-            custom_config = lighting_config.get("custom_config", "")
-            if custom_config:
-                self.summary_text.insert(tk.END, f"\nCustom Configuration: {custom_config}\n")
-    
-    def _add_utilities_config(self):
-        """Add utilities configuration to the summary."""
-        utilities_config = self.app.user_config.get("utilities", {})
-        if utilities_config:
-            self.summary_text.insert(tk.END, "\nUtilities Configuration\n", "section2")
-            self.summary_text.insert(tk.END, "-----------------------\n\n")
-            
-            # System utilities
-            system = utilities_config.get("system", {})
-            if system:
-                self.summary_text.insert(tk.END, "System Utilities:\n")
-                self.summary_text.insert(tk.END, f"  - Enabled: {'Yes' if system.get('enabled', True) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Auto Updates: {'Yes' if system.get('auto_updates', True) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - System Monitoring: {'Yes' if system.get('system_monitoring', True) else 'No'}\n")
-                self.summary_text.insert(tk.END, f"  - Error Reporting: {'Yes' if system.get('error_reporting', True) else 'No'}\n")
-                
-                log_dir = system.get("log_directory", "")
-                if log_dir:
-                    self.summary_text.insert(tk.END, f"  - Custom Log Directory: {log_dir}\n")
-                
-                self.summary_text.insert(tk.END, "\n")
-            
-            # Backup settings
-            backup = utilities_config.get("backup", {})
-            if backup and backup.get("enabled", False):
-                self.summary_text.insert(tk.END, "Backup Settings:\n")
-                self.summary_text.insert(tk.END, f"  - Frequency: {backup.get('frequency', 'weekly')}\n")
-                self.summary_text.insert(tk.END, f"  - Directory: {backup.get('directory', '')}\n")
-                self.summary_text.insert(tk.END, f"  - Keep Backups: {backup.get('keep_backups', 5)}\n")
-                self.summary_text.insert(tk.END, "\n")
-            
-            # Maintenance tools
-            tools = utilities_config.get("maintenance_tools", {})
-            if tools:
-                enabled_tools = []
-                if tools.get("rom_validator", False):
-                    enabled_tools.append("ROM Validator")
-                if tools.get("input_tester", False):
-                    enabled_tools.append("Input Tester")
-                if tools.get("system_cleaner", False):
-                    enabled_tools.append("System Cleaner")
-                if tools.get("config_editor", False):
-                    enabled_tools.append("Configuration Editor")
-                if tools.get("media_manager", False):
-                    enabled_tools.append("Media Manager")
-                if tools.get("quick_service", False):
-                    enabled_tools.append("Quick Service Menu")
-                
-                if enabled_tools:
-                    self.summary_text.insert(tk.END, "Maintenance Tools:\n")
-                    for tool in enabled_tools:
-                        self.summary_text.insert(tk.END, f"  - {tool}\n")
-                    self.summary_text.insert(tk.END, "\n")
-            
-            # Advanced options
-            advanced = utilities_config.get("advanced", {})
-            if advanced:
-                self.summary_text.insert(tk.END, "Advanced Options:\n")
-                self.summary_text.insert(tk.END, f"  - Maintenance Key: {advanced.get('maintenance_key', 'F10')}\n")
-                
-                if "maintenance_password" in advanced:
-                    self.summary_text.insert(tk.END, "  - Maintenance Password: [Set]\n")
-                
-                self.summary_text.insert(tk.END, "\n")
-            
-            # Custom scripts
-            scripts = utilities_config.get("custom_scripts", {})
-            if scripts and scripts.get("enabled", False):
-                self.summary_text.insert(tk.END, "Custom Scripts:\n")
-                self.summary_text.insert(tk.END, f"  - Directory: {scripts.get('directory', '')}\n")
+    def installation_complete(self, success, progress_window):
+        """Handle installation completion.
+        
+        Args:
+            success: Whether the installation was successful
+            progress_window: The progress dialog to close
+        """
+        # Close the progress window
+        progress_window.destroy()
+        
+        if success:
+            messagebox.showinfo(
+                "Installation Complete",
+                "Arcade Station has been successfully installed!\n\n"
+                "You can now start using it."
+            )
+            super().on_next()
+        else:
+            messagebox.showerror(
+                "Installation Failed",
+                "The installation could not be completed. Please check the logs for details."
+            )
     
     def export_config(self):
         """Export the configuration to a JSON file."""

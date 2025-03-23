@@ -3,6 +3,8 @@ Base Page class for all installer wizard pages
 """
 import tkinter as tk
 from tkinter import ttk
+import os
+import tomllib
 
 class BasePage:
     """Base class for all installer wizard pages."""
@@ -137,4 +139,76 @@ class BasePage:
         Args:
             enabled: True to enable, False to disable
         """
-        self.next_button.config(state="normal" if enabled else "disabled") 
+        self.next_button.config(state="normal" if enabled else "disabled")
+        
+    def update_installed_config(self, key, value):
+        """Update a configuration value in the installed config file.
+        
+        Args:
+            key: Configuration key path (e.g., "display.monitor_index")
+            value: New value to set
+            
+        Returns:
+            bool: True if update was successful, False otherwise
+        """
+        if not self.app.user_config.get("install_path"):
+            return False
+            
+        install_path = self.app.user_config["install_path"]
+        config_dir = os.path.join(install_path, "config")
+        
+        # Determine which config file to update based on the key prefix
+        config_file = None
+        if key.startswith("display.") or key.startswith("dynamic_marquee."):
+            config_file = os.path.join(config_dir, "display_config.toml")
+        elif key.startswith("default."):
+            config_file = os.path.join(config_dir, "default_config.toml")
+        elif key.startswith("keys."):
+            config_file = os.path.join(config_dir, "key_listener.toml")
+        elif key.startswith("process_names."):
+            config_file = os.path.join(config_dir, "processes_to_kill.toml")
+        elif key.startswith("mame."):
+            config_file = os.path.join(config_dir, "mame_config.toml")
+        elif key.startswith("screenshot.") or key.startswith("icloud."):
+            config_file = os.path.join(config_dir, "screenshot_config.toml")
+        elif key.startswith("lights.") or key.startswith("streaming.") or key.startswith("vpn.") or key.startswith("volume_control."):
+            config_file = os.path.join(config_dir, "utility_config.toml")
+        elif key.startswith("pegasus."):
+            config_file = os.path.join(config_dir, "pegasus_binaries.toml")
+        elif key.startswith("games."):
+            config_file = os.path.join(config_dir, "installed_games.toml")
+        
+        if not config_file or not os.path.exists(config_file):
+            return False
+        
+        try:
+            # Read existing config
+            with open(config_file, 'rb') as f:
+                config_data = tomllib.load(f)
+            
+            # Update the value
+            key_parts = key.split('.')
+            current = config_data
+            
+            # Navigate to the nested dict
+            for part in key_parts[:-1]:
+                if part not in current:
+                    current[part] = {}
+                current = current[part]
+            
+            # Set the value
+            current[key_parts[-1]] = value
+            
+            # Write back to file
+            try:
+                import tomli_w
+                with open(config_file, 'wb') as f:
+                    tomli_w.dump(config_data, f)
+            except ImportError:
+                # Fallback to manual writing
+                self.app.install_manager._write_toml_manually(config_file, config_data)
+                
+            return True
+        except Exception as e:
+            print(f"Error updating config: {str(e)}")
+            return False 

@@ -217,6 +217,10 @@ class DisplayConfigPage(BasePage):
         else:
             self.marquee_settings.pack_forget()
             self.itgmania_frame.pack_forget()
+            
+        # Update the configuration immediately
+        if self.app.user_config.get("install_path"):
+            self.update_installed_config("dynamic_marquee.enabled", self.enable_marquee_var.get())
     
     def browse_image(self):
         """Open a file browser dialog for selecting the default marquee image."""
@@ -232,6 +236,10 @@ class DisplayConfigPage(BasePage):
         
         if image_path:
             self.image_var.set(image_path)
+            
+            # Update the configuration immediately
+            if self.app.user_config.get("install_path"):
+                self.update_installed_config("display.default_image_path", image_path)
     
     def validate(self):
         """Validate display configuration settings."""
@@ -296,32 +304,18 @@ class DisplayConfigPage(BasePage):
                 self.toggle_marquee_options()
 
     def save_data(self):
-        """Save display configuration settings."""
+        """Save the display configuration data."""
+        # Store display settings in user_config
         self.app.user_config["use_dynamic_marquee"] = self.enable_marquee_var.get()
+        self.app.user_config["marquee_monitor"] = int(self.monitor_var.get())
+        self.app.user_config["marquee_background_color"] = self.color_var.get()
+        self.app.user_config["default_marquee_image"] = self.image_var.get()
+        self.app.user_config["enable_itgmania_display"] = self.enable_itgmania_var.get()
         
-        if self.enable_marquee_var.get():
-            self.app.user_config["marquee_monitor"] = int(self.monitor_var.get())
-            self.app.user_config["marquee_background_color"] = self.color_var.get()
-            
-            if self.image_var.get().strip():
-                self.app.user_config["default_marquee_image"] = self.image_var.get().strip()
-            
-            self.app.user_config["enable_itgmania_display"] = self.enable_itgmania_var.get()
-        
-        # Create the display_config structure for the TOML file
-        display_config = {
-            "marquee": {
-                "enabled": self.enable_marquee_var.get(),
-                "monitor": int(self.monitor_var.get()) if self.enable_marquee_var.get() else 0,
-                "background_color": self.color_var.get(),
-                "default_image": self.image_var.get().strip() if self.enable_marquee_var.get() and self.image_var.get().strip() else ""
-            },
-            "itgmania_display": {
-                "enabled": self.enable_itgmania_var.get() if self.enable_marquee_var.get() else False,
-                "simfile_banner_enabled": True,
-                "song_background_enabled": True
-            }
-        }
-        
-        # Store the complete configuration
-        self.app.user_config["display_config"] = display_config 
+        # Also update the installed configuration directly
+        if self.app.user_config.get("install_path"):
+            self.update_installed_config("display.monitor_index", int(self.monitor_var.get()))
+            self.update_installed_config("display.background_color", self.color_var.get())
+            self.update_installed_config("display.default_image_path", self.image_var.get())
+            self.update_installed_config("dynamic_marquee.enabled", self.enable_marquee_var.get())
+            self.update_installed_config("dynamic_marquee.itgmania_display_enabled", self.enable_itgmania_var.get()) 

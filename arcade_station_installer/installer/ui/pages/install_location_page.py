@@ -163,4 +163,235 @@ class InstallLocationPage(BasePage):
     
     def save_data(self):
         """Save the installation path."""
-        self.app.user_config["install_path"] = self.path_var.get().strip() 
+        install_path = self.path_var.get().strip()
+        self.app.user_config["install_path"] = install_path
+        
+        # Skip file copy if we're in reconfigure mode or files are already copied
+        if self.app.is_reconfigure_mode or self.app.install_manager.files_copied:
+            return
+        
+        # Immediately copy project files to the installation location
+        try:
+            # Show a progress indicator
+            progress_window = tk.Toplevel(self.app.root)
+            progress_window.title("Copying Files")
+            progress_window.geometry("400x200")
+            progress_window.transient(self.app.root)
+            progress_window.grab_set()
+            
+            # Center the window
+            progress_window.update_idletasks()
+            width = progress_window.winfo_width()
+            height = progress_window.winfo_height()
+            x = (progress_window.winfo_screenwidth() // 2) - (width // 2)
+            y = (progress_window.winfo_screenheight() // 2) - (height // 2)
+            progress_window.geometry(f"{width}x{height}+{x}+{y}")
+            
+            # Add a header
+            header_label = ttk.Label(
+                progress_window,
+                text="Copying Project Files",
+                font=("Arial", 12, "bold")
+            )
+            header_label.pack(pady=(10, 5))
+            
+            # Add a description
+            progress_label = ttk.Label(
+                progress_window, 
+                text=f"Copying files to:\n{install_path}",
+                wraplength=380,
+                justify="center"
+            )
+            progress_label.pack(pady=5)
+            
+            # Add a status label that will be updated
+            status_label = ttk.Label(
+                progress_window,
+                text="Preparing...",
+                wraplength=380,
+                justify="center"
+            )
+            status_label.pack(pady=5)
+            
+            # Add progress bar
+            progress_bar = ttk.Progressbar(
+                progress_window,
+                mode="indeterminate"
+            )
+            progress_bar.pack(fill="x", padx=20, pady=10)
+            progress_bar.start()
+            
+            # Update the UI
+            progress_window.update()
+            
+            # Define a callback to update the status label
+            def update_status(message):
+                status_label.config(text=message)
+                progress_window.update()
+            
+            # Create the base directories
+            update_status("Creating directory structure...")
+            os.makedirs(install_path, exist_ok=True)
+            src_dir = os.path.join(install_path, "src")
+            os.makedirs(src_dir, exist_ok=True)
+            config_dir = os.path.join(install_path, "config")
+            os.makedirs(config_dir, exist_ok=True)
+            
+            # Patch the copy_project_files method to use our status callback
+            original_copy = self.app.install_manager._copy_project_files
+            
+            def patched_copy(install_path):
+                try:
+                    import shutil
+                    from pathlib import Path
+                    import os
+                    
+                    # Get the current directory (where the installer is running from)
+                    current_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
+                    
+                    # Show source directory in status
+                    update_status(f"Copying from: {current_dir}")
+                    
+                    # Need to copy everything (all directories and files)
+                    update_status("Starting full copy of all project files...")
+                    
+                    # Get all items in the current directory
+                    all_items = list(current_dir.iterdir())
+                    
+                    # Keep a count for user feedback
+                    total_dirs_copied = 0
+                    total_files_copied = 0
+                    
+                    # Copy each item (except the installer while it's running)
+                    for item in all_items:
+                        # Skip the installer for now to avoid copying it while it's running
+                        if item.name == "arcade_station_installer":
+                            continue
+                            
+                        dst_path = Path(install_path) / item.name
+                        
+                        update_status(f"Copying {item.name}...")
+                        
+                        # Remove destination if it exists
+                        if dst_path.exists():
+                            if dst_path.is_dir():
+                                shutil.rmtree(dst_path)
+                            else:
+                                os.remove(dst_path)
+                        
+                        # Copy directory or file with detailed status updates
+                        if item.is_dir():
+                            # Add a callback function to count items being copied
+                            def copy_with_progress(src, dst):
+                                nonlocal total_dirs_copied, total_files_copied
+                                if os.path.isdir(src):
+                                    total_dirs_copied += 1
+                                    os.makedirs(dst, exist_ok=True)
+                                    update_status(f"Copying directory: {os.path.basename(src)}")
+                                    items = os.listdir(src)
+                                    for item in items:
+                                        s = os.path.join(src, item)
+                                        d = os.path.join(dst, item)
+                                        copy_with_progress(s, d)
+                                else:
+                                    total_files_copied += 1
+                                    shutil.copy2(src, dst)
+                            
+                            # Use our custom recursive copy function
+                            copy_with_progress(str(item), str(dst_path))
+                        else:
+                            shutil.copy2(item, dst_path)
+                            total_files_copied += 1
+                    
+                    # Now copy the installer directory (without locking it up)
+                    installer_src = current_dir / "arcade_station_installer"
+                    installer_dst = Path(install_path) / "arcade_station_installer"
+                    
+                    if installer_src.exists():
+                        update_status("Copying installer files...")
+                        
+                        # Create the destination directory
+                        os.makedirs(installer_dst, exist_ok=True)
+                        
+                        # Copy all files and subdirectories in the installer except for any running processes
+                        for item in installer_src.iterdir():
+                            dst_item = installer_dst / item.name
+                            try:
+                                if item.is_dir():
+                                    # Use our custom recursive copy function for complete copy
+                                    def copy_installer_dir(src, dst):
+                                        nonlocal total_dirs_copied, total_files_copied
+                                        os.makedirs(dst, exist_ok=True)
+                                        total_dirs_copied += 1
+                                        
+                                        for item in os.listdir(src):
+                                            s = os.path.join(src, item)
+                                            d = os.path.join(dst, item)
+                                            
+                                            if os.path.isdir(s):
+                                                copy_installer_dir(s, d)
+                                            else:
+                                                try:
+                                                    shutil.copy2(s, d)
+                                                    total_files_copied += 1
+                                                except (PermissionError, OSError) as e:
+                                                    update_status(f"Skipping locked file: {os.path.basename(s)}")
+                                    
+                                    copy_installer_dir(str(item), str(dst_item))
+                                else:
+                                    try:
+                                        shutil.copy2(item, dst_item)
+                                        total_files_copied += 1
+                                    except (PermissionError, OSError):
+                                        update_status(f"Skipping locked file: {item.name}")
+                            except Exception as e:
+                                update_status(f"Error copying {item.name}: {str(e)}")
+                    
+                    # Ensure these specific directories exist even if not in source
+                    required_dirs = [
+                        "src/arcade_station",
+                        "src/pegasus-fe/config/metafiles",
+                        "config",
+                        "assets/images/banners",
+                        ".venv"
+                    ]
+                    
+                    for dir_path in required_dirs:
+                        dir_full_path = Path(install_path) / dir_path
+                        if not dir_full_path.exists():
+                            update_status(f"Creating required directory: {dir_path}")
+                            os.makedirs(dir_full_path, exist_ok=True)
+                    
+                    # Mark files as copied
+                    self.app.install_manager.files_copied = True
+                    update_status(f"Copy completed: {total_dirs_copied} directories and {total_files_copied} files copied successfully!")
+                    
+                except Exception as e:
+                    update_status(f"Error copying files: {str(e)}")
+                    raise
+            
+            # Replace the method temporarily
+            self.app.install_manager._copy_project_files = patched_copy
+            
+            try:
+                # Copy the project files using our patched method
+                self.app.install_manager._copy_project_files(install_path)
+                
+                # Wait a moment so the user can see the "success" message
+                self.app.root.after(1000, lambda: progress_bar.stop())
+                self.app.root.after(1500, lambda: progress_window.destroy())
+                
+                # Don't show the messagebox if the success message will be visible in the progress dialog
+            finally:
+                # Restore the original method
+                self.app.install_manager._copy_project_files = original_copy
+            
+        except Exception as e:
+            # Set files_copied to False in case of error
+            self.app.install_manager.files_copied = False
+            
+            messagebox.showerror(
+                "Copy Error",
+                f"An error occurred while copying files: {str(e)}\n\n"
+                "You can continue, but the installation may not function correctly."
+            ) 
