@@ -364,7 +364,6 @@ class ITGManiaSetupPage(BasePage):
                 "type": "binary",
                 "launch_args": "",
                 "banner": image_path,
-                "display_module_installed": self.install_module_var.get(),
                 "enabled": True
             }
             

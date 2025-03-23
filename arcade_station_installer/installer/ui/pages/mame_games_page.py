@@ -519,8 +519,24 @@ class MAMEGamesPage(BasePage):
         
         return True
     
+    def on_next(self):
+        """Override the base class method to prevent config updates when MAME is disabled."""
+        if self.validate():
+            self.save_data()
+            self.on_leave()
+            self.app.next_page()
+    
     def save_data(self):
         """Save the MAME configuration and game entries."""
+        # Clear previous MAME config if it exists
+        if "mame_path" in self.app.user_config:
+            del self.app.user_config["mame_path"]
+        if "mame_inipath" in self.app.user_config:
+            del self.app.user_config["mame_inipath"]
+        if "mame_games" in self.app.user_config:
+            del self.app.user_config["mame_games"]
+            
+        # Only add MAME configuration if enabled
         if self.use_mame_var.get():
             self.app.user_config["mame_path"] = self.path_var.get().strip()
             

@@ -377,17 +377,29 @@ class DisplayConfigPage(BasePage):
         
         # Also update the installed configuration directly
         if self.app.user_config.get("install_path"):
-            self.update_installed_config("display.monitor_index", int(self.monitor_var.get()))
-            self.update_installed_config("display.background_color", self.color_var.get())
-            
-            if self.use_default_image_var.get():
-                image_path = os.path.join(
-                    self.app.user_config["install_path"],
-                    "assets", "images", "banners", "arcade_station.png"
-                )
-                self.update_installed_config("display.default_image_path", image_path)
-            else:
-                self.update_installed_config("display.default_image_path", self.image_var.get())
+            try:
+                self.update_installed_config("display.monitor_index", int(self.monitor_var.get()))
                 
-            self.update_installed_config("dynamic_marquee.enabled", self.enable_marquee_var.get())
-            self.update_installed_config("dynamic_marquee.itgmania_display_enabled", self.enable_itgmania_var.get()) 
+                # Make sure the color value is a string and properly formatted 
+                bg_color = self.color_var.get()
+                if bg_color.startswith("#") and len(bg_color) not in (4, 7, 9):
+                    # Fix invalid hex value by defaulting to black
+                    bg_color = "black"
+                self.update_installed_config("display.background_color", bg_color)
+                
+                # Update image path
+                if self.use_default_image_var.get():
+                    image_path = os.path.join(
+                        self.app.user_config["install_path"],
+                        "assets", "images", "banners", "arcade_station.png"
+                    )
+                    self.update_installed_config("display.default_image_path", image_path)
+                else:
+                    self.update_installed_config("display.default_image_path", self.image_var.get())
+                    
+                # Update other settings
+                self.update_installed_config("dynamic_marquee.enabled", self.enable_marquee_var.get())
+                self.update_installed_config("dynamic_marquee.itgmania_display_enabled", self.enable_itgmania_var.get())
+            except Exception as e:
+                print(f"Error updating display config: {str(e)}")
+                # Continue without crashing the installer 
