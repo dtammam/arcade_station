@@ -18,6 +18,14 @@ class ITGManiaSetupPage(BasePage):
             "Configure ITGMania integration"
         )
         self.default_image_path = ""
+        
+        # Set the default image path to the standard asset location
+        if "install_path" in self.app.user_config:
+            asset_path = os.path.join(
+                self.app.user_config["install_path"],
+                "assets", "images", "banners", "simply-love.png"
+            )
+            self.default_image_path = asset_path
     
     def create_widgets(self):
         """Create page-specific widgets."""
@@ -189,20 +197,6 @@ class ITGManiaSetupPage(BasePage):
         
         if file_path:
             self.path_var.set(file_path)
-            
-            # Try to find the Simply Love theme and auto-fill the image path
-            if self.use_default_image_var.get():
-                itg_dir = os.path.dirname(file_path)
-                if self.app.install_manager.is_windows:
-                    # For Windows, the exe is in the root dir
-                    theme_dir = os.path.join(itg_dir, "Themes", "Simply Love")
-                else:
-                    # For Linux/Mac, find the appropriate path
-                    theme_dir = os.path.join(file_path, "Themes", "Simply Love")
-                
-                default_image = os.path.join(theme_dir, "Graphics", "Banner.png")
-                if os.path.isfile(default_image):
-                    self.default_image_path = default_image
     
     def browse_image(self):
         """Open a file browser dialog for selecting the ITGMania banner image."""
@@ -249,18 +243,19 @@ class ITGManiaSetupPage(BasePage):
                     "The specified image file does not exist."
                 )
                 return False
-        elif not self.default_image_path:
-            # If using default but no default was found
-            messagebox.showwarning(
-                "Default Image Not Found", 
-                "Could not find the default Simply Love theme image. "
-                "You can continue, but no banner will be displayed."
-            )
         
         return True
     
     def on_enter(self):
         """Called when the page is shown."""
+        # Update the default image path based on the current installation path
+        if "install_path" in self.app.user_config:
+            asset_path = os.path.join(
+                self.app.user_config["install_path"],
+                "assets", "images", "banners", "simply-love.png"
+            )
+            self.default_image_path = asset_path
+        
         # Pre-populate fields if in reconfiguration mode
         if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
             if 'installed_games' in self.app.user_config:
@@ -305,9 +300,15 @@ class ITGManiaSetupPage(BasePage):
             
             # Determine which image to use
             image_path = ""
-            if self.use_default_image_var.get() and self.default_image_path:
-                image_path = self.default_image_path
-                self.app.user_config["itgmania"]["default_image_path"] = self.default_image_path
+            if self.use_default_image_var.get():
+                # Make sure we're using the asset in the installation directory
+                if "install_path" in self.app.user_config:
+                    asset_path = os.path.join(
+                        self.app.user_config["install_path"],
+                        "assets", "images", "banners", "simply-love.png"
+                    )
+                    image_path = asset_path
+                    self.app.user_config["itgmania"]["default_image_path"] = asset_path
             elif not self.use_default_image_var.get() and self.image_var.get().strip():
                 image_path = self.image_var.get().strip()
                 self.app.user_config["itgmania"]["custom_image"] = image_path
