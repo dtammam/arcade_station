@@ -309,8 +309,17 @@ class InstallerApp:
         if self.current_page < len(self.pages) - 1:
             self.show_page(self.current_page + 1)
         else:
-            # We've reached the end of the wizard
-            self.finish_installation()
+            # We've reached the end of the wizard - only finish if we're on the summary page
+            current_page_class = self.pages[self.current_page].__class__.__name__
+            if current_page_class == "SummaryPage":
+                self.finish_installation()
+            else:
+                # If we're not on the summary page but at the end of pages list,
+                # we need to recalculate the page flow
+                self.decide_next_page_flow()
+                # Then try to advance again if there are more pages
+                if self.current_page < len(self.pages) - 1:
+                    self.show_page(self.current_page + 1)
     
     def prev_page(self):
         """Go back to the previous page in the wizard."""

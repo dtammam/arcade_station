@@ -416,7 +416,10 @@ class InstallLocationPage(BasePage):
                 self.app.root.after(1000, lambda: progress_bar.stop())
                 self.app.root.after(1500, lambda: progress_window.destroy())
                 
-                # Don't show the messagebox if the success message will be visible in the progress dialog
+                # Ensure we update the page flow to continue configuration
+                # This is important to prevent the installer from prematurely finishing
+                self.app.decide_next_page_flow()
+                
             finally:
                 # Restore the original method
                 self.app.install_manager._copy_project_files = original_copy
