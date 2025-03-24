@@ -4,19 +4,21 @@ Utility configuration page for the Arcade Station Installer
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
+import platform
 
 from .base_page import BasePage
 
 class UtilityConfigPage(BasePage):
-    """Page for configuring system utilities and maintenance tools."""
+    """Page for configuring system utilities for Arcade Station."""
     
     def __init__(self, container, app):
         """Initialize the utility configuration page."""
         super().__init__(container, app)
         self.set_title(
             "Utilities Setup",
-            "Configure system utilities and maintenance tools"
+            "Configure utilities for your Arcade Station"
         )
+        self.is_windows = platform.system() == "Windows"
     
     def create_widgets(self):
         """Create page-specific widgets."""
@@ -26,513 +28,575 @@ class UtilityConfigPage(BasePage):
         # Introduction
         intro_text = ttk.Label(
             main_frame,
-            text="Configure system utilities and maintenance tools for your Arcade Station. "
-                 "These tools help maintain your system and provide additional functionality.",
+            text="Configure utilities for your Arcade Station. These tools enhance your gaming experience.",
             wraplength=500,
             justify="left"
         )
         intro_text.pack(anchor="w", pady=(0, 15))
         
-        # System utilities frame
-        system_frame = ttk.LabelFrame(
-            main_frame,
-            text="System Utilities",
+        # Lights configuration (Windows only)
+        if self.is_windows:
+            self.create_lights_section(main_frame)
+        
+        # Streaming configuration
+        self.create_streaming_section(main_frame)
+        
+        # VPN configuration (Windows only)
+        if self.is_windows:
+            self.create_vpn_section(main_frame)
+        
+        # OSD configuration (Windows only)
+        if self.is_windows:
+            self.create_osd_section(main_frame)
+    
+    def create_lights_section(self, parent):
+        """Create the lights configuration section."""
+        lights_frame = ttk.LabelFrame(
+            parent,
+            text="Lights Configuration (Windows Only)",
             padding=(10, 5)
         )
-        system_frame.pack(fill="x", pady=10)
+        lights_frame.pack(fill="x", pady=10)
         
-        # Enable system utilities
-        self.enable_system_var = tk.BooleanVar(value=True)
-        enable_system = ttk.Checkbutton(
-            system_frame,
-            text="Enable system utilities",
-            variable=self.enable_system_var
+        # Enable lights management
+        self.enable_lights_var = tk.BooleanVar(value=True)
+        enable_lights = ttk.Checkbutton(
+            lights_frame,
+            text="Do you want Arcade Station to manage your lights? This is useful for things like litboards, as you'll need to reset them when closing your games.",
+            variable=self.enable_lights_var,
+            command=self.toggle_lights_options,
+            wraplength=500
         )
-        enable_system.pack(anchor="w", pady=5)
+        enable_lights.pack(anchor="w", pady=5)
         
-        # Auto updates
-        self.auto_updates_var = tk.BooleanVar(value=True)
-        auto_updates = ttk.Checkbutton(
-            system_frame,
-            text="Check for updates automatically",
-            variable=self.auto_updates_var
-        )
-        auto_updates.pack(anchor="w", padx=20, pady=2)
+        # Lights options frame
+        self.lights_options_frame = ttk.Frame(lights_frame)
         
-        # System monitoring
-        self.system_monitoring_var = tk.BooleanVar(value=True)
-        system_monitoring = ttk.Checkbutton(
-            system_frame,
-            text="Enable system monitoring (CPU, RAM, temperature)",
-            variable=self.system_monitoring_var
-        )
-        system_monitoring.pack(anchor="w", padx=20, pady=2)
+        # Lights reset program
+        reset_frame = ttk.Frame(self.lights_options_frame)
+        reset_frame.pack(fill="x", pady=5)
         
-        # Error reporting
-        self.error_reporting_var = tk.BooleanVar(value=True)
-        error_reporting = ttk.Checkbutton(
-            system_frame,
-            text="Enable automatic error reporting",
-            variable=self.error_reporting_var
-        )
-        error_reporting.pack(anchor="w", padx=20, pady=2)
-        
-        # Custom log directory
-        log_frame = ttk.Frame(system_frame)
-        log_frame.pack(fill="x", padx=20, pady=2)
-        
-        log_label = ttk.Label(
-            log_frame,
-            text="Custom Log Directory:",
+        reset_label = ttk.Label(
+            reset_frame,
+            text="Lights reset program:",
             width=20
         )
-        log_label.pack(side="left", padx=(0, 5))
+        reset_label.pack(side="left", padx=(0, 5))
         
-        self.log_dir_var = tk.StringVar()
-        log_dir_entry = ttk.Entry(
-            log_frame,
-            textvariable=self.log_dir_var,
+        self.lights_reset_var = tk.StringVar(value="../bin/windows/LightsTest.exe")
+        reset_entry = ttk.Entry(
+            reset_frame,
+            textvariable=self.lights_reset_var,
             width=40
         )
-        log_dir_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        reset_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
         
-        browse_log_button = ttk.Button(
-            log_frame,
+        browse_reset_button = ttk.Button(
+            reset_frame,
             text="Browse...",
-            command=self.browse_log_dir
+            command=self.browse_lights_reset
         )
-        browse_log_button.pack(side="right")
+        browse_reset_button.pack(side="right")
         
-        # Backup frame
-        backup_frame = ttk.LabelFrame(
-            main_frame,
-            text="Backup and Restore",
+        # Lights MAME executable
+        mame_frame = ttk.Frame(self.lights_options_frame)
+        mame_frame.pack(fill="x", pady=5)
+        
+        mame_label = ttk.Label(
+            mame_frame,
+            text="Lights MAME executable:",
+            width=20
+        )
+        mame_label.pack(side="left", padx=(0, 5))
+        
+        self.lights_mame_var = tk.StringVar(value="../bin/windows/mame2lit.exe")
+        mame_entry = ttk.Entry(
+            mame_frame,
+            textvariable=self.lights_mame_var,
+            width=40
+        )
+        mame_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_mame_button = ttk.Button(
+            mame_frame,
+            text="Browse...",
+            command=self.browse_lights_mame
+        )
+        browse_mame_button.pack(side="right")
+    
+    def create_streaming_section(self, parent):
+        """Create the streaming configuration section."""
+        streaming_frame = ttk.LabelFrame(
+            parent,
+            text="Streaming Configuration",
             padding=(10, 5)
         )
-        backup_frame.pack(fill="x", pady=10)
+        streaming_frame.pack(fill="x", pady=10)
         
-        # Enable backups
-        self.enable_backup_var = tk.BooleanVar(value=True)
-        enable_backup = ttk.Checkbutton(
-            backup_frame,
-            text="Enable automatic backups",
-            variable=self.enable_backup_var,
-            command=self.toggle_backup_options
+        # Enable streaming
+        self.enable_streaming_var = tk.BooleanVar(value=False)
+        enable_streaming = ttk.Checkbutton(
+            streaming_frame,
+            text="Do you want Arcade Station to help kickoff your streaming session?",
+            variable=self.enable_streaming_var,
+            command=self.toggle_streaming_options,
+            wraplength=500
         )
-        enable_backup.pack(anchor="w", pady=5)
+        enable_streaming.pack(anchor="w", pady=5)
         
-        # Backup options frame
-        self.backup_options_frame = ttk.Frame(backup_frame)
-        self.backup_options_frame.pack(fill="x", pady=5)
+        # Streaming options frame
+        self.streaming_options_frame = ttk.Frame(streaming_frame)
         
-        # Backup frequency
-        frequency_frame = ttk.Frame(self.backup_options_frame)
-        frequency_frame.pack(fill="x", padx=20, pady=2)
+        # Webcam management
+        webcam_frame = ttk.Frame(self.streaming_options_frame)
+        webcam_frame.pack(fill="x", pady=5)
         
-        frequency_label = ttk.Label(
-            frequency_frame,
-            text="Backup Frequency:",
+        self.enable_webcam_var = tk.BooleanVar(value=False)
+        enable_webcam = ttk.Checkbutton(
+            webcam_frame,
+            text="Do you need a webcam management app to start before streaming?",
+            variable=self.enable_webcam_var,
+            command=self.toggle_webcam_options,
+            wraplength=500
+        )
+        enable_webcam.pack(anchor="w", pady=5)
+        
+        # Webcam executable frame
+        self.webcam_options_frame = ttk.Frame(self.streaming_options_frame)
+        
+        webcam_exe_frame = ttk.Frame(self.webcam_options_frame)
+        webcam_exe_frame.pack(fill="x", pady=5)
+        
+        webcam_exe_label = ttk.Label(
+            webcam_exe_frame,
+            text="Webcam app:",
             width=20
         )
-        frequency_label.pack(side="left", padx=(0, 5))
+        webcam_exe_label.pack(side="left", padx=(0, 5))
         
-        self.frequency_var = tk.StringVar(value="weekly")
-        frequency_combo = ttk.Combobox(
-            frequency_frame,
-            textvariable=self.frequency_var,
-            values=["daily", "weekly", "monthly", "manual"],
-            width=15
-        )
-        frequency_combo.pack(side="left")
-        frequency_combo.state(["readonly"])
-        
-        # Backup directory
-        backup_dir_frame = ttk.Frame(self.backup_options_frame)
-        backup_dir_frame.pack(fill="x", padx=20, pady=2)
-        
-        backup_dir_label = ttk.Label(
-            backup_dir_frame,
-            text="Backup Directory:",
-            width=20
-        )
-        backup_dir_label.pack(side="left", padx=(0, 5))
-        
-        self.backup_dir_var = tk.StringVar()
-        backup_dir_entry = ttk.Entry(
-            backup_dir_frame,
-            textvariable=self.backup_dir_var,
+        self.webcam_exe_var = tk.StringVar(value="")
+        webcam_exe_entry = ttk.Entry(
+            webcam_exe_frame,
+            textvariable=self.webcam_exe_var,
             width=40
         )
-        backup_dir_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        webcam_exe_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
         
-        browse_backup_button = ttk.Button(
-            backup_dir_frame,
+        browse_webcam_button = ttk.Button(
+            webcam_exe_frame,
             text="Browse...",
-            command=self.browse_backup_dir
+            command=self.browse_webcam_exe
         )
-        browse_backup_button.pack(side="right")
+        browse_webcam_button.pack(side="right")
         
-        # Keep backups
-        keep_frame = ttk.Frame(self.backup_options_frame)
-        keep_frame.pack(fill="x", padx=20, pady=2)
+        # OBS executable
+        obs_frame = ttk.Frame(self.streaming_options_frame)
+        obs_frame.pack(fill="x", pady=5)
         
-        keep_label = ttk.Label(
-            keep_frame,
-            text="Keep Backups:",
+        obs_label = ttk.Label(
+            obs_frame,
+            text="OBS executable:",
             width=20
         )
-        keep_label.pack(side="left", padx=(0, 5))
+        obs_label.pack(side="left", padx=(0, 5))
         
-        self.keep_var = tk.IntVar(value=5)
-        keep_spinbox = ttk.Spinbox(
-            keep_frame,
+        self.obs_exe_var = tk.StringVar(value="")
+        obs_entry = ttk.Entry(
+            obs_frame,
+            textvariable=self.obs_exe_var,
+            width=40
+        )
+        obs_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_obs_button = ttk.Button(
+            obs_frame,
+            text="Browse...",
+            command=self.browse_obs_exe
+        )
+        browse_obs_button.pack(side="right")
+        
+        # OBS arguments
+        args_frame = ttk.Frame(self.streaming_options_frame)
+        args_frame.pack(fill="x", pady=5)
+        
+        args_label = ttk.Label(
+            args_frame,
+            text="OBS arguments:",
+            width=20
+        )
+        args_label.pack(side="left", padx=(0, 5))
+        
+        self.obs_args_var = tk.StringVar(value="--startstreaming --disable-shutdown-check")
+        args_entry = ttk.Entry(
+            args_frame,
+            textvariable=self.obs_args_var,
+            width=40
+        )
+        args_entry.pack(side="left", fill="x", expand=True)
+    
+    def create_vpn_section(self, parent):
+        """Create the VPN configuration section."""
+        vpn_frame = ttk.LabelFrame(
+            parent,
+            text="VPN Configuration (Windows Only)",
+            padding=(10, 5)
+        )
+        vpn_frame.pack(fill="x", pady=10)
+        
+        # Enable VPN
+        self.enable_vpn_var = tk.BooleanVar(value=False)
+        enable_vpn = ttk.Checkbutton(
+            vpn_frame,
+            text="Do you want Arcade Station to automatically connect your VPN?",
+            variable=self.enable_vpn_var,
+            command=self.toggle_vpn_options,
+            wraplength=500
+        )
+        enable_vpn.pack(anchor="w", pady=5)
+        
+        # VPN options frame
+        self.vpn_options_frame = ttk.Frame(vpn_frame)
+        
+        # VPN install directory
+        vpn_dir_frame = ttk.Frame(self.vpn_options_frame)
+        vpn_dir_frame.pack(fill="x", pady=5)
+        
+        vpn_dir_label = ttk.Label(
+            vpn_dir_frame,
+            text="VPN install directory:",
+            width=20
+        )
+        vpn_dir_label.pack(side="left", padx=(0, 5))
+        
+        self.vpn_dir_var = tk.StringVar(value="C:/Program Files/OpenVPN/bin")
+        vpn_dir_entry = ttk.Entry(
+            vpn_dir_frame,
+            textvariable=self.vpn_dir_var,
+            width=40
+        )
+        vpn_dir_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_vpn_dir_button = ttk.Button(
+            vpn_dir_frame,
+            text="Browse...",
+            command=self.browse_vpn_dir
+        )
+        browse_vpn_dir_button.pack(side="right")
+        
+        # VPN application
+        vpn_app_frame = ttk.Frame(self.vpn_options_frame)
+        vpn_app_frame.pack(fill="x", pady=5)
+        
+        vpn_app_label = ttk.Label(
+            vpn_app_frame,
+            text="VPN application:",
+            width=20
+        )
+        vpn_app_label.pack(side="left", padx=(0, 5))
+        
+        self.vpn_app_var = tk.StringVar(value="openvpn-gui.exe")
+        vpn_app_entry = ttk.Entry(
+            vpn_app_frame,
+            textvariable=self.vpn_app_var,
+            width=40
+        )
+        vpn_app_entry.pack(side="left", fill="x", expand=True)
+        
+        # VPN process name
+        vpn_process_frame = ttk.Frame(self.vpn_options_frame)
+        vpn_process_frame.pack(fill="x", pady=5)
+        
+        vpn_process_label = ttk.Label(
+            vpn_process_frame,
+            text="VPN process name:",
+            width=20
+        )
+        vpn_process_label.pack(side="left", padx=(0, 5))
+        
+        self.vpn_process_var = tk.StringVar(value="openvpn")
+        vpn_process_entry = ttk.Entry(
+            vpn_process_frame,
+            textvariable=self.vpn_process_var,
+            width=40
+        )
+        vpn_process_entry.pack(side="left", fill="x", expand=True)
+        
+        # VPN config file
+        vpn_config_frame = ttk.Frame(self.vpn_options_frame)
+        vpn_config_frame.pack(fill="x", pady=5)
+        
+        vpn_config_label = ttk.Label(
+            vpn_config_frame,
+            text="VPN config file:",
+            width=20
+        )
+        vpn_config_label.pack(side="left", padx=(0, 5))
+        
+        self.vpn_config_var = tk.StringVar(value="name_of_your.ovpn")
+        vpn_config_entry = ttk.Entry(
+            vpn_config_frame,
+            textvariable=self.vpn_config_var,
+            width=40
+        )
+        vpn_config_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        
+        browse_vpn_config_button = ttk.Button(
+            vpn_config_frame,
+            text="Browse...",
+            command=self.browse_vpn_config
+        )
+        browse_vpn_config_button.pack(side="right")
+        
+        # Seconds to wait
+        vpn_wait_frame = ttk.Frame(self.vpn_options_frame)
+        vpn_wait_frame.pack(fill="x", pady=5)
+        
+        vpn_wait_label = ttk.Label(
+            vpn_wait_frame,
+            text="Seconds to wait:",
+            width=20
+        )
+        vpn_wait_label.pack(side="left", padx=(0, 5))
+        
+        self.vpn_wait_var = tk.IntVar(value=10)
+        vpn_wait_spinbox = ttk.Spinbox(
+            vpn_wait_frame,
             from_=1,
-            to=20,
-            textvariable=self.keep_var,
+            to=60,
+            textvariable=self.vpn_wait_var,
             width=5
         )
-        keep_spinbox.pack(side="left")
-        
-        # Maintenance tools frame
-        tools_frame = ttk.LabelFrame(
-            main_frame,
-            text="Maintenance Tools",
+        vpn_wait_spinbox.pack(side="left")
+    
+    def create_osd_section(self, parent):
+        """Create the OSD configuration section."""
+        osd_frame = ttk.LabelFrame(
+            parent,
+            text="On-Screen Display Configuration (Windows Only)",
             padding=(10, 5)
         )
-        tools_frame.pack(fill="x", pady=10)
+        osd_frame.pack(fill="x", pady=10)
         
-        # Tools to install
-        tools_label = ttk.Label(
-            tools_frame,
-            text="Select maintenance tools to install:",
-            font=("Arial", 10, "bold")
+        # Enable OSD
+        self.enable_osd_var = tk.BooleanVar(value=True)
+        osd_text = "Kiosk mode on a Windows machine makes the native on-screen display for volume not usable. Would you like to enable a replacement OSD?"
+        enable_osd = ttk.Checkbutton(
+            osd_frame,
+            text=osd_text,
+            variable=self.enable_osd_var,
+            wraplength=500
         )
-        tools_label.pack(anchor="w", pady=5)
+        enable_osd.pack(anchor="w", pady=5)
         
-        # ROM validation tool
-        self.rom_validator_var = tk.BooleanVar(value=True)
-        rom_validator = ttk.Checkbutton(
-            tools_frame,
-            text="ROM Validator - Check ROM integrity and verify MD5 checksums",
-            variable=self.rom_validator_var
+        # OSD information
+        osd_info = ttk.Label(
+            osd_frame,
+            text="AudioSwitch will be installed to handle volume display. Settings will be configured automatically.",
+            wraplength=500,
+            foreground="gray"
         )
-        rom_validator.pack(anchor="w", padx=20, pady=2)
-        
-        # Input tester
-        self.input_tester_var = tk.BooleanVar(value=True)
-        input_tester = ttk.Checkbutton(
-            tools_frame,
-            text="Input Tester - Test and calibrate arcade controls and gamepads",
-            variable=self.input_tester_var
-        )
-        input_tester.pack(anchor="w", padx=20, pady=2)
-        
-        # System cleaner
-        self.system_cleaner_var = tk.BooleanVar(value=True)
-        system_cleaner = ttk.Checkbutton(
-            tools_frame,
-            text="System Cleaner - Remove temporary files and optimize performance",
-            variable=self.system_cleaner_var
-        )
-        system_cleaner.pack(anchor="w", padx=20, pady=2)
-        
-        # Config editor
-        self.config_editor_var = tk.BooleanVar(value=True)
-        config_editor = ttk.Checkbutton(
-            tools_frame,
-            text="Configuration Editor - Advanced editor for system configuration files",
-            variable=self.config_editor_var
-        )
-        config_editor.pack(anchor="w", padx=20, pady=2)
-        
-        # Media manager
-        self.media_manager_var = tk.BooleanVar(value=True)
-        media_manager = ttk.Checkbutton(
-            tools_frame,
-            text="Media Manager - Manage game banners, marquees and videos",
-            variable=self.media_manager_var
-        )
-        media_manager.pack(anchor="w", padx=20, pady=2)
-        
-        # Quick service menu
-        self.quick_service_var = tk.BooleanVar(value=True)
-        quick_service = ttk.Checkbutton(
-            tools_frame,
-            text="Quick Service Menu - Add a service menu accessible in-game",
-            variable=self.quick_service_var
-        )
-        quick_service.pack(anchor="w", padx=20, pady=2)
-        
-        # Advanced options
-        advanced_frame = ttk.LabelFrame(
-            main_frame,
-            text="Advanced Options",
-            padding=(10, 5)
-        )
-        advanced_frame.pack(fill="x", pady=10)
-        
-        # Startup password
-        startup_frame = ttk.Frame(advanced_frame)
-        startup_frame.pack(fill="x", pady=5)
-        
-        self.use_password_var = tk.BooleanVar(value=False)
-        use_password = ttk.Checkbutton(
-            startup_frame,
-            text="Require password for maintenance mode:",
-            variable=self.use_password_var,
-            command=self.toggle_password
-        )
-        use_password.pack(side="left", padx=(0, 5))
-        
-        self.password_var = tk.StringVar()
-        self.password_entry = ttk.Entry(
-            startup_frame,
-            textvariable=self.password_var,
-            width=20,
-            show="*"
-        )
-        self.password_entry.pack(side="right", padx=5)
-        
-        # Custom maintenance key
-        key_frame = ttk.Frame(advanced_frame)
-        key_frame.pack(fill="x", pady=5)
-        
-        key_label = ttk.Label(
-            key_frame,
-            text="Maintenance Mode Key:"
-        )
-        key_label.pack(side="left", padx=(0, 5))
-        
-        self.key_var = tk.StringVar(value="F10")
-        key_combo = ttk.Combobox(
-            key_frame,
-            textvariable=self.key_var,
-            values=["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "Tab", "Escape"],
-            width=10
-        )
-        key_combo.pack(side="left")
-        key_combo.state(["readonly"])
-        
-        # Custom scripts frame
-        scripts_frame = ttk.LabelFrame(
-            main_frame,
-            text="Custom Scripts",
-            padding=(10, 5)
-        )
-        scripts_frame.pack(fill="x", pady=10)
-        
-        # Add custom scripts
-        self.use_scripts_var = tk.BooleanVar(value=False)
-        use_scripts = ttk.Checkbutton(
-            scripts_frame,
-            text="Add custom maintenance scripts",
-            variable=self.use_scripts_var,
-            command=self.toggle_scripts
-        )
-        use_scripts.pack(anchor="w", pady=5)
-        
-        # Scripts options frame
-        self.scripts_frame = ttk.Frame(scripts_frame)
-        
-        # Script folder
-        script_dir_frame = ttk.Frame(self.scripts_frame)
-        script_dir_frame.pack(fill="x", pady=5)
-        
-        script_dir_label = ttk.Label(
-            script_dir_frame,
-            text="Scripts Directory:",
-            width=20
-        )
-        script_dir_label.pack(side="left", padx=(0, 5))
-        
-        self.script_dir_var = tk.StringVar()
-        script_dir_entry = ttk.Entry(
-            script_dir_frame,
-            textvariable=self.script_dir_var,
-            width=40
-        )
-        script_dir_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
-        
-        browse_script_button = ttk.Button(
-            script_dir_frame,
-            text="Browse...",
-            command=self.browse_script_dir
-        )
-        browse_script_button.pack(side="right")
-        
-        # Initialize UI state
-        self.toggle_backup_options()
-        self.toggle_password()
-        self.toggle_scripts()
+        osd_info.pack(anchor="w", padx=20, pady=5)
     
-    def toggle_backup_options(self):
-        """Show or hide backup options based on checkbox state."""
-        if self.enable_backup_var.get():
-            self.backup_options_frame.pack(fill="x", pady=5)
+    def toggle_lights_options(self):
+        """Show or hide lights options based on checkbox state."""
+        if self.enable_lights_var.get():
+            self.lights_options_frame.pack(fill="x", pady=5)
         else:
-            self.backup_options_frame.pack_forget()
+            self.lights_options_frame.pack_forget()
     
-    def toggle_password(self):
-        """Enable or disable password entry based on checkbox state."""
-        if self.use_password_var.get():
-            self.password_entry.configure(state="normal")
+    def toggle_streaming_options(self):
+        """Show or hide streaming options based on checkbox state."""
+        if self.enable_streaming_var.get():
+            self.streaming_options_frame.pack(fill="x", pady=5)
         else:
-            self.password_entry.configure(state="disabled")
+            self.streaming_options_frame.pack_forget()
     
-    def toggle_scripts(self):
-        """Show or hide custom scripts options based on checkbox state."""
-        if self.use_scripts_var.get():
-            self.scripts_frame.pack(fill="x", pady=5)
+    def toggle_webcam_options(self):
+        """Show or hide webcam options based on checkbox state."""
+        if self.enable_webcam_var.get():
+            self.webcam_options_frame.pack(fill="x", pady=5)
         else:
-            self.scripts_frame.pack_forget()
+            self.webcam_options_frame.pack_forget()
     
-    def browse_log_dir(self):
-        """Browse for a log directory."""
-        initial_dir = self.log_dir_var.get() if self.log_dir_var.get() else os.path.expanduser("~")
+    def toggle_vpn_options(self):
+        """Show or hide VPN options based on checkbox state."""
+        if self.enable_vpn_var.get():
+            self.vpn_options_frame.pack(fill="x", pady=5)
+        else:
+            self.vpn_options_frame.pack_forget()
+    
+    def browse_lights_reset(self):
+        """Browse for the lights reset executable."""
+        file_path = filedialog.askopenfilename(
+            title="Select Lights Reset Executable",
+            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+        )
         
+        if file_path:
+            self.lights_reset_var.set(file_path)
+    
+    def browse_lights_mame(self):
+        """Browse for the lights MAME executable."""
+        file_path = filedialog.askopenfilename(
+            title="Select Lights MAME Executable",
+            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+        )
+        
+        if file_path:
+            self.lights_mame_var.set(file_path)
+    
+    def browse_webcam_exe(self):
+        """Browse for the webcam management executable."""
+        file_path = filedialog.askopenfilename(
+            title="Select Webcam Management Application",
+            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+        )
+        
+        if file_path:
+            self.webcam_exe_var.set(file_path)
+    
+    def browse_obs_exe(self):
+        """Browse for the OBS executable."""
+        file_path = filedialog.askopenfilename(
+            title="Select OBS Studio Executable",
+            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+        )
+        
+        if file_path:
+            self.obs_exe_var.set(file_path)
+    
+    def browse_vpn_dir(self):
+        """Browse for the VPN installation directory."""
         dir_path = filedialog.askdirectory(
-            title="Select Log Directory",
-            initialdir=initial_dir
+            title="Select VPN Installation Directory"
         )
         
         if dir_path:
-            self.log_dir_var.set(dir_path)
+            self.vpn_dir_var.set(dir_path)
     
-    def browse_backup_dir(self):
-        """Browse for a backup directory."""
-        initial_dir = self.backup_dir_var.get() if self.backup_dir_var.get() else os.path.expanduser("~")
-        
-        dir_path = filedialog.askdirectory(
-            title="Select Backup Directory",
-            initialdir=initial_dir
+    def browse_vpn_config(self):
+        """Browse for the VPN configuration file."""
+        file_path = filedialog.askopenfilename(
+            title="Select VPN Configuration File",
+            filetypes=[("OpenVPN files", "*.ovpn"), ("All files", "*.*")]
         )
         
-        if dir_path:
-            self.backup_dir_var.set(dir_path)
-    
-    def browse_script_dir(self):
-        """Browse for a scripts directory."""
-        initial_dir = self.script_dir_var.get() if self.script_dir_var.get() else os.path.expanduser("~")
-        
-        dir_path = filedialog.askdirectory(
-            title="Select Scripts Directory",
-            initialdir=initial_dir
-        )
-        
-        if dir_path:
-            self.script_dir_var.set(dir_path)
+        if file_path:
+            self.vpn_config_var.set(os.path.basename(file_path))
     
     def validate(self):
         """Validate utility configuration."""
-        # Validate custom log directory if provided
-        log_dir = self.log_dir_var.get().strip()
-        if log_dir and not os.path.isdir(log_dir):
-            messagebox.showerror(
-                "Invalid Log Directory", 
-                "The specified log directory does not exist. Please create it first."
-            )
-            return False
-        
-        # Validate backup configuration
-        if self.enable_backup_var.get():
-            backup_dir = self.backup_dir_var.get().strip()
-            if not backup_dir:
+        if self.is_windows and self.enable_lights_var.get():
+            # Validate light reset executable path
+            if not self.lights_reset_var.get().strip():
                 messagebox.showerror(
-                    "Backup Directory Required", 
-                    "Please specify a backup directory."
+                    "Invalid Lights Reset Path", 
+                    "Please specify a path for the lights reset executable."
                 )
                 return False
             
-            if not os.path.isdir(backup_dir):
-                if messagebox.askyesno(
-                    "Create Directory?", 
-                    f"The backup directory '{backup_dir}' does not exist. Would you like to create it?"
-                ):
-                    try:
-                        os.makedirs(backup_dir, exist_ok=True)
-                    except Exception as e:
-                        messagebox.showerror(
-                            "Error Creating Directory", 
-                            f"Failed to create backup directory: {str(e)}"
-                        )
-                        return False
-                else:
-                    return False
-        
-        # Validate custom scripts directory
-        if self.use_scripts_var.get():
-            script_dir = self.script_dir_var.get().strip()
-            if not script_dir:
+            # Validate light MAME executable path
+            if not self.lights_mame_var.get().strip():
                 messagebox.showerror(
-                    "Scripts Directory Required", 
-                    "Please specify a directory containing your custom scripts."
+                    "Invalid Lights MAME Path", 
+                    "Please specify a path for the lights MAME executable."
+                )
+                return False
+        
+        if self.enable_streaming_var.get():
+            # Validate webcam executable if enabled
+            if self.enable_webcam_var.get() and not self.webcam_exe_var.get().strip():
+                messagebox.showerror(
+                    "Invalid Webcam Application", 
+                    "Please specify a path for the webcam management application."
                 )
                 return False
             
-            if not os.path.isdir(script_dir):
+            # Validate OBS executable
+            if not self.obs_exe_var.get().strip():
                 messagebox.showerror(
-                    "Invalid Scripts Directory", 
-                    "The specified scripts directory does not exist."
+                    "Invalid OBS Path", 
+                    "Please specify a path for the OBS Studio executable."
                 )
                 return False
         
-        # Validate password if enabled
-        if self.use_password_var.get() and not self.password_var.get().strip():
-            messagebox.showerror(
-                "Password Required", 
-                "Please enter a password for maintenance mode."
-            )
-            return False
+        if self.is_windows and self.enable_vpn_var.get():
+            # Validate VPN directory
+            if not self.vpn_dir_var.get().strip():
+                messagebox.showerror(
+                    "Invalid VPN Directory", 
+                    "Please specify the VPN installation directory."
+                )
+                return False
+            
+            # Validate VPN application
+            if not self.vpn_app_var.get().strip():
+                messagebox.showerror(
+                    "Invalid VPN Application", 
+                    "Please specify the VPN application filename."
+                )
+                return False
+            
+            # Validate VPN process
+            if not self.vpn_process_var.get().strip():
+                messagebox.showerror(
+                    "Invalid VPN Process", 
+                    "Please specify the VPN process name."
+                )
+                return False
+            
+            # Validate VPN config
+            if not self.vpn_config_var.get().strip():
+                messagebox.showerror(
+                    "Invalid VPN Config", 
+                    "Please specify the VPN configuration file."
+                )
+                return False
         
         return True
     
     def save_data(self):
         """Save utility configuration to the user config."""
-        utilities_config = {
-            "system": {
-                "enabled": self.enable_system_var.get(),
-                "auto_updates": self.auto_updates_var.get(),
-                "system_monitoring": self.system_monitoring_var.get(),
-                "error_reporting": self.error_reporting_var.get()
-            },
-            "maintenance_tools": {
-                "rom_validator": self.rom_validator_var.get(),
-                "input_tester": self.input_tester_var.get(),
-                "system_cleaner": self.system_cleaner_var.get(),
-                "config_editor": self.config_editor_var.get(),
-                "media_manager": self.media_manager_var.get(),
-                "quick_service": self.quick_service_var.get()
-            },
-            "advanced": {
-                "maintenance_key": self.key_var.get()
+        utilities_config = {}
+        
+        # Save lights configuration
+        if self.is_windows:
+            utilities_config["lights"] = {
+                "enabled": self.enable_lights_var.get(),
+                "light_reset_executable_path": self.lights_reset_var.get() if self.enable_lights_var.get() else "",
+                "light_mame_executable_path": self.lights_mame_var.get() if self.enable_lights_var.get() else ""
             }
+        
+        # Save streaming configuration
+        utilities_config["streaming"] = {
+            "webcam_management_enabled": self.enable_webcam_var.get() if self.enable_streaming_var.get() else False,
+            "webcam_management_executable": self.webcam_exe_var.get() if self.enable_streaming_var.get() and self.enable_webcam_var.get() else "",
+            "obs_executable": self.obs_exe_var.get() if self.enable_streaming_var.get() else "",
+            "obs_arguments": self.obs_args_var.get() if self.enable_streaming_var.get() else ""
         }
         
-        # Add custom log directory if provided
-        log_dir = self.log_dir_var.get().strip()
-        if log_dir:
-            utilities_config["system"]["log_directory"] = log_dir
-        
-        # Add backup configuration if enabled
-        if self.enable_backup_var.get():
-            utilities_config["backup"] = {
-                "enabled": True,
-                "frequency": self.frequency_var.get(),
-                "directory": self.backup_dir_var.get().strip(),
-                "keep_backups": self.keep_var.get()
-            }
-        else:
-            utilities_config["backup"] = {"enabled": False}
-        
-        # Add password if enabled
-        if self.use_password_var.get():
-            utilities_config["advanced"]["maintenance_password"] = self.password_var.get()
-        
-        # Add custom scripts if enabled
-        if self.use_scripts_var.get():
-            utilities_config["custom_scripts"] = {
-                "enabled": True,
-                "directory": self.script_dir_var.get().strip()
+        # Save VPN configuration
+        if self.is_windows:
+            utilities_config["vpn"] = {
+                "enabled": self.enable_vpn_var.get(),
+                "vpn_application_directory": self.vpn_dir_var.get() if self.enable_vpn_var.get() else "",
+                "vpn_application": self.vpn_app_var.get() if self.enable_vpn_var.get() else "",
+                "vpn_process": self.vpn_process_var.get() if self.enable_vpn_var.get() else "",
+                "vpn_config_profile": self.vpn_config_var.get() if self.enable_vpn_var.get() else "",
+                "seconds_to_wait": self.vpn_wait_var.get()
             }
         
-        self.app.user_config["utilities"] = utilities_config 
+        # Save OSD configuration
+        if self.is_windows:
+            utilities_config["osd"] = {
+                "enabled": self.enable_osd_var.get(),
+                "sound_osd_executable": "../bin/windows/AudioSwitch/AudioSwitch.exe"
+            }
+        
+        self.app.user_config["utilities"] = utilities_config
+        
+        # Initialize toggle states for the UI
+        self.toggle_lights_options()
+        self.toggle_streaming_options()
+        self.toggle_webcam_options()
+        self.toggle_vpn_options() 
