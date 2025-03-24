@@ -13,12 +13,12 @@ class UtilityConfigPage(BasePage):
     
     def __init__(self, container, app):
         """Initialize the utility configuration page."""
+        self.is_windows = platform.system() == "Windows"
         super().__init__(container, app)
         self.set_title(
             "Utilities Setup",
             "Configure utilities for your Arcade Station"
         )
-        self.is_windows = platform.system() == "Windows"
     
     def create_widgets(self):
         """Create page-specific widgets."""
