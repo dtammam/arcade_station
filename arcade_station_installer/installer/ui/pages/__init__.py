@@ -10,7 +10,7 @@ from .game_setup_page import GameSetupPage
 from .itgmania_setup_page import ITGManiaSetupPage
 from .binary_games_page import BinaryGamesPage
 from .mame_games_page import MAMEGamesPage
-from .control_config_page import ControlConfigPage
+from .key_bindings_page import KeyBindingsPage
 from .utility_config_page import UtilityConfigPage
 from .summary_page import SummaryPage
 
@@ -24,7 +24,7 @@ __all__ = [
     'ITGManiaSetupPage',
     'BinaryGamesPage',
     'MAMEGamesPage',
-    'ControlConfigPage',
+    'KeyBindingsPage',
     'UtilityConfigPage',
     'SummaryPage',
 ] 

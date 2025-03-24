@@ -544,10 +544,15 @@ class InstallationManager:
         
         # Generate key_listener.toml
         key_listener = {
-            "key_mappings": {
+            "key_mappings": config.get("key_listener", {}).get("key_mappings", {})
+        }
+        
+        # If no key bindings were provided in the configuration, set default ones
+        if not key_listener["key_mappings"]:
+            key_listener["key_mappings"] = {
                 "ctrl+space": "../arcade_station/core/common/kill_all_and_reset_pegasus.py"
             }
-        }
+            
         self._write_toml(os.path.join(config_dir, "key_listener.toml"), key_listener)
         
         # Generate processes_to_kill.toml
@@ -948,22 +953,30 @@ Categories=Game;
         with open(file_path, "w", encoding="utf-8") as f:
             self._write_toml_section(f, data, indent)
     
-    def _write_toml_section(self, file, data: Dict[str, Any], indent: int = 0) -> None:
+    def _write_toml_section(self, file, data: Dict[str, Any], indent: int = 0, section_path: str = "") -> None:
         """Write a section of a TOML file.
         
         Args:
             file: File to write to
             data: Data to write
             indent: Current indentation level
+            section_path: Current section path for context
         """
         for key, value in data.items():
             if isinstance(value, dict):
                 # Write a table header
-                file.write(f"[{key}]\n")
-                self._write_toml_section(file, value, indent + 2)
+                current_section = f"{section_path}.{key}" if section_path else key
+                file.write(f"[{current_section}]\n")
+                self._write_toml_section(file, value, indent + 2, current_section)
                 file.write("\n")
             else:
                 # Write a key-value pair
+                # Check if we're in the key_mappings section and need to quote the key
+                if section_path == "key_mappings":
+                    # Ensure the key is quoted properly
+                    if not (key.startswith('"') and key.endswith('"')):
+                        key = f'"{key}"'
+                
                 if isinstance(value, str):
                     file.write(f'{key} = "{value}"\n')
                 elif isinstance(value, bool):

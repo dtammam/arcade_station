@@ -15,7 +15,7 @@ from .pages import (
     ITGManiaSetupPage,
     BinaryGamesPage,
     MAMEGamesPage,
-    ControlConfigPage,
+    KeyBindingsPage,
     UtilityConfigPage,
     SummaryPage,
 )
@@ -161,7 +161,7 @@ class InstallerApp:
             "itgmania": ITGManiaSetupPage(self.content, self),
             "binary_games": BinaryGamesPage(self.content, self),
             "mame_games": MAMEGamesPage(self.content, self),
-            "control_config": ControlConfigPage(self.content, self),
+            "key_bindings": KeyBindingsPage(self.content, self),
             "utility": UtilityConfigPage(self.content, self),
             "summary": SummaryPage(self.content, self),
         }
@@ -208,9 +208,9 @@ class InstallerApp:
                 self.add_step_indicator("MAME Games")
         
         # Always include these configuration pages
-        new_page_flow.append(self.conditional_pages["control_config"])
+        new_page_flow.append(self.conditional_pages["key_bindings"])
         new_page_flow.append(self.conditional_pages["display"])
-        self.add_step_indicator("Control Config")
+        self.add_step_indicator("Key Bindings")
         self.add_step_indicator("Display Config")
         
         # Include Windows-specific kiosk mode page

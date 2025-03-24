@@ -190,14 +190,29 @@ class BasePage:
             key_parts = key.split('.')
             current = config_data
             
-            # Navigate to the nested dict
-            for part in key_parts[:-1]:
-                if part not in current:
-                    current[part] = {}
-                current = current[part]
-            
-            # Set the value
-            current[key_parts[-1]] = value
+            # Special handling for key_mappings keys
+            if key_parts[0] == "key_mappings" and len(key_parts) == 2:
+                # For key_mappings, we need to quote the key properly
+                hotkey = key_parts[1]
+                
+                # Remove existing mappings with the same hotkey
+                if hotkey in current["key_mappings"]:
+                    del current["key_mappings"][hotkey]
+                
+                # Add the key with proper quotes (if it doesn't already have them)
+                if not (hotkey.startswith('"') and hotkey.endswith('"')):
+                    hotkey = f'"{hotkey}"'
+                
+                current["key_mappings"][hotkey] = value
+            else:
+                # Navigate to the nested dict
+                for part in key_parts[:-1]:
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                
+                # Set the value
+                current[key_parts[-1]] = value
             
             # Write back to file safely
             try:
@@ -226,54 +241,32 @@ class BasePage:
             print(f"Error updating config: {str(e)}")
             return False
     
-    def _write_toml_section(self, file, data, prefix=""):
+    def _write_toml_section(self, file, data, section_path=""):
         """Write a section of a TOML file.
         
         Args:
             file: File to write to
             data: Data to write
-            prefix: Current key prefix
+            section_path: Current section path for context
         """
-        # First write non-table items
-        for key, value in data.items():
-            if not isinstance(value, dict):
-                self._write_toml_value(file, key, value)
-        
-        # Then write tables
         for key, value in data.items():
             if isinstance(value, dict):
-                new_prefix = f"{prefix}.{key}" if prefix else key
-                file.write(f"\n[{new_prefix}]\n")
-                for k, v in value.items():
-                    if isinstance(v, dict):
-                        sub_prefix = f"{new_prefix}.{k}"
-                        file.write(f"\n[{sub_prefix}]\n")
-                        self._write_toml_section(file, v, "")
-                    else:
-                        self._write_toml_value(file, k, v)
-    
-    def _write_toml_value(self, file, key, value):
-        """Write a single TOML key-value pair.
-        
-        Args:
-            file: File to write to
-            key: Key to write
-            value: Value to write
-        """
-        if isinstance(value, str):
-            # Properly escape string
-            escaped_value = value.replace('\\', '\\\\').replace('"', '\\"')
-            file.write(f'{key} = "{escaped_value}"\n')
-        elif isinstance(value, bool):
-            file.write(f"{key} = {str(value).lower()}\n")
-        elif isinstance(value, (list, tuple)):
-            # Handle arrays
-            file.write(f"{key} = [\n")
-            for item in value:
-                if isinstance(item, str):
-                    file.write(f'  "{item}",\n')
+                # Write a table header
+                current_section = f"{section_path}.{key}" if section_path else key
+                file.write(f"[{current_section}]\n")
+                self._write_toml_section(file, value, current_section)
+                file.write("\n")
+            else:
+                # Write a key-value pair
+                # Check if we're in the key_mappings section and need to quote the key
+                if section_path == "key_mappings":
+                    # Ensure the key is quoted properly
+                    if not (key.startswith('"') and key.endswith('"')):
+                        key = f'"{key}"'
+                
+                if isinstance(value, str):
+                    file.write(f'{key} = "{value}"\n')
+                elif isinstance(value, bool):
+                    file.write(f"{key} = {str(value).lower()}\n")
                 else:
-                    file.write(f"  {item},\n")
-            file.write("]\n")
-        else:
-            file.write(f"{key} = {value}\n") 
+                    file.write(f"{key} = {value}\n") 
