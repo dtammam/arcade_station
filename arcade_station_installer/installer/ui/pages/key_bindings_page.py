@@ -52,8 +52,9 @@ class KeyBindingsPage(BasePage):
         # Introduction
         intro_text = ttk.Label(
             self.key_bindings_tab,
-            text="Configure global hotkeys for Arcade Station. These keys will work from anywhere "
-                 "in the system, including during gameplay.",
+            text="Configure global hotkeys for Arcade Station. These keys will work from anywhere in the system, including during gameplay."
+                 "Examples below that are used by the original author of Arcade Station."
+                 "Key syntax is from the Keyboard library - all keys within this link https://github.com/boppreh/keyboard/blob/master/README.md#api",
             wraplength=500,
             justify="left"
         )
@@ -62,7 +63,7 @@ class KeyBindingsPage(BasePage):
         # Keybindings frame
         keybindings_frame = ttk.LabelFrame(
             self.key_bindings_tab,
-            text="Global Hotkeys",
+            text="Key bindings",
             padding=(10, 5)
         )
         keybindings_frame.pack(fill="both", expand=True, pady=10)
@@ -74,7 +75,7 @@ class KeyBindingsPage(BasePage):
         ttk.Label(
             header_frame,
             text="Function",
-            width=30,
+            width=50,
             font=("Arial", 9, "bold")
         ).pack(side="left", padx=(5, 5))
         
