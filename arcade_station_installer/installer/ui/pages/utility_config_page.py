@@ -64,8 +64,7 @@ class UtilityConfigPage(BasePage):
             lights_frame,
             text="Do you want Arcade Station to manage your lights? This is useful for things like litboards, as you'll need to reset them when closing your games.",
             variable=self.enable_lights_var,
-            command=self.toggle_lights_options,
-            wraplength=500
+            command=self.toggle_lights_options
         )
         enable_lights.pack(anchor="w", pady=5)
         
@@ -139,8 +138,7 @@ class UtilityConfigPage(BasePage):
             streaming_frame,
             text="Do you want Arcade Station to help kickoff your streaming session?",
             variable=self.enable_streaming_var,
-            command=self.toggle_streaming_options,
-            wraplength=500
+            command=self.toggle_streaming_options
         )
         enable_streaming.pack(anchor="w", pady=5)
         
@@ -156,8 +154,7 @@ class UtilityConfigPage(BasePage):
             webcam_frame,
             text="Do you need a webcam management app to start before streaming?",
             variable=self.enable_webcam_var,
-            command=self.toggle_webcam_options,
-            wraplength=500
+            command=self.toggle_webcam_options
         )
         enable_webcam.pack(anchor="w", pady=5)
         
@@ -249,8 +246,7 @@ class UtilityConfigPage(BasePage):
             vpn_frame,
             text="Do you want Arcade Station to automatically connect your VPN?",
             variable=self.enable_vpn_var,
-            command=self.toggle_vpn_options,
-            wraplength=500
+            command=self.toggle_vpn_options
         )
         enable_vpn.pack(anchor="w", pady=5)
         
@@ -383,8 +379,7 @@ class UtilityConfigPage(BasePage):
         enable_osd = ttk.Checkbutton(
             osd_frame,
             text=osd_text,
-            variable=self.enable_osd_var,
-            wraplength=500
+            variable=self.enable_osd_var
         )
         enable_osd.pack(anchor="w", pady=5)
         
