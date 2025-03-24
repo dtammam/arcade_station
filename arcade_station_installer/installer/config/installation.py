@@ -623,31 +623,38 @@ class InstallationManager:
         self._write_toml(os.path.join(config_dir, "screenshot_config.toml"), screenshot_config)
         
         # Generate utility config
-        utility_config = {
-            "lights": {
-                "enabled": False,
-                "light_reset_executable_path": "",
-                "light_mame_executable_path": ""
-            },
-            "streaming": {
-                "webcam_management_enabled": False,
-                "webcam_management_executable": "",
-                "obs_executable": config.get("obs_path", ""),
-                "obs_arguments": "--startstreaming --disable-shutdown-check"
-            },
-            "vpn": {
-                "enabled": config.get("enable_vpn", False),
-                "vpn_application_directory": config.get("vpn_path", ""),
-                "vpn_application": "openvpn-gui.exe",
-                "vpn_process": "openvpn",
-                "vpn_config_profile": "",
-                "seconds_to_wait": 10
-            },
-            "osd": {
-                "enabled": config.get("enable_volume_control", False) and self.is_windows,
-                "sound_osd_executable": config.get("audio_switcher_path", "")
+        utility_config = {}
+        
+        # Use the values from the utilities config if provided
+        if "utilities" in config:
+            utility_config = config["utilities"]
+        else:
+            # Fallback to defaults if not provided
+            utility_config = {
+                "lights": {
+                    "enabled": False,
+                    "light_reset_executable_path": "",
+                    "light_mame_executable_path": ""
+                },
+                "streaming": {
+                    "webcam_management_enabled": False,
+                    "webcam_management_executable": "",
+                    "obs_executable": config.get("obs_path", ""),
+                    "obs_arguments": "--startstreaming --disable-shutdown-check"
+                },
+                "vpn": {
+                    "enabled": config.get("enable_vpn", False),
+                    "vpn_application_directory": config.get("vpn_path", ""),
+                    "vpn_application": "openvpn-gui.exe",
+                    "vpn_process": "openvpn",
+                    "vpn_config_profile": "",
+                    "seconds_to_wait": 10
+                },
+                "osd": {
+                    "enabled": config.get("enable_volume_control", False) and self.is_windows,
+                    "sound_osd_executable": config.get("audio_switcher_path", "")
+                }
             }
-        }
         self._write_toml(os.path.join(config_dir, "utility_config.toml"), utility_config)
         
         # Generate Pegasus binaries config

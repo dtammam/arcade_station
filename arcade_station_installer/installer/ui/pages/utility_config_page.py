@@ -22,7 +22,25 @@ class UtilityConfigPage(BasePage):
     
     def create_widgets(self):
         """Create page-specific widgets."""
-        main_frame = ttk.Frame(self.content_frame)
+        # Create a canvas with scrollbar for the content
+        canvas = tk.Canvas(self.content_frame)
+        scrollbar = ttk.Scrollbar(self.content_frame, orient="vertical", command=canvas.yview)
+        self.scrollable_frame = ttk.Frame(canvas)
+        
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+        
+        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        main_frame = ttk.Frame(self.scrollable_frame)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Introduction
@@ -48,6 +66,12 @@ class UtilityConfigPage(BasePage):
         # OSD configuration (Windows only)
         if self.is_windows:
             self.create_osd_section(main_frame)
+            
+        # Initialize visibility of option frames
+        self.toggle_lights_options()
+        self.toggle_streaming_options()
+        self.toggle_webcam_options()
+        self.toggle_vpn_options()
     
     def create_lights_section(self, parent):
         """Create the lights configuration section."""
@@ -58,8 +82,8 @@ class UtilityConfigPage(BasePage):
         )
         lights_frame.pack(fill="x", pady=10)
         
-        # Enable lights management
-        self.enable_lights_var = tk.BooleanVar(value=True)
+        # Enable lights management - unchecked by default
+        self.enable_lights_var = tk.BooleanVar(value=False)
         enable_lights = ttk.Checkbutton(
             lights_frame,
             text="Do you want Arcade Station to manage your lights? This is useful for things like litboards, as you'll need to reset them when closing your games.",
@@ -171,7 +195,7 @@ class UtilityConfigPage(BasePage):
         )
         webcam_exe_label.pack(side="left", padx=(0, 5))
         
-        self.webcam_exe_var = tk.StringVar(value="")
+        self.webcam_exe_var = tk.StringVar(value="C:/Program Files/Logitech/LogiCapture/bin/LogiCapture.exe")
         webcam_exe_entry = ttk.Entry(
             webcam_exe_frame,
             textvariable=self.webcam_exe_var,
@@ -197,7 +221,7 @@ class UtilityConfigPage(BasePage):
         )
         obs_label.pack(side="left", padx=(0, 5))
         
-        self.obs_exe_var = tk.StringVar(value="")
+        self.obs_exe_var = tk.StringVar(value="C:/Program Files/obs-studio/bin/64bit/obs64.exe")
         obs_entry = ttk.Entry(
             obs_frame,
             textvariable=self.obs_exe_var,
@@ -328,7 +352,7 @@ class UtilityConfigPage(BasePage):
         )
         vpn_config_label.pack(side="left", padx=(0, 5))
         
-        self.vpn_config_var = tk.StringVar(value="name_of_your.ovpn")
+        self.vpn_config_var = tk.StringVar(value="cash_me_outside_how_abou_dat.ovpn")
         vpn_config_entry = ttk.Entry(
             vpn_config_frame,
             textvariable=self.vpn_config_var,
