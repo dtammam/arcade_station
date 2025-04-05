@@ -338,7 +338,7 @@ class BinaryGamesPage(BasePage):
         # Add button with larger size and better styling
         add_button = ttk.Button(
             add_button_frame,
-            text="Add Another Game",
+            text="Add Another Binary-Based Game",
             command=self.add_game,
             style="Accent.TButton"  # Use a more prominent style
         )
