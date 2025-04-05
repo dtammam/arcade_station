@@ -678,9 +678,13 @@ shortname: arcade_station
                 # Determine banner image path
                 banner_path = "../../../../assets/images/banners/simply-love.png"
                 if config["itgmania"].get("custom_image"):
-                    custom_banner = config["itgmania"].get("custom_image", "").replace(config["install_path"], "../..")
+                    custom_banner = config["itgmania"].get("custom_image", "")
                     if custom_banner:
-                        banner_path = custom_banner
+                        # For custom images, use absolute path
+                        banner_path = custom_banner.replace("\\", "/")
+                elif config["itgmania"].get("use_default_image", True):
+                    # For default image, use relative path
+                    banner_path = "../../../../assets/images/banners/simply-love.png"
                 
                 metadata_content += """game: ITGMania
 file: not\\using\\files\\to\\launch\\games\\ITGMania
@@ -703,9 +707,12 @@ assets.box_front: {}
             launcher_path = os.path.join(config["install_path"], "src", "arcade_station", "launchers", "launch_game.py")
             python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
             
-            asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
+            # Use absolute path for custom banner, relative for default
+            asset_path = game_info.get("banner", "")
             if not asset_path:
                 asset_path = "../../../../assets/images/banners/simply-love.png"
+            else:
+                asset_path = asset_path.replace("\\", "/")
             
             metadata_content += """game: {}
 file: not\\using\\files\\to\\launch\\games\\{}
@@ -729,9 +736,13 @@ assets.box_front: {}
                     continue
                     
                 display_name = game_info.get("display_name", game_id.replace("_", " ").title())
-                asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
-                if not asset_path:
-                    asset_path = "../../../../assets/images/banners/arcade_station.png"
+                # Use absolute path for custom banner, omit if no banner
+                asset_path = game_info.get("banner", "")
+                if asset_path:
+                    asset_path = asset_path.replace("\\", "/")
+                    asset_line = f"assets.box_front: {asset_path}\n"
+                else:
+                    asset_line = ""
                 
                 sort_char = chr(ord('b') + idx)  # start with 'b' for binary games
                 
@@ -742,9 +753,9 @@ launch:
     "{}" 
     "{}" 
     "{}"
-assets.box_front: {}
+{}
 
-""".format(display_name, display_name, sort_char, python_path, launcher_path, game_id, asset_path)
+""".format(display_name, display_name, sort_char, python_path, launcher_path, game_id, asset_line)
         
         # Add MAME games if configured
         if config.get("mame_games"):
