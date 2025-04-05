@@ -4,6 +4,7 @@ ITGMania setup page for the Arcade Station Installer
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
+import platform
 
 from .base_page import BasePage
 
@@ -18,7 +19,15 @@ class ITGManiaSetupPage(BasePage):
             "Configure ITGMania integration"
         )
         self.default_image_path = ""
-        self.default_itgmania_path = r"C:\Games\ITGmania\Program\ITGmania.exe"
+        
+        # Set default paths based on OS
+        self.default_paths = {
+            "Windows": r"C:\Games\ITGmania\Program\ITGmania.exe",
+            "Linux": "/opt/itgmania/Program/ITGmania",
+            "Darwin": "/Applications/ITGmania/Program/ITGmania.app/Contents/MacOS/ITGmania"
+        }
+        self.current_os = platform.system()
+        self.default_itgmania_path = self.default_paths.get(self.current_os, "")
         
         # Set the default image path to the standard asset location
         if "install_path" in self.app.user_config:
@@ -277,8 +286,8 @@ class ITGManiaSetupPage(BasePage):
             )
             self.default_image_path = asset_path
         
-        # Check for default ITGMania path on Windows
-        if self.app.install_manager.is_windows and os.path.exists(self.default_itgmania_path):
+        # Check for default ITGMania path based on OS
+        if os.path.exists(self.default_itgmania_path):
             self.use_default_path_var.set(True)
             self.path_var.set(self.default_itgmania_path)
             self.default_path_checkbox.pack(anchor="w", pady=(0, 5))
