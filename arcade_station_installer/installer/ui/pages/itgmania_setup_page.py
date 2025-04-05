@@ -18,6 +18,7 @@ class ITGManiaSetupPage(BasePage):
             "Configure ITGMania integration"
         )
         self.default_image_path = ""
+        self.default_itgmania_path = r"C:\Games\ITGmania\Program\ITGmania.exe"
         
         # Set the default image path to the standard asset location
         if "install_path" in self.app.user_config:
@@ -72,19 +73,28 @@ class ITGManiaSetupPage(BasePage):
         path_label.pack(side="left", padx=(0, 5))
         
         self.path_var = tk.StringVar()
-        path_entry = ttk.Entry(
+        self.path_entry = ttk.Entry(
             path_frame,
             textvariable=self.path_var,
             width=40
         )
-        path_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
+        self.path_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
         
-        browse_button = ttk.Button(
+        self.browse_button = ttk.Button(
             path_frame,
             text="Browse...",
             command=self.browse_itgmania
         )
-        browse_button.pack(side="right")
+        self.browse_button.pack(side="right")
+        
+        # Default path detection checkbox
+        self.use_default_path_var = tk.BooleanVar(value=False)
+        self.default_path_checkbox = ttk.Checkbutton(
+            self.itgmania_frame,
+            text="Default installation path detected, uncheck if you'd like to set to something else.",
+            variable=self.use_default_path_var,
+            command=self.toggle_default_path
+        )
         
         # ITGMania image
         image_frame = ttk.Frame(self.itgmania_frame)
@@ -172,6 +182,17 @@ class ITGManiaSetupPage(BasePage):
             self.image_entry.config(state="normal")
             self.browse_image_button.config(state="normal")
     
+    def toggle_default_path(self):
+        """Enable or disable the path entry based on default path checkbox."""
+        if self.use_default_path_var.get():
+            self.path_var.set(self.default_itgmania_path)
+            self.path_entry.config(state="disabled")
+            self.browse_button.config(state="disabled")
+        else:
+            self.path_entry.config(state="normal")
+            self.browse_button.config(state="normal")
+            self.path_var.set("")
+    
     def browse_itgmania(self):
         """Open a file browser dialog for selecting the ITGMania executable."""
         filetypes = [
@@ -256,6 +277,17 @@ class ITGManiaSetupPage(BasePage):
             )
             self.default_image_path = asset_path
         
+        # Check for default ITGMania path on Windows
+        if self.app.install_manager.is_windows and os.path.exists(self.default_itgmania_path):
+            self.use_default_path_var.set(True)
+            self.path_var.set(self.default_itgmania_path)
+            self.default_path_checkbox.pack(anchor="w", pady=(0, 5))
+            self.toggle_default_path()
+        else:
+            self.use_default_path_var.set(False)
+            self.default_path_checkbox.pack_forget()
+            self.path_var.set("")
+        
         # Pre-populate fields if in reconfiguration mode
         if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
             if 'installed_games' in self.app.user_config:
@@ -270,6 +302,11 @@ class ITGManiaSetupPage(BasePage):
                     # Set path
                     if 'path' in itgmania_config:
                         self.path_var.set(itgmania_config['path'])
+                        # If the path matches the default, check the default path checkbox
+                        if itgmania_config['path'] == self.default_itgmania_path:
+                            self.use_default_path_var.set(True)
+                            self.default_path_checkbox.pack(anchor="w", pady=(0, 5))
+                            self.toggle_default_path()
                     
                     # Set banner image
                     if 'banner' in itgmania_config:
