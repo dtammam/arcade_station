@@ -176,7 +176,16 @@ class GameEntry:
             ("All files", "*.*")
         ]
         
-        initial_dir = os.path.dirname(self.banner_var.get()) if self.banner_var.get() else os.path.expanduser("~")
+        # Try to use the assets folder as initial directory
+        install_path = self.app.user_config.get("install_path", "")
+        assets_path = os.path.join(install_path, "assets", "images", "banners")
+        
+        # If assets folder exists, use it as initial directory
+        if os.path.isdir(assets_path):
+            initial_dir = assets_path
+        # Otherwise fall back to the current banner path or home directory
+        else:
+            initial_dir = os.path.dirname(self.banner_var.get()) if self.banner_var.get() else os.path.expanduser("~")
         
         file_path = filedialog.askopenfilename(
             title="Select Banner Image",
