@@ -492,27 +492,16 @@ class InstallationManager:
                 itg_image = config["itgmania"]["custom_image"]
                 
             installed_games["games"]["itgmania"] = {
-                "display_name": "ITGMania",
                 "path": itg_path,
-                "type": "binary",
-                "launch_args": "",
-                "banner": itg_image,
-                "enabled": True
+                "banner": itg_image
             }
             
-            # Add display module status if available
-            if "install_marquee_module" in config["itgmania"]:
-                installed_games["games"]["itgmania"]["display_module_installed"] = config["itgmania"]["install_marquee_module"]
         # Also check binary_games for ITGMania as a fallback
         elif config.get("binary_games", {}).get("itgmania"):
             game_info = config["binary_games"]["itgmania"]
             installed_games["games"]["itgmania"] = {
-                "display_name": game_info.get("display_name", "ITGMania"),
                 "path": game_info["path"],
-                "type": "binary",
-                "launch_args": "",
-                "banner": game_info.get("banner", ""),
-                "enabled": True
+                "banner": game_info.get("banner", "")
             }
         
         # Add other binary games if configured
@@ -523,12 +512,8 @@ class InstallationManager:
                     continue
                     
                 installed_games["games"][game_id] = {
-                    "display_name": game_info.get("display_name", game_id.replace("_", " ").title()),
                     "path": game_info["path"],
-                    "type": "binary",
-                    "launch_args": "",
-                    "banner": game_info.get("banner", ""),
-                    "enabled": True
+                    "banner": game_info.get("banner", "")
                 }
         
         # Add MAME games if configured
@@ -985,6 +970,9 @@ Categories=Game;
                         key = f'"{key}"'
                 
                 if isinstance(value, str):
+                    # Convert backslashes to forward slashes for paths
+                    if any(path_key in key.lower() for path_key in ['path', 'banner', 'rom', 'state']):
+                        value = value.replace('\\', '/')
                     file.write(f'{key} = "{value}"\n')
                 elif isinstance(value, bool):
                     file.write(f"{key} = {str(value).lower()}\n")

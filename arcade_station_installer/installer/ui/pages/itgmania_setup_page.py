@@ -417,24 +417,18 @@ class ITGManiaSetupPage(BasePage):
             if "installed_games" not in self.app.user_config:
                 self.app.user_config["installed_games"] = {"games": {}}
             
-            # Add ITGMania to installed games
+            # Add ITGMania to installed games in the correct format
             self.app.user_config["installed_games"]["games"]["itgmania"] = {
-                "display_name": "ITGMania",
                 "path": itgmania_path,
-                "type": "binary",
-                "launch_args": "",
-                "banner": image_path,
-                "enabled": True
+                "banner": image_path
             }
             
             # IMPORTANT: Also add to binary_games which is used for metadata.pegasus.txt generation
             if "binary_games" not in self.app.user_config:
                 self.app.user_config["binary_games"] = {}
                 
-            # Add ITGMania to binary games with the same format as other binary games
+            # Add ITGMania to binary games with the same format
             self.app.user_config["binary_games"]["itgmania"] = {
-                "id": "itgmania",
-                "display_name": "ITGMania",
                 "path": itgmania_path,
                 "banner": image_path
             } 
