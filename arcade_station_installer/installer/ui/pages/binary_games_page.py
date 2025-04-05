@@ -7,6 +7,7 @@ from tkinter import ttk, filedialog, messagebox
 import uuid
 
 from .base_page import BasePage
+from ...utils.game_id import generate_game_id, validate_game_id, get_display_name
 
 class GameEntry:
     """A class representing a binary game entry in the UI."""
@@ -73,12 +74,16 @@ class GameEntry:
         id_label.pack(side="left", padx=(0, 5))
         
         self.id_var = tk.StringVar(value=self.id)
-        id_entry = ttk.Entry(
+        self.id_entry = ttk.Entry(
             id_frame,
             textvariable=self.id_var,
-            width=30
+            width=30,
+            state="readonly"  # Make it read-only
         )
-        id_entry.pack(side="left", fill="x", expand=True)
+        self.id_entry.pack(side="left", fill="x", expand=True)
+        
+        # Add trace to name_var to update ID automatically
+        self.name_var.trace_add("write", self._update_id)
         
         # Game executable
         exe_frame = ttk.Frame(self.frame)
@@ -133,6 +138,20 @@ class GameEntry:
             width=10
         )
         browse_image_button.pack(side="right")
+    
+    def _update_id(self, *args):
+        """Update the ID when the name changes."""
+        name = self.name_var.get().strip()
+        if name:
+            # Get all existing game IDs from other entries
+            existing_ids = {}
+            for entry in self.parent.game_entries:
+                if entry != self:
+                    existing_ids[entry.id_var.get()] = True
+            
+            # Generate new ID
+            new_id = generate_game_id(name, existing_ids)
+            self.id_var.set(new_id)
     
     def delete(self):
         """Delete this game entry."""
@@ -216,18 +235,20 @@ class GameEntry:
             bool: True if valid, False otherwise
         """
         # Check if name is set
-        if not self.name_var.get().strip():
+        name = self.name_var.get().strip()
+        if not name:
             messagebox.showerror(
                 "Invalid Name", 
                 "Please enter a name for the game."
             )
             return False
         
-        # Check if ID is set
-        if not self.id_var.get().strip():
+        # ID validation is automatic now
+        game_id = self.id_var.get()
+        if not validate_game_id(game_id):
             messagebox.showerror(
                 "Invalid ID", 
-                "Please enter a unique ID for the game."
+                f"The game ID '{game_id}' is invalid. Only lowercase letters, numbers, and underscores are allowed."
             )
             return False
         

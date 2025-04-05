@@ -17,6 +17,7 @@ except ImportError:
     pass
 
 from .. import IS_WINDOWS, IS_LINUX, IS_MAC, INSTALLER_DIR, RESOURCES_DIR
+from ..utils.game_id import get_display_name
 
 class InstallationManager:
     """Manages the Arcade Station installation process."""
@@ -507,11 +508,11 @@ class InstallationManager:
         # Add other binary games if configured
         if config.get("binary_games"):
             for game_id, game_info in config["binary_games"].items():
-                # Skip ITGMania as it was already handled above
                 if game_id == "itgmania":
                     continue
                     
                 installed_games["games"][game_id] = {
+                    "display_name": game_info["display_name"],
                     "path": game_info["path"],
                     "banner": game_info.get("banner", "")
                 }
@@ -520,6 +521,7 @@ class InstallationManager:
         if config.get("mame_games"):
             for game_id, game_info in config["mame_games"].items():
                 installed_games["games"][game_id] = {
+                    "display_name": game_info["display_name"],
                     "rom": game_info["rom"],
                     "state": game_info.get("state", "o"),
                     "banner": game_info.get("banner", "")
@@ -735,7 +737,7 @@ assets.box_front: {}
                 if game_id == "itgmania":
                     continue
                     
-                display_name = game_info.get("display_name", game_id.replace("_", " ").title())
+                display_name = game_info.get("display_name", get_display_name(game_id))
                 # Use absolute path for custom banner, omit if no banner
                 asset_path = game_info.get("banner", "")
                 if asset_path:
