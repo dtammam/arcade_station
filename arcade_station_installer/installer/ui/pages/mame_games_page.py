@@ -297,7 +297,7 @@ class MAMEGamesPage(BasePage):
         mame_config_frame.pack(fill="x", pady=10)
         
         # Use MAME checkbox
-        self.use_mame_var = tk.BooleanVar(value=True)
+        self.use_mame_var = tk.BooleanVar(value=False)
         use_mame = ttk.Checkbutton(
             mame_config_frame,
             text="I want to use MAME games with Arcade Station",
@@ -358,15 +358,16 @@ class MAMEGamesPage(BasePage):
         )
         browse_ini_button.pack(side="right")
         
-        # Create a frame with scrollbar for the game entries
+        # Game Entries frame
         self.entries_frame = ttk.LabelFrame(
             main_frame,
             text="Game Entries",
             padding=(10, 5)
         )
+        self.entries_frame.pack(fill="both", expand=True, pady=10)
         
+        # Create a frame with scrollbar for the game entries
         self.entries_canvas = tk.Canvas(self.entries_frame, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(self.entries_frame, orient="vertical", command=self.entries_canvas.yview)
         self.scrollable_frame = ttk.Frame(self.entries_canvas)
         
         self.scrollable_frame.bind(
@@ -377,22 +378,25 @@ class MAMEGamesPage(BasePage):
         )
         
         self.entries_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        self.entries_canvas.configure(yscrollcommand=scrollbar.set)
         
-        self.entries_canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # Pack the scrollable area with some padding
+        self.entries_canvas.pack(side="top", fill="both", expand=True, padx=10, pady=(0, 20))
         
         # Add games frame (container for game entries)
         self.games_frame = ttk.Frame(self.scrollable_frame)
         self.games_frame.pack(fill="both", expand=True)
         
-        # Add button
+        # Create a frame for the add button
+        add_button_frame = ttk.Frame(main_frame)
+        add_button_frame.pack(fill="x", padx=10, pady=10)
+        
+        # Add button with larger size and better styling
         add_button = ttk.Button(
             main_frame,
-            text="Add MAME Game",
+            text="Add Another MAME-Based Game",
             command=self.add_game
         )
-        add_button.pack(anchor="center", pady=10)
+        add_button.pack(expand=True, pady=5)
         
         # Configure canvas scroll region when frame changes size
         self.scrollable_frame.bind(
