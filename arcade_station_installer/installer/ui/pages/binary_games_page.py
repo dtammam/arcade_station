@@ -313,7 +313,6 @@ class BinaryGamesPage(BasePage):
         
         # Create a frame with scrollbar for the game entries
         self.entries_canvas = tk.Canvas(main_frame, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=self.entries_canvas.yview)
         self.scrollable_frame = ttk.Frame(self.entries_canvas)
         
         self.scrollable_frame.bind(
@@ -324,22 +323,26 @@ class BinaryGamesPage(BasePage):
         )
         
         self.entries_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-        self.entries_canvas.configure(yscrollcommand=scrollbar.set)
         
-        self.entries_canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # Pack the scrollable area with some padding
+        self.entries_canvas.pack(side="top", fill="both", expand=True, padx=10, pady=(0, 20))
         
         # Add games frame (container for game entries)
         self.games_frame = ttk.Frame(self.scrollable_frame)
         self.games_frame.pack(fill="both", expand=True)
         
-        # Add button
+        # Create a frame for the add button
+        add_button_frame = ttk.Frame(main_frame)
+        add_button_frame.pack(fill="x", padx=10, pady=10)
+        
+        # Add button with larger size and better styling
         add_button = ttk.Button(
-            main_frame,
-            text="Add Game",
-            command=self.add_game
+            add_button_frame,
+            text="Add Another Game",
+            command=self.add_game,
+            style="Accent.TButton"  # Use a more prominent style
         )
-        add_button.pack(anchor="center", pady=10)
+        add_button.pack(expand=True, pady=5)
         
         # Configure canvas scroll region when frame changes size
         self.scrollable_frame.bind(
