@@ -13,14 +13,8 @@ class ITGManiaSetupPage(BasePage):
     
     def __init__(self, container, app):
         """Initialize the ITGMania setup page."""
-        super().__init__(container, app)
-        self.set_title(
-            "ITGMania Setup",
-            "Configure ITGMania integration"
-        )
+        # Initialize variables before parent's __init__
         self.default_image_path = ""
-        
-        # Set default paths based on OS
         self.default_paths = {
             "Windows": r"C:\Games\ITGmania\Program\ITGmania.exe",
             "Linux": "/opt/itgmania/Program/ITGmania",
@@ -29,13 +23,27 @@ class ITGManiaSetupPage(BasePage):
         self.current_os = platform.system()
         self.default_itgmania_path = self.default_paths.get(self.current_os, "")
         
-        # Set the default image path to the standard asset location
+        # Call parent's __init__ which will call create_widgets
+        super().__init__(container, app)
+        
+        # Set title and default image path after parent initialization
+        self.set_title(
+            "ITGMania Setup",
+            "Configure ITGMania integration"
+        )
+        
         if "install_path" in self.app.user_config:
             asset_path = os.path.join(
                 self.app.user_config["install_path"],
                 "assets", "images", "banners", "simply-love.png"
             )
             self.default_image_path = asset_path
+            # Update the image path if using default
+            if self.use_default_image_var.get():
+                self.image_var.set(asset_path)
+        
+        # Initialize UI state after all variables are set
+        self.toggle_default_image()
     
     def create_widgets(self):
         """Create page-specific widgets."""
@@ -184,12 +192,15 @@ class ITGManiaSetupPage(BasePage):
     def toggle_default_image(self):
         """Enable or disable the image entry based on default image checkbox."""
         if self.use_default_image_var.get():
-            self.image_var.set("")
+            # Set the default image path and disable the entry
+            if self.default_image_path:
+                self.image_var.set(self.default_image_path)
             self.image_entry.config(state="disabled")
             self.browse_image_button.config(state="disabled")
         else:
             self.image_entry.config(state="normal")
             self.browse_image_button.config(state="normal")
+            self.image_var.set("")
     
     def toggle_default_path(self):
         """Enable or disable the path entry based on default path checkbox."""
@@ -285,6 +296,9 @@ class ITGManiaSetupPage(BasePage):
                 "assets", "images", "banners", "simply-love.png"
             )
             self.default_image_path = asset_path
+            # If using default image, update the path display
+            if self.use_default_image_var.get():
+                self.image_var.set(asset_path)
         
         # Check for default ITGMania path based on OS
         if os.path.exists(self.default_itgmania_path):
