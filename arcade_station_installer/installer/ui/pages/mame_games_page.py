@@ -48,10 +48,9 @@ class MameGameEntry:
         self.name_var = tk.StringVar()
         name_entry = ttk.Entry(
             name_frame,
-            textvariable=self.name_var,
-            width=30
+            textvariable=self.name_var
         )
-        name_entry.pack(side="left", fill="x", expand=True)
+        name_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
         
         # Delete button
         delete_button = ttk.Button(
@@ -60,7 +59,7 @@ class MameGameEntry:
             command=self.delete,
             width=10
         )
-        delete_button.pack(side="right", padx=5)
+        delete_button.pack(side="right")
         
         # Unique ID
         id_frame = ttk.Frame(self.frame)
@@ -77,7 +76,6 @@ class MameGameEntry:
         self.id_entry = ttk.Entry(
             id_frame,
             textvariable=self.id_var,
-            width=30,
             state="readonly"
         )
         self.id_entry.pack(side="left", fill="x", expand=True)
@@ -96,12 +94,11 @@ class MameGameEntry:
         self.rom_var = tk.StringVar()
         rom_entry = ttk.Entry(
             rom_frame,
-            textvariable=self.rom_var,
-            width=30
+            textvariable=self.rom_var
         )
         rom_entry.pack(side="left", fill="x", expand=True)
         
-        # State (save state) - often 'o' for most MAME games
+        # State (save state)
         state_frame = ttk.Frame(self.frame)
         state_frame.pack(fill="x", pady=2)
         
@@ -112,9 +109,12 @@ class MameGameEntry:
         )
         state_label.pack(side="left", padx=(0, 5))
         
+        state_container = ttk.Frame(state_frame)
+        state_container.pack(side="left", fill="x", expand=True)
+        
         self.state_var = tk.StringVar(value="o")
         state_entry = ttk.Entry(
-            state_frame,
+            state_container,
             textvariable=self.state_var,
             width=10
         )
@@ -122,7 +122,7 @@ class MameGameEntry:
         
         # Help for save state
         state_help = ttk.Label(
-            state_frame,
+            state_container,
             text="(Default: 'o' for standard save state)",
             font=("Arial", 9),
             foreground="#555555"
@@ -143,8 +143,7 @@ class MameGameEntry:
         self.banner_var = tk.StringVar()
         banner_entry = ttk.Entry(
             banner_frame,
-            textvariable=self.banner_var,
-            width=40
+            textvariable=self.banner_var
         )
         banner_entry.pack(side="left", fill="x", expand=True, padx=(0, 5))
         
@@ -366,10 +365,16 @@ class MAMEGamesPage(BasePage):
         )
         self.entries_frame.pack(fill="both", expand=True, pady=10)
         
-        # Create a frame with scrollbar for the game entries
-        self.entries_canvas = tk.Canvas(self.entries_frame, highlightthickness=0)
+        # Create a container for the scrollable area
+        scroll_container = ttk.Frame(self.entries_frame)
+        scroll_container.pack(fill="both", expand=True, padx=10)  # Added padding
+        
+        # Create canvas and scrollbar
+        self.entries_canvas = tk.Canvas(scroll_container, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(scroll_container, orient="vertical", command=self.entries_canvas.yview)
         self.scrollable_frame = ttk.Frame(self.entries_canvas)
         
+        # Configure scroll region
         self.scrollable_frame.bind(
             "<Configure>",
             lambda e: self.entries_canvas.configure(
@@ -377,45 +382,44 @@ class MAMEGamesPage(BasePage):
             )
         )
         
+        # Create window in canvas with fixed width
         self.entries_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         
-        # Pack the scrollable area with some padding
-        self.entries_canvas.pack(side="top", fill="both", expand=True, padx=10, pady=(0, 20))
+        # Configure canvas
+        self.entries_canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        self.entries_canvas.pack(side="left", fill="both", expand=True, padx=(5, 0))  # Added padding
+        scrollbar.pack(side="right", fill="y", padx=(0, 5))  # Added padding
+        
+        # Configure canvas to expand with window
+        main_frame.bind(
+            "<Configure>",
+            lambda e: self.entries_canvas.configure(width=e.width - 80)  # Adjusted width calculation
+        )
         
         # Add games frame (container for game entries)
         self.games_frame = ttk.Frame(self.scrollable_frame)
         self.games_frame.pack(fill="both", expand=True)
         
-        # Create a frame for the add button
-        add_button_frame = ttk.Frame(main_frame)
-        add_button_frame.pack(fill="x", padx=10, pady=10)
+        # Create a fixed-height container for the add button
+        button_container = ttk.Frame(main_frame, height=60)  # Fixed height container
+        button_container.pack(fill="x", side="bottom", pady=10)
+        button_container.pack_propagate(False)  # Prevent container from shrinking
         
         # Add button with larger size and better styling
         add_button = ttk.Button(
-            main_frame,
+            button_container,
             text="Add Another MAME-Based Game",
-            command=self.add_game
+            command=self.add_game,
+            style="Accent.TButton"  # Use a more prominent style
         )
         add_button.pack(expand=True, pady=5)
-        
-        # Configure canvas scroll region when frame changes size
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: self.entries_canvas.configure(scrollregion=self.entries_canvas.bbox("all"))
-        )
-        
-        # Configure canvas to expand with window
-        main_frame.bind(
-            "<Configure>",
-            lambda e: self.entries_canvas.configure(width=e.width - 40)
-        )
         
         # Set initial state
         self.toggle_mame_settings()
         
-        # Add a default empty game entry if MAME is enabled
-        if self.use_mame_var.get():
-            self.add_game()
+        # Don't add a default game entry since MAME is disabled by default
     
     def toggle_mame_settings(self):
         """Show or hide MAME settings based on checkbox state."""
