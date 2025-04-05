@@ -311,10 +311,24 @@ class BinaryGamesPage(BasePage):
         )
         intro_text.pack(anchor="w", pady=(0, 20))
         
-        # Create a frame with scrollbar for the game entries
-        self.entries_canvas = tk.Canvas(main_frame, highlightthickness=0)
+        # Game Entries frame
+        self.entries_frame = ttk.LabelFrame(
+            main_frame,
+            text="Game Entries",
+            padding=(10, 5)
+        )
+        self.entries_frame.pack(fill="both", expand=True, pady=10)
+        
+        # Create a container for the scrollable area
+        scroll_container = ttk.Frame(self.entries_frame)
+        scroll_container.pack(fill="both", expand=True, padx=10)
+        
+        # Create canvas and scrollbar
+        self.entries_canvas = tk.Canvas(scroll_container, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(scroll_container, orient="vertical", command=self.entries_canvas.yview)
         self.scrollable_frame = ttk.Frame(self.entries_canvas)
         
+        # Configure scroll region
         self.scrollable_frame.bind(
             "<Configure>",
             lambda e: self.entries_canvas.configure(
@@ -322,39 +336,39 @@ class BinaryGamesPage(BasePage):
             )
         )
         
+        # Create window in canvas with fixed width
         self.entries_canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
         
-        # Pack the scrollable area with some padding
-        self.entries_canvas.pack(side="top", fill="both", expand=True, padx=10, pady=(0, 20))
+        # Configure canvas
+        self.entries_canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        self.entries_canvas.pack(side="left", fill="both", expand=True, padx=(5, 0))
+        scrollbar.pack(side="right", fill="y", padx=(0, 5))
+        
+        # Configure canvas to expand with window
+        main_frame.bind(
+            "<Configure>",
+            lambda e: self.entries_canvas.configure(width=e.width - 80)  # Adjusted width calculation
+        )
         
         # Add games frame (container for game entries)
         self.games_frame = ttk.Frame(self.scrollable_frame)
         self.games_frame.pack(fill="both", expand=True)
         
-        # Create a frame for the add button
-        add_button_frame = ttk.Frame(main_frame)
-        add_button_frame.pack(fill="x", padx=10, pady=10)
+        # Create a fixed-height container for the add button
+        button_container = ttk.Frame(main_frame, height=60)
+        button_container.pack(fill="x", side="bottom", pady=10)
+        button_container.pack_propagate(False)  # Prevent container from shrinking
         
         # Add button with larger size and better styling
         add_button = ttk.Button(
-            add_button_frame,
-            text="Add Another Binary-Based Game",
+            button_container,
+            text="Add Another Game",
             command=self.add_game,
-            style="Accent.TButton"  # Use a more prominent style
+            style="Accent.TButton"
         )
         add_button.pack(expand=True, pady=5)
-        
-        # Configure canvas scroll region when frame changes size
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: self.entries_canvas.configure(scrollregion=self.entries_canvas.bbox("all"))
-        )
-        
-        # Configure canvas to expand with window
-        main_frame.bind(
-            "<Configure>",
-            lambda e: self.entries_canvas.configure(width=e.width - 20)
-        )
         
         # Add a default empty game entry
         self.add_game()
