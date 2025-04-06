@@ -14,12 +14,21 @@ class GameSetupPage(BasePage):
     
     def __init__(self, container, app):
         """Initialize the game setup page."""
+        # Initialize icon paths before parent's __init__
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+        self.icon_paths = {
+            'itgmania': os.path.join(project_root, "assets", "images", "icons", "itgmania_logo.png"),
+            'binary': os.path.join(project_root, "assets", "images", "icons", "binary_logo.png"),
+            'mame': os.path.join(project_root, "assets", "images", "icons", "mame_logo.png")
+        }
+        
+        # Now call parent's __init__
         super().__init__(container, app)
         self.set_title(
             "Game Setup",
             "Configure your games"
         )
-    
+        
     def on_enter(self):
         """Called when the page is shown."""
         # If in reconfigure mode and we have existing games, pre-check the checkbox
@@ -61,16 +70,12 @@ class GameSetupPage(BasePage):
         itg_frame = ttk.Frame(types_frame)
         itg_frame.pack(fill="x", pady=5)
         
-        itg_icon = ttk.Label(
-            itg_frame,
-            text="🎮",
-            font=("Arial", 16)
-        )
+        itg_icon = self.create_image_label(itg_frame, self.icon_paths['itgmania'], size=(32, 32))
         itg_icon.pack(side="left", padx=(5, 10))
         
         itg_text = ttk.Label(
             itg_frame,
-            text="ITGMania - Dance game simulator with advanced features",
+            text="Built on StepMania 5.1, ITGMania powers high-performance rhythm gaming with the iconic Simply Love interface.",
             wraplength=450,
             justify="left"
         )
@@ -80,16 +85,12 @@ class GameSetupPage(BasePage):
         binary_frame = ttk.Frame(types_frame)
         binary_frame.pack(fill="x", pady=5)
         
-        binary_icon = ttk.Label(
-            binary_frame,
-            text="📁",
-            font=("Arial", 16)
-        )
+        binary_icon = self.create_image_label(binary_frame, self.icon_paths['binary'], size=(32, 32))
         binary_icon.pack(side="left", padx=(5, 10))
         
         binary_text = ttk.Label(
             binary_frame,
-            text="Binary Games - Executable-based games like OpenITG, NotITG, etc.",
+            text="From StepMania to Fortnite, binary games boot via .exe files.",
             wraplength=450,
             justify="left"
         )
@@ -99,16 +100,12 @@ class GameSetupPage(BasePage):
         mame_frame = ttk.Frame(types_frame)
         mame_frame.pack(fill="x", pady=5)
         
-        mame_icon = ttk.Label(
-            mame_frame,
-            text="🎲",
-            font=("Arial", 16)
-        )
+        mame_icon = self.create_image_label(mame_frame, self.icon_paths['mame'], size=(32, 32))
         mame_icon.pack(side="left", padx=(5, 10))
         
         mame_text = ttk.Label(
             mame_frame,
-            text="MAME Games - Arcade games emulated using MAME",
+            text="From DDR EXTREME to Pac-Man, MAME emulates classic arcade games on PC.",
             wraplength=450,
             justify="left"
         )

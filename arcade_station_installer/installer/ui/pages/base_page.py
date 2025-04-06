@@ -5,6 +5,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import tomllib
+from PIL import Image, ImageTk
 
 class BasePage:
     """Base class for all installer wizard pages."""
@@ -53,6 +54,29 @@ class BasePage:
         Override in subclasses to add page-specific content.
         """
         pass
+    
+    def create_image_label(self, parent, image_path, size=(32, 32)):
+        """Create a label with an image.
+        
+        Args:
+            parent: The parent widget
+            image_path: Path to the image file
+            size: Tuple of (width, height) for the image size
+            
+        Returns:
+            ttk.Label: The label widget containing the image
+        """
+        try:
+            img = Image.open(image_path)
+            img = img.resize(size, Image.LANCZOS)
+            photo = ImageTk.PhotoImage(img)
+            
+            label = ttk.Label(parent, image=photo)
+            label.image = photo  # Keep a reference
+            return label
+        except Exception as e:
+            # Fallback to text if image loading fails
+            return ttk.Label(parent, text="[Image]")
     
     def on_enter(self):
         """Called when the page is shown.
