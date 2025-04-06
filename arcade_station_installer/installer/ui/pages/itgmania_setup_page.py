@@ -5,6 +5,8 @@ import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import platform
+import tomllib
+import logging
 
 from .base_page import BasePage
 
@@ -289,6 +291,43 @@ class ITGManiaSetupPage(BasePage):
     
     def on_enter(self):
         """Called when the page is shown."""
+        # Load existing ITGMania config if in reconfigure mode
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            installed_games_path = os.path.join(self.app.user_config.get("install_path", ""), "config", "installed_games.toml")
+            if os.path.exists(installed_games_path):
+                try:
+                    with open(installed_games_path, "rb") as f:
+                        installed_games = tomllib.load(f)
+                        if "games" in installed_games and "itgmania" in installed_games["games"]:
+                            itgmania_config = installed_games["games"]["itgmania"]
+                            
+                            # Enable ITGMania checkbox
+                            self.use_itgmania_var.set(True)
+                            
+                            # Set path
+                            if "path" in itgmania_config:
+                                self.path_var.set(itgmania_config["path"])
+                                # If the path matches the default, check the default path checkbox
+                                if itgmania_config["path"] == self.default_itgmania_path:
+                                    self.use_default_path_var.set(True)
+                                    self.default_path_checkbox.pack(anchor="w", pady=(0, 5))
+                                    self.toggle_default_path()
+                            
+                            # Set banner image
+                            if "banner" in itgmania_config:
+                                self.use_default_image_var.set(False)
+                                self.image_var.set(itgmania_config["banner"])
+                            
+                            # Set module installation
+                            if "display_module_installed" in itgmania_config:
+                                self.install_module_var.set(itgmania_config["display_module_installed"])
+                            
+                            # Update UI state
+                            self.toggle_itgmania_settings()
+                            self.toggle_default_image()
+                except Exception as e:
+                    logging.warning(f"Failed to load existing ITGMania config: {e}")
+        
         # Update the default image path based on the current installation path
         if "install_path" in self.app.user_config:
             asset_path = os.path.join(
@@ -310,40 +349,7 @@ class ITGManiaSetupPage(BasePage):
             self.use_default_path_var.set(False)
             self.default_path_checkbox.pack_forget()
             self.path_var.set("")
-        
-        # Pre-populate fields if in reconfiguration mode
-        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
-            if 'installed_games' in self.app.user_config:
-                # Check if ITGMania is in installed games
-                installed_games = self.app.user_config['installed_games']
-                if 'games' in installed_games and 'itgmania' in installed_games['games']:
-                    itgmania_config = installed_games['games']['itgmania']
-                    
-                    # Enable ITGMania checkbox
-                    self.use_itgmania_var.set(True)
-                    
-                    # Set path
-                    if 'path' in itgmania_config:
-                        self.path_var.set(itgmania_config['path'])
-                        # If the path matches the default, check the default path checkbox
-                        if itgmania_config['path'] == self.default_itgmania_path:
-                            self.use_default_path_var.set(True)
-                            self.default_path_checkbox.pack(anchor="w", pady=(0, 5))
-                            self.toggle_default_path()
-                    
-                    # Set banner image
-                    if 'banner' in itgmania_config:
-                        self.use_default_image_var.set(False)
-                        self.image_var.set(itgmania_config['banner'])
-                    
-                    # Set module installation
-                    if 'display_module_installed' in itgmania_config:
-                        self.install_module_var.set(itgmania_config['display_module_installed'])
-                    
-                    # Update UI state
-                    self.toggle_itgmania_settings()
-                    self.toggle_default_image()
-
+    
     def save_data(self):
         """Save ITGMania settings."""
         self.app.user_config["itgmania"] = {

@@ -415,9 +415,70 @@ class InstallationManager:
         """Generate the configuration files.
         
         Args:
-            config: User configuration from the wizard
-            config_dir: Directory to write the configuration files
+            config: The configuration dictionary
+            config_dir: The directory to write the config files to
         """
+        # Create config directory if it doesn't exist
+        os.makedirs(config_dir, exist_ok=True)
+        
+        # Load existing installed_games.toml if it exists
+        installed_games_path = os.path.join(config_dir, "installed_games.toml")
+        installed_games = {"games": {}}
+        if os.path.exists(installed_games_path):
+            try:
+                with open(installed_games_path, "rb") as f:
+                    installed_games = tomllib.load(f)
+            except Exception as e:
+                logging.warning(f"Failed to load existing installed_games.toml: {e}")
+        
+        # Only update games if we're not skipping configuration
+        if not config.get("skip_games", False):
+            # Add ITGMania if configured from either source
+            if config.get("itgmania", {}).get("enabled", False):
+                itg_path = config["itgmania"]["path"]
+                
+                # Determine image path
+                itg_image = ""
+                if config["itgmania"].get("use_default_image", True):
+                    itg_image = os.path.join(config["install_path"], "assets", "images", "banners", "simply-love.png")
+                elif config["itgmania"].get("custom_image"):
+                    itg_image = config["itgmania"]["custom_image"]
+                    
+                installed_games["games"]["itgmania"] = {
+                    "path": itg_path,
+                    "banner": itg_image
+                }
+                
+            # Also check binary_games for ITGMania as a fallback
+            elif config.get("binary_games", {}).get("itgmania"):
+                game_info = config["binary_games"]["itgmania"]
+                installed_games["games"]["itgmania"] = {
+                    "path": game_info["path"],
+                    "banner": game_info.get("banner", "")
+                }
+            
+            # Add other binary games if configured
+            if config.get("binary_games"):
+                for game_id, game_info in config["binary_games"].items():
+                    if game_id == "itgmania":
+                        continue
+                        
+                    installed_games["games"][game_id] = {
+                        "display_name": game_info["display_name"],
+                        "path": game_info["path"],
+                        "banner": game_info.get("banner", "")
+                    }
+            
+            # Add MAME games if configured
+            if config.get("mame_games"):
+                for game_id, game_info in config["mame_games"].items():
+                    installed_games["games"][game_id] = {
+                        "display_name": game_info["display_name"],
+                        "rom": game_info["rom"],
+                        "state": game_info.get("state", "o"),
+                        "banner": game_info.get("banner", "")
+                    }
+        
         # Generate default_config.toml
         log_dir = os.path.join(config_dir, "logs")
         if config.get("log_dir"):
@@ -477,56 +538,6 @@ class InstallationManager:
         self._write_toml(os.path.join(config_dir, "display_config.toml"), display_config)
         
         # Generate installed_games.toml
-        installed_games = {
-            "games": {}
-        }
-        
-        # Add ITGMania if configured from either source
-        if config.get("itgmania", {}).get("enabled", False):
-            itg_path = config["itgmania"]["path"]
-            
-            # Determine image path
-            itg_image = ""
-            if config["itgmania"].get("use_default_image", True):
-                itg_image = os.path.join(config["install_path"], "assets", "images", "banners", "simply-love.png")
-            elif config["itgmania"].get("custom_image"):
-                itg_image = config["itgmania"]["custom_image"]
-                
-            installed_games["games"]["itgmania"] = {
-                "path": itg_path,
-                "banner": itg_image
-            }
-            
-        # Also check binary_games for ITGMania as a fallback
-        elif config.get("binary_games", {}).get("itgmania"):
-            game_info = config["binary_games"]["itgmania"]
-            installed_games["games"]["itgmania"] = {
-                "path": game_info["path"],
-                "banner": game_info.get("banner", "")
-            }
-        
-        # Add other binary games if configured
-        if config.get("binary_games"):
-            for game_id, game_info in config["binary_games"].items():
-                if game_id == "itgmania":
-                    continue
-                    
-                installed_games["games"][game_id] = {
-                    "display_name": game_info["display_name"],
-                    "path": game_info["path"],
-                    "banner": game_info.get("banner", "")
-                }
-        
-        # Add MAME games if configured
-        if config.get("mame_games"):
-            for game_id, game_info in config["mame_games"].items():
-                installed_games["games"][game_id] = {
-                    "display_name": game_info["display_name"],
-                    "rom": game_info["rom"],
-                    "state": game_info.get("state", "o"),
-                    "banner": game_info.get("banner", "")
-                }
-        
         self._write_toml(os.path.join(config_dir, "installed_games.toml"), installed_games)
         
         # Generate key_listener.toml

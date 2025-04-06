@@ -5,6 +5,8 @@ import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import uuid
+import tomllib
+import logging
 
 from .base_page import BasePage
 from ...utils.game_id import generate_game_id, validate_game_id, get_display_name
@@ -280,6 +282,37 @@ class MAMEGamesPage(BasePage):
             "MAME Games Setup",
             "Configure MAME-based arcade games"
         )
+    
+    def on_enter(self):
+        """Called when the page is shown."""
+        # Load existing MAME games if in reconfigure mode
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            installed_games_path = os.path.join(self.app.user_config.get("install_path", ""), "config", "installed_games.toml")
+            if os.path.exists(installed_games_path):
+                try:
+                    with open(installed_games_path, "rb") as f:
+                        installed_games = tomllib.load(f)
+                        if "games" in installed_games:
+                            # Clear existing entries
+                            for entry in self.game_entries[:]:
+                                self.remove_game(entry)
+                            
+                            # Add entries for each MAME game
+                            for game_id, game_info in installed_games["games"].items():
+                                if "rom" in game_info:  # This is a MAME game
+                                    entry = MameGameEntry(self, self.games_frame, self.app, self.remove_game)
+                                    entry.id_var.set(game_id)
+                                    entry.name_var.set(game_info.get("display_name", game_id))
+                                    entry.rom_var.set(game_info.get("rom", ""))
+                                    entry.state_var.set(game_info.get("state", "o"))
+                                    entry.banner_var.set(game_info.get("banner", ""))
+                                    self.game_entries.append(entry)
+                                    
+                                    # Enable MAME if we have games
+                                    self.use_mame_var.set(True)
+                                    self.toggle_mame_settings()
+                except Exception as e:
+                    logging.warning(f"Failed to load existing MAME games: {e}")
     
     def create_widgets(self):
         """Create page-specific widgets."""

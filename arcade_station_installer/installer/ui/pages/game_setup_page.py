@@ -3,6 +3,9 @@ Game setup overview page for the Arcade Station Installer
 """
 import tkinter as tk
 from tkinter import ttk
+import os
+import tomllib
+import logging
 
 from .base_page import BasePage
 
@@ -16,6 +19,20 @@ class GameSetupPage(BasePage):
             "Game Setup",
             "Configure your games"
         )
+    
+    def on_enter(self):
+        """Called when the page is shown."""
+        # If in reconfigure mode and we have existing games, pre-check the checkbox
+        if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
+            installed_games_path = os.path.join(self.app.user_config.get("install_path", ""), "config", "installed_games.toml")
+            if os.path.exists(installed_games_path):
+                try:
+                    with open(installed_games_path, "rb") as f:
+                        installed_games = tomllib.load(f)
+                        if installed_games.get("games"):
+                            self.has_games_var.set(True)
+                except Exception as e:
+                    logging.warning(f"Failed to load existing installed_games.toml: {e}")
     
     def create_widgets(self):
         """Create page-specific widgets."""
@@ -140,30 +157,29 @@ class GameSetupPage(BasePage):
     
     def on_next(self):
         """Handle next button click."""
-        # If the user doesn't have games to configure now, skip the game setup pages
+        # If the user doesn't have games to configure now, skip to key bindings
         if not self.has_games_var.get():
-            # Find the control config page index
-            control_index = self.find_control_config_page_index()
-            if control_index != -1:
-                # Skip to control config page
+            # Find the key bindings page index
+            key_bindings_index = self.find_key_bindings_page_index()
+            if key_bindings_index != -1:
                 self.on_leave()
-                self.app.show_page(control_index)
+                self.app.show_page(key_bindings_index)
                 return
         
         # Otherwise proceed normally
         super().on_next()
     
-    def find_control_config_page_index(self):
-        """Find the index of the control config page.
+    def find_key_bindings_page_index(self):
+        """Find the index of the key bindings page.
         
         Returns:
-            int: Index of the control config page, or -1 if not found
+            int: Index of the key bindings page, or -1 if not found
         """
         for i, page in enumerate(self.app.pages):
-            if page.__class__.__name__ == "ControlConfigPage":
+            if page.__class__.__name__ == "KeyBindingsPage":
                 return i
         return -1
     
     def save_data(self):
         """Save game setup data."""
-        self.app.user_config["configure_games"] = self.has_games_var.get() 
+        self.app.user_config["skip_games"] = not self.has_games_var.get() 
