@@ -15,7 +15,7 @@ class WelcomePage(BasePage):
         """Initialize the welcome page."""
         super().__init__(container, app)
         self.set_title(
-            "Welcome to Arcade Station",
+            "Welcome to arcade_station",
             f"Installation for {get_platform_name()}"
         )
         
@@ -52,8 +52,8 @@ class WelcomePage(BasePage):
         # Welcome text
         welcome_text = ttk.Label(
             welcome_frame,
-            text="Welcome to the Arcade Station installer! This wizard will guide you through "
-                 "the process of setting up Arcade Station on your system.",
+            text="Welcome to the arcade_station installer! This wizard will guide you through the process of setting up arcade_station on your system.\n\n"
+            "Please select Next to continue.",
             wraplength=500,
             justify="center"
         )
@@ -61,7 +61,7 @@ class WelcomePage(BasePage):
         
         # Installation status
         self.status_frame = ttk.Frame(welcome_frame)
-        self.status_frame.pack(fill="x", pady=20)
+        self.status_frame.pack(fill="x", pady=40)
         
         # This will be updated in on_enter
         self.status_label = ttk.Label(
@@ -70,6 +70,13 @@ class WelcomePage(BasePage):
             justify="center"
         )
         self.status_label.pack(pady=10)
+        
+        # Install wizard image
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+        image_path = os.path.join(project_root, "assets", "images", "photos", "install_wizard.png")
+        if os.path.exists(image_path):
+            image_label = self.create_image_label(welcome_frame, image_path, size=(400, 300))
+            image_label.pack(pady=20)
         
         # Installation mode radio buttons
         self.install_mode_var = tk.StringVar(value="new")
@@ -108,7 +115,7 @@ class WelcomePage(BasePage):
         # Since installation status will be checked after the user selects an installation location,
         # we'll display a generic welcome message and hide installation options
         self.status_label.config(
-            text="Please proceed to select an installation location."
+            text=""
         )
         
         # Hide installation options frame until we know if Arcade Station is installed
