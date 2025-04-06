@@ -181,9 +181,43 @@ class InstallLocationPage(BasePage):
             if result:  # Yes was pressed
                 self.app.is_reconfigure_mode = True
                 self.app.install_manager.files_copied = True
-            else:  # No was pressed
-                self.app.is_reset_mode = True
-                self.app.install_manager.files_copied = False
+            else:  # No was pressed - attempt to delete existing installation
+                try:
+                    # First try to delete everything except .git
+                    for item in os.listdir(path):
+                        item_path = os.path.join(path, item)
+                        if item != '.git':
+                            try:
+                                if os.path.isfile(item_path):
+                                    os.remove(item_path)
+                                elif os.path.isdir(item_path):
+                                    shutil.rmtree(item_path)
+                            except Exception as e:
+                                messagebox.showerror(
+                                    "Delete Error",
+                                    f"Could not delete {item}. Please close any programs using files in this directory and try again.\n\nError: {e}"
+                                )
+                                return False
+                    
+                    # Then try to delete .git if it exists
+                    git_path = os.path.join(path, '.git')
+                    if os.path.exists(git_path):
+                        try:
+                            shutil.rmtree(git_path)
+                        except Exception:
+                            # If we can't delete .git, just log it and continue
+                            print("Warning: Could not delete .git directory, continuing with installation")
+                    
+                    # Recreate the directory
+                    os.makedirs(path)
+                    self.app.is_reset_mode = True
+                    self.app.install_manager.files_copied = False
+                except Exception as e:
+                    messagebox.showerror(
+                        "Reset Error",
+                        f"An unexpected error occurred while resetting the installation: {e}"
+                    )
+                    return False
             
             # Update page flow based on the selected mode
             self.app.decide_next_page_flow()
@@ -206,6 +240,7 @@ class InstallLocationPage(BasePage):
             return
         
         # Immediately copy project files to the installation location
+        progress_window = None
         try:
             # Show a progress indicator
             progress_window = tk.Toplevel(self.app.root)
@@ -428,8 +463,16 @@ class InstallLocationPage(BasePage):
             # Set files_copied to False in case of error
             self.app.install_manager.files_copied = False
             
+            # Clean up the progress window if it exists
+            if progress_window and progress_window.winfo_exists():
+                progress_window.destroy()
+            
+            # Show error and return to previous page
             messagebox.showerror(
                 "Copy Error",
-                f"An error occurred while copying files: {str(e)}\n\n"
-                "You can continue, but the installation may not function correctly."
-            ) 
+                f"An error occurred while copying files: {str(e)}\n\nPlease ensure you have sufficient permissions and try again."
+            )
+            
+            # Go back to the previous page
+            self.app.prev_page()
+            return
