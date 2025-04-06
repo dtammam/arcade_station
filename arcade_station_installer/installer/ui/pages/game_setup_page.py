@@ -76,7 +76,7 @@ class GameSetupPage(BasePage):
         itg_text = ttk.Label(
             itg_frame,
             text="Built on StepMania 5.1, ITGMania powers high-performance rhythm gaming with the iconic Simply Love interface.",
-            wraplength=450,
+            wraplength=750,
             justify="left"
         )
         itg_text.pack(side="left", fill="x", expand=True)
@@ -91,7 +91,7 @@ class GameSetupPage(BasePage):
         binary_text = ttk.Label(
             binary_frame,
             text="From StepMania to Fortnite, binary games boot via .exe files.",
-            wraplength=450,
+            wraplength=750,
             justify="left"
         )
         binary_text.pack(side="left", fill="x", expand=True)
@@ -106,7 +106,7 @@ class GameSetupPage(BasePage):
         mame_text = ttk.Label(
             mame_frame,
             text="From DDR EXTREME to Pac-Man, MAME emulates classic arcade games on PC.",
-            wraplength=450,
+            wraplength=750,
             justify="left"
         )
         mame_text.pack(side="left", fill="x", expand=True)
@@ -122,12 +122,10 @@ class GameSetupPage(BasePage):
         process_text = ttk.Label(
             process_frame,
             text="In the next few screens, you'll configure each type of game:\n\n"
-                 "1. ITGMania configuration (optional but recommended)\n"
-                 "2. Binary games configuration\n"
-                 "3. MAME games configuration\n\n"
-                 "For each game, you can specify the executable path and an optional "
-                 "banner image to display on the marquee.",
-            wraplength=500,
+                 "- For each game, you can specify the executable path and an optional image for the menu and marquee.\n\n"
+                 "- Your input will be saved to configuration files and can be updated later.\n\n"
+                 "- Everything is optional. You can uncheck the box below to skip game configuration and preserve existing settings.",
+            wraplength=750,
             justify="left"
         )
         process_text.pack(fill="x", pady=10)
@@ -136,7 +134,7 @@ class GameSetupPage(BasePage):
         self.has_games_var = tk.BooleanVar(value=True)
         has_games = ttk.Checkbutton(
             main_frame,
-            text="I have games to configure now",
+            text="I would like to configure games now",
             variable=self.has_games_var
         )
         has_games.pack(anchor="w", pady=10)
@@ -144,10 +142,10 @@ class GameSetupPage(BasePage):
         # Help text
         help_text = ttk.Label(
             main_frame,
-            text="Note: You can always add more games later by running the installer again.",
+            text="Note: You can skip game setup. You can always add more games later by running the installer again.",
             font=("Arial", 9, "italic"),
             foreground="#555555",
-            wraplength=500,
+            wraplength=750,
             justify="left"
         )
         help_text.pack(anchor="w", pady=(0, 10))
