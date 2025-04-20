@@ -440,7 +440,7 @@ class InstallationManager:
                 # Determine image path
                 itg_image = ""
                 if config["itgmania"].get("use_default_image", True):
-                    itg_image = os.path.join(config["install_path"], "assets", "images", "banners", "simply-love.png")
+                    itg_image = os.path.join(config["install_path"], "assets", "images", "banners", "itgmania.png")
                 elif config["itgmania"].get("custom_image"):
                     itg_image = config["itgmania"]["custom_image"]
                     
@@ -530,7 +530,7 @@ class InstallationManager:
             # Set banner path based on whether using default or custom
             if config["itgmania"].get("use_default_image", True):
                 display_config["dynamic_marquee"]["itgmania_banner_path"] = os.path.join(
-                    config["install_path"], "assets", "images", "banners", "simply-love.png"
+                    config["install_path"], "assets", "images", "banners", "itgmania.png"
                 )
             elif config["itgmania"].get("custom_image"):
                 display_config["dynamic_marquee"]["itgmania_banner_path"] = config["itgmania"]["custom_image"]
@@ -689,7 +689,7 @@ shortname: arcade_station
                 python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
                 
                 # Determine banner image path
-                banner_path = "../../../../assets/images/banners/simply-love.png"
+                banner_path = "../../../../assets/images/banners/itgmania.png"
                 if config["itgmania"].get("custom_image"):
                     custom_banner = config["itgmania"].get("custom_image", "")
                     if custom_banner:
@@ -697,7 +697,7 @@ shortname: arcade_station
                         banner_path = custom_banner.replace("\\", "/")
                 elif config["itgmania"].get("use_default_image", True):
                     # For default image, use relative path
-                    banner_path = "../../../../assets/images/banners/simply-love.png"
+                    banner_path = "../../../../assets/images/banners/itgmania.png"
                 
                 metadata_content += """game: ITGMania
 file: not\\using\\files\\to\\launch\\games\\ITGMania
@@ -723,7 +723,7 @@ assets.box_front: {}
             # Use absolute path for custom banner, relative for default
             asset_path = game_info.get("banner", "")
             if not asset_path:
-                asset_path = "../../../../assets/images/banners/simply-love.png"
+                asset_path = "../../../../assets/images/banners/itgmania.png"
             else:
                 asset_path = asset_path.replace("\\", "/")
             
