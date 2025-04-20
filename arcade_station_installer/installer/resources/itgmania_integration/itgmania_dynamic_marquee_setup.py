@@ -78,52 +78,62 @@ except ImportError:
     log_message = fallback_log_message
 
 
-def get_itgmania_install_path():
+def validate_itgmania_path(path):
     """
-    Ask the user for the ITGMania installation path and validate it.
+    Validate that the provided path exists and looks like an ITGMania installation.
+    If the path is to an executable, it will check the parent directories for a Themes folder.
     
+    Args:
+        path (Path): The path to validate.
+        
     Returns:
-        Path: The validated ITGMania installation path.
+        bool: True if valid, False otherwise.
+        Path: The corrected base path to the ITGMania installation.
     """
-    while True:
-        log_message("===== ITGMania Integration Setup =====", "SETUP")
-        log_message("This script will configure your ITGMania installation to work with Arcade Station's dynamic marquee.", "SETUP")
+    if not path.exists():
+        log_message(f"Error: The path {path} does not exist.", "SETUP")
+        return False, path
+    
+    # If the path is to a file (executable), navigate up to find the ITGMania base directory
+    base_path = path
+    if path.is_file():
+        log_message(f"Path points to a file, looking for ITGMania base directory...", "SETUP")
+        # The executable is typically in a Program subdirectory, so we need to go up at least one level
+        parent_dir = path.parent
         
-        default_paths = {
-            "windows": r"C:\Games\ITGmania",
-            "darwin": "/Applications/ITGmania",
-            "linux": os.path.expanduser("~/ITGmania")
-        }
+        # First try the immediate parent directory (Program directory)
+        if (parent_dir / "Themes").exists():
+            log_message(f"Found Themes directory at {parent_dir}", "SETUP")
+            return True, parent_dir
         
-        system = platform.system().lower()
-        if system in default_paths:
-            default_path = default_paths[system]
-        else:
-            default_path = "ITGmania"
+        # Then try one level up (ITGMania root)
+        root_dir = parent_dir.parent
+        if (root_dir / "Themes").exists():
+            log_message(f"Found Themes directory at {root_dir}", "SETUP")
+            return True, root_dir
         
-        itgmania_path = input(f"\nEnter the path to your ITGMania installation [default: {default_path}]: ")
+        # If we still haven't found it, check two levels up (unusual but possible)
+        grandparent_dir = root_dir.parent
+        if (grandparent_dir / "Themes").exists():
+            log_message(f"Found Themes directory at {grandparent_dir}", "SETUP")
+            return True, grandparent_dir
         
-        if not itgmania_path:
-            itgmania_path = default_path
-        
-        install_path = Path(itgmania_path)
-        
-        # Validate the path
-        if not install_path.exists():
-            log_message(f"Error: The path {install_path} does not exist.", "SETUP")
-            retry = input("Would you like to try again? (y/n): ").lower()
-            if retry != 'y':
-                sys.exit(1)
-            continue
-        
-        # Check if this looks like an ITGMania installation
-        if not (install_path / "Themes").exists():
-            log_message(f"Warning: This doesn't appear to be a valid ITGMania installation (no Themes folder found).", "SETUP")
-            confirm = input("Continue anyway? (y/n): ").lower()
-            if confirm != 'y':
-                continue
-        
-        return install_path
+        log_message(f"Warning: Could not find a Themes directory in parent directories of {path}.", "SETUP")
+        return False, path
+    
+    # If the path is already a directory, check if it has a Themes subdirectory
+    if (base_path / "Themes").exists():
+        log_message(f"Valid ITGMania installation found at {base_path}", "SETUP")
+        return True, base_path
+    
+    # Check if the parent directory has a Themes subdirectory (in case we're in a subdirectory)
+    parent_dir = base_path.parent
+    if (parent_dir / "Themes").exists():
+        log_message(f"Found Themes directory at parent directory {parent_dir}", "SETUP")
+        return True, parent_dir
+    
+    log_message(f"Warning: The path {path} doesn't appear to be a valid ITGMania installation (no Themes folder found).", "SETUP")
+    return False, path
 
 
 def copy_shim_files(itgmania_path):
@@ -346,49 +356,66 @@ def update_config(log_file_path, itgmania_path=None, banner_image_path=None):
         return False
 
 
-def main():
+def setup_itgmania_integration(itgmania_path, banner_image_path=None):
     """
-    Main function to set up ITGMania integration.
+    Main function to set up ITGMania integration, designed to be called directly from other modules.
+    
+    Args:
+        itgmania_path (str): Path to the ITGMania installation.
+        banner_image_path (str, optional): Path to a custom banner image.
+        
+    Returns:
+        bool: True if setup was successful, False otherwise.
     """
     try:
         log_message("==================================================", "SETUP")
         log_message("   Arcade Station - ITGMania Integration Setup", "SETUP")
         log_message("==================================================", "SETUP")
         
-        # Step 1: Get ITGMania installation path
-        itgmania_path = get_itgmania_install_path()
+        # Convert string paths to Path objects
+        itgmania_path = Path(itgmania_path)
+        if banner_image_path:
+            banner_image_path = Path(banner_image_path)
         
-        # Step 2: Copy module file
+        # Validate the ITGMania path and get the corrected base path
+        is_valid, base_path = validate_itgmania_path(itgmania_path)
+        if not is_valid:
+            log_message("Proceeding despite validation issues.", "SETUP")
+        
+        # Use the corrected base path from validation
+        itgmania_path = base_path
+        
+        log_message(f"Using ITGMania installation at: {itgmania_path}", "SETUP")
+        
+        # Copy module files
         log_message("Step 1: Copying module file to ITGMania installation...", "SETUP")
         success, (dest_file, dest_image, is_portable) = copy_shim_files(itgmania_path)
         if not success:
-            sys.exit(1)
+            return False
         
-        # Step 3: Determine log file path
+        # Determine log file path
         log_message("Step 2: Determining log file path...", "SETUP")
         log_file_path = determine_log_file_path(itgmania_path, dest_file, is_portable)
         
-        # Step 4: Update config
+        # Update config
         log_message("Step 3: Updating configuration...", "SETUP")
-        if not update_config(log_file_path, itgmania_path, dest_image):
-            sys.exit(1)
+        
+        # Use the provided banner image if specified, otherwise use the copied one
+        banner_path = banner_image_path if banner_image_path else dest_image
+        
+        if not update_config(log_file_path, itgmania_path, banner_path):
+            return False
         
         log_message("==================================================", "SETUP")
         log_message("   Setup Complete!", "SETUP")
         log_message("==================================================", "SETUP")
         log_message("ITGMania is now configured to work with Arcade Station's dynamic marquee.", "SETUP")
         log_message(f"Log file path: {log_file_path}", "SETUP")
-        if dest_image:
-            log_message(f"Banner image path: {dest_image}", "SETUP")
-        log_message("\nTo use this feature:", "SETUP")
-        log_message("1. Make sure Arcade Station is running", "SETUP")
-        log_message("2. Launch ITGMania", "SETUP")
-        log_message("3. Select songs to see their banners on your marquee display", "SETUP")
-        log_message("==================================================", "SETUP")
+        if banner_path:
+            log_message(f"Banner image path: {banner_path}", "SETUP")
         
-    except KeyboardInterrupt:
-        log_message("\nSetup canceled by user.", "SETUP")
-        sys.exit(1)
+        return True
+        
     except Exception as e:
         log_message(f"Setup failed: {str(e)}", "ERROR")
         
@@ -396,6 +423,49 @@ def main():
         import traceback
         traceback.print_exc()
         
+        return False
+
+
+def main():
+    """
+    Command-line entry point when script is run directly.
+    Prompts the user for the ITGMania installation path and sets up the integration.
+    """
+    try:
+        # Interactive mode
+        print("Running ITGMania integration setup in interactive mode.")
+        
+        # Get ITGMania path from user input
+        default_paths = {
+            "windows": r"C:\Games\ITGmania",
+            "darwin": "/Applications/ITGmania",
+            "linux": os.path.expanduser("~/ITGmania")
+        }
+        
+        system = platform.system().lower()
+        if system in default_paths:
+            default_path = default_paths[system]
+        else:
+            default_path = "ITGmania"
+        
+        itgmania_path = input(f"\nEnter the path to your ITGMania installation [default: {default_path}]: ")
+        
+        if not itgmania_path:
+            itgmania_path = default_path
+        
+        # Run the setup function
+        if setup_itgmania_integration(itgmania_path):
+            print("\nSetup completed successfully!")
+            print("To use this feature:")
+            print("1. Make sure Arcade Station is running")
+            print("2. Launch ITGMania")
+            print("3. Select songs to see their banners on your marquee display")
+        else:
+            print("\nSetup failed. Check the error messages above.")
+            sys.exit(1)
+            
+    except KeyboardInterrupt:
+        print("\nSetup canceled by user.")
         sys.exit(1)
 
 

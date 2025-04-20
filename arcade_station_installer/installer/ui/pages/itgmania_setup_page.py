@@ -437,4 +437,35 @@ class ITGManiaSetupPage(BasePage):
             self.app.user_config["binary_games"]["itgmania"] = {
                 "path": itgmania_path,
                 "banner": image_path
-            } 
+            }
+            
+            # Check if we should run the ITGMania setup script
+            if self.use_itgmania_var.get() and self.install_module_var.get():
+                try:
+                    # Import and use the setup module directly
+                    import sys
+                    import logging
+                    from pathlib import Path
+                    
+                    # Import the setup function using an absolute import path that will work with the installer structure
+                    from arcade_station_installer.installer.resources.itgmania_integration.itgmania_dynamic_marquee_setup import setup_itgmania_integration
+                    
+                    # Get the ITGMania installation path from the UI
+                    itgmania_path = self.path_var.get().strip()
+                    
+                    # Get the banner image path if using custom image
+                    banner_path = None
+                    if not self.use_default_image_var.get() and self.image_var.get().strip():
+                        banner_path = self.image_var.get().strip()
+                    
+                    # Call the setup function directly
+                    logging.info(f"Setting up ITGMania integration with path: {itgmania_path}")
+                    success = setup_itgmania_integration(itgmania_path, banner_path)
+                    
+                    if not success:
+                        logging.error("ITGMania integration setup failed")
+                    else:
+                        logging.info("ITGMania integration setup completed successfully")
+                    
+                except Exception as e:
+                    logging.error(f"Failed to run ITGMania setup script: {e}")
