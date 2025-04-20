@@ -201,30 +201,6 @@ class DisplayConfigPage(BasePage):
         )
         use_default_image.pack(anchor="w", pady=5)
         
-        # ITGMania integration
-        self.itgmania_frame = ttk.LabelFrame(
-            main_frame,
-            text="ITGMania Integration",
-            padding=(10, 5)
-        )
-        
-        itgmania_explanation = ttk.Label(
-            self.itgmania_frame,
-            text="Arcade Station can integrate with ITGMania to display song-specific "
-                 "information on the marquee display.",
-            wraplength=450,
-            justify="left"
-        )
-        itgmania_explanation.pack(anchor="w", pady=5)
-        
-        self.enable_itgmania_var = tk.BooleanVar(value=True)
-        enable_itgmania = ttk.Checkbutton(
-            self.itgmania_frame,
-            text="Enable ITGMania marquee integration",
-            variable=self.enable_itgmania_var
-        )
-        enable_itgmania.pack(anchor="w", pady=5)
-        
         # Set initial state
         self.toggle_marquee_options()
         self.toggle_default_image()
@@ -233,10 +209,8 @@ class DisplayConfigPage(BasePage):
         """Show or hide marquee options based on checkbox state."""
         if self.enable_marquee_var.get():
             self.marquee_settings.pack(fill="x", pady=10)
-            self.itgmania_frame.pack(fill="x", pady=10)
         else:
             self.marquee_settings.pack_forget()
-            self.itgmania_frame.pack_forget()
             
         # Update the configuration immediately
         if self.app.user_config.get("install_path"):
@@ -339,10 +313,6 @@ class DisplayConfigPage(BasePage):
                     if not self.use_default_image_var.get() and 'default_image' in config['marquee']:
                         self.image_var.set(config['marquee']['default_image'])
                 
-                # Set ITGMania display state
-                if 'itgmania_display' in config and 'enabled' in config['itgmania_display']:
-                    self.enable_itgmania_var.set(config['itgmania_display']['enabled'])
-                
                 # Update UI based on marquee state
                 self.toggle_marquee_options()
                 self.toggle_default_image()
@@ -373,8 +343,6 @@ class DisplayConfigPage(BasePage):
             image_path = self.image_var.get().strip()
             self.app.user_config["default_marquee_image"] = image_path
         
-        self.app.user_config["enable_itgmania_display"] = self.enable_itgmania_var.get()
-        
         # Also update the installed configuration directly
         if self.app.user_config.get("install_path"):
             try:
@@ -399,7 +367,6 @@ class DisplayConfigPage(BasePage):
                     
                 # Update other settings
                 self.update_installed_config("dynamic_marquee.enabled", self.enable_marquee_var.get())
-                self.update_installed_config("dynamic_marquee.itgmania_display_enabled", self.enable_itgmania_var.get())
             except Exception as e:
                 print(f"Error updating display config: {str(e)}")
                 # Continue without crashing the installer 
