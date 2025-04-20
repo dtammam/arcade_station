@@ -16,7 +16,7 @@ import tomllib  # Standard library in Python 3.11+
 
 # Add the root directory to the Python path
 SCRIPT_DIR = Path(__file__).resolve().parent
-ROOT_DIR = SCRIPT_DIR.parent.parent
+ROOT_DIR = SCRIPT_DIR.parent.parent.parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
 # Define fallback functions in case arcade_station module is not available
