@@ -37,7 +37,7 @@ class ITGManiaSetupPage(BasePage):
         if "install_path" in self.app.user_config:
             asset_path = os.path.join(
                 self.app.user_config["install_path"],
-                "assets", "images", "banners", "simply-love.png"
+                "assets", "images", "banners", "itgmania.png"
             )
             self.default_image_path = asset_path
             # Update the image path if using default
@@ -332,7 +332,7 @@ class ITGManiaSetupPage(BasePage):
         if "install_path" in self.app.user_config:
             asset_path = os.path.join(
                 self.app.user_config["install_path"],
-                "assets", "images", "banners", "simply-love.png"
+                "assets", "images", "banners", "itgmania.png"
             )
             self.default_image_path = asset_path
             # If using default image, update the path display
@@ -373,7 +373,7 @@ class ITGManiaSetupPage(BasePage):
                     # Define the path to the Simply Love banner in the assets directory
                     asset_path = os.path.join(
                         self.app.user_config["install_path"],
-                        "assets", "images", "banners", "simply-love.png"
+                        "assets", "images", "banners", "itgmania.png"
                     )
                     image_path = asset_path
                     self.app.user_config["itgmania"]["default_image_path"] = asset_path
