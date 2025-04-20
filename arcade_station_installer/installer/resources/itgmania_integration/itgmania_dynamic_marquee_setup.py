@@ -153,7 +153,7 @@ def copy_shim_files(itgmania_path):
     try:
         # Source paths for the module files
         source_lua = SCRIPT_DIR / "ArcadeStationMarquee.lua"
-        source_png = SCRIPT_DIR / "simply-love.png"
+        source_png = SCRIPT_DIR / "itgmania.png"
         
         if not source_lua.exists():
             log_message(f"Module file {source_lua} does not exist.", "SETUP")
@@ -208,7 +208,7 @@ def copy_shim_files(itgmania_path):
         # Copy the banner image if it exists
         dest_png = None
         if source_png.exists():
-            dest_png = dest_dir / "simply-love.png"
+            dest_png = dest_dir / "itgmania.png"
             shutil.copy2(source_png, dest_png)
             log_message(f"Copied banner image to {dest_png}", "SETUP")
             

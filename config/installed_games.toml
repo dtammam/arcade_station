@@ -1,5 +1,5 @@
 [games]
-itgmania = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/simply-love.png" }
+itgmania = { path = "C:/Games/ITGmania/Program/ITGmania.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/itgmania.png" }
 
 
 not_itg = { path = "C:/Games/NotITG 4.2.0/Program/NotITG-v4.2.0.exe", banner = "C:/Repositories/arcade_station/assets/images/banners/notitg.png" }
