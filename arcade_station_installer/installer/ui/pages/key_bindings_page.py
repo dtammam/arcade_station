@@ -4,8 +4,40 @@ Key bindings configuration page for the Arcade Station Installer
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
+import webbrowser
 
 from .base_page import BasePage
+
+class HyperlinkLabel(ttk.Label):
+    """A label that acts as a hyperlink."""
+    
+    def __init__(self, master, text, url, **kwargs):
+        """Initialize the hyperlink label.
+        
+        Args:
+            master: Parent widget
+            text: Text to display
+            url: URL to open when clicked
+            **kwargs: Additional arguments to pass to ttk.Label
+        """
+        self.url = url
+        
+        # Configure style for hyperlink
+        style = ttk.Style()
+        style.configure("Hyperlink.TLabel", foreground="blue", cursor="hand2")
+        
+        super().__init__(master, text=text, style="Hyperlink.TLabel", **kwargs)
+        
+        # Bind click event
+        self.bind("<Button-1>", self._open_url)
+        
+        # Underline the text when mouse enters
+        self.bind("<Enter>", lambda e: self.configure(font=("Arial", 9, "underline")))
+        self.bind("<Leave>", lambda e: self.configure(font=("Arial", 9)))
+    
+    def _open_url(self, event):
+        """Open the URL in the default browser."""
+        webbrowser.open(self.url)
 
 class KeyBindingsPage(BasePage):
     """Page for configuring key bindings and process management."""
@@ -49,16 +81,35 @@ class KeyBindingsPage(BasePage):
         if not hasattr(self, 'key_bindings'):
             self.key_bindings = []
         
-        # Introduction
-        intro_text = ttk.Label(
-            self.key_bindings_tab,
-            text="Configure global hotkeys for Arcade Station. These keys will work from anywhere in the system, including during gameplay."
-                 "Examples below that are used by the original author of Arcade Station."
-                 "Key syntax is from the Keyboard library - all keys within this link https://github.com/boppreh/keyboard/blob/master/README.md#api",
+        # Introduction - create a wrapper frame with proper wrapping
+        intro_frame = ttk.Frame(self.key_bindings_tab)
+        intro_frame.pack(fill="x", anchor="w", pady=(10, 15))
+        
+        # First part of text
+        ttk.Label(
+            intro_frame,
+            text="Configure global hotkeys for Arcade Station. These keys will work from anywhere in the system, including during gameplay. Examples below that are used by the original author of Arcade Station.",
             wraplength=500,
             justify="left"
+        ).pack(anchor="w", fill="x")
+        
+        # Second line with the hyperlink inline
+        link_frame = ttk.Frame(intro_frame)
+        link_frame.pack(anchor="w", fill="x", pady=(3, 0))
+        
+        ttk.Label(
+            link_frame,
+            text="Key syntax is from the Keyboard library.",
+            justify="left"
+        ).pack(side="left")
+        
+        # Create the hyperlink
+        keyboard_link = HyperlinkLabel(
+            link_frame,
+            text="All keys within the library are supported.",
+            url="https://github.com/boppreh/keyboard/blob/master/README.md#api"
         )
-        intro_text.pack(anchor="w", pady=(10, 15))
+        keyboard_link.pack(side="left", padx=(3, 0))
         
         # Keybindings frame
         keybindings_frame = ttk.LabelFrame(
@@ -70,51 +121,67 @@ class KeyBindingsPage(BasePage):
         
         # Column headers
         header_frame = ttk.Frame(keybindings_frame)
-        header_frame.pack(fill="x", pady=(5, 0))
+        header_frame.pack(fill="x", padx=5, pady=(5, 0))
+        
+        # Fixed width for columns - using grid with specific column spans
+        header_frame.columnconfigure(0, minsize=200)  # Function column
+        header_frame.columnconfigure(1, minsize=220)  # Script Path column  
+        header_frame.columnconfigure(2, minsize=100)  # Hotkey column
         
         ttk.Label(
-            header_frame,
+            header_frame, 
             text="Function",
-            width=50,
             font=("Arial", 9, "bold")
-        ).pack(side="left", padx=(5, 5))
+        ).grid(row=0, column=0, sticky="w")
         
         ttk.Label(
             header_frame,
             text="Script Path",
-            width=40,
             font=("Arial", 9, "bold")
-        ).pack(side="left", padx=(5, 5))
+        ).grid(row=0, column=1, sticky="w")
         
         ttk.Label(
             header_frame,
             text="Hotkey",
-            width=15,
             font=("Arial", 9, "bold")
-        ).pack(side="left", padx=(5, 5))
+        ).grid(row=0, column=2, sticky="w")
         
         # Separator
         ttk.Separator(keybindings_frame, orient="horizontal").pack(fill="x", padx=5, pady=5)
         
         # Scrollable frame for key bindings
-        canvas = tk.Canvas(keybindings_frame)
-        scrollbar = ttk.Scrollbar(keybindings_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
+        canvas_frame = ttk.Frame(keybindings_frame)
+        canvas_frame.pack(fill="both", expand=True, padx=5, pady=5)
         
-        scrollable_frame.bind(
+        # Create canvas with both horizontal and vertical scrollbars
+        canvas = tk.Canvas(canvas_frame, width=500)
+        scrollbar_v = ttk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
+        scrollbar_h = ttk.Scrollbar(canvas_frame, orient="horizontal", command=canvas.xview)
+        
+        # Create scrollable frame inside canvas
+        self.scrollable_frame = ttk.Frame(canvas)
+        
+        # Configure scrolling
+        self.scrollable_frame.bind(
             "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all"),
+                width=500
+            )
         )
         
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        # Create window inside canvas
+        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar_v.set, xscrollcommand=scrollbar_h.set)
         
-        canvas.pack(side="left", fill="both", expand=True, padx=5, pady=5)
-        scrollbar.pack(side="right", fill="y", pady=5)
+        # Place scrollbars and canvas in the frame
+        scrollbar_h.pack(side="bottom", fill="x")
+        scrollbar_v.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
         
         # Default key bindings
         default_bindings = [
-            ("Kill all processes and reset pegasus", "../arcade_station/core/common/kill_all_and_reset_pegasus.py", "ctrl+space"),
+            ("Reset back to menu", "../arcade_station/core/common/kill_all_and_reset_pegasus.py", "ctrl+space"),
             ("Take screenshot (Windows)", "../../bin/windows/take_screenshot.vbs", "+"),
             ("Take screenshot (Windows)", "../../bin/windows/take_screenshot.vbs", "/"),
             ("Start streaming", "../arcade_station/core/common/start_streaming.py", "ctrl+f4"),
@@ -127,17 +194,21 @@ class KeyBindingsPage(BasePage):
         
         # Add key bindings
         for i, (display_name, script_path, key) in enumerate(default_bindings):
-            self._add_key_binding_row(scrollable_frame, i, display_name, script_path, key)
+            self._add_key_binding_row(self.scrollable_frame, i, display_name, script_path, key)
+        
+        # Create a container frame for the button to ensure proper positioning
+        button_frame = ttk.Frame(keybindings_frame)
+        button_frame.pack(fill="x", padx=5, pady=10, after=canvas_frame)
         
         # Add button for adding new key binding
         add_button = ttk.Button(
-            keybindings_frame,
+            button_frame,
             text="Add Key Binding",
             command=lambda: self._add_key_binding_row(
-                scrollable_frame, len(self.key_bindings), "", "", ""
+                self.scrollable_frame, len(self.key_bindings), "", "", ""
             )
         )
-        add_button.pack(anchor="w", padx=5, pady=10)
+        add_button.pack(side="left", padx=0)
         
         # Key format help
         help_text = ttk.Label(
@@ -161,32 +232,37 @@ class KeyBindingsPage(BasePage):
         row_frame = ttk.Frame(parent)
         row_frame.pack(fill="x", pady=2)
         
+        # Use the same column configuration as the header
+        row_frame.columnconfigure(0, minsize=200)  # Function column
+        row_frame.columnconfigure(1, minsize=220)  # Script Path column
+        row_frame.columnconfigure(2, minsize=100)  # Hotkey column
+        
         # Display name field
         display_var = tk.StringVar(value=display_name)
         display_entry = ttk.Entry(
             row_frame,
             textvariable=display_var,
-            width=30
+            width=25
         )
-        display_entry.pack(side="left", padx=(0, 5))
+        display_entry.grid(row=0, column=0, sticky="w")
         
         # Script path field
         script_var = tk.StringVar(value=script_path)
         script_entry = ttk.Entry(
             row_frame,
             textvariable=script_var,
-            width=40
+            width=33
         )
-        script_entry.pack(side="left", padx=(0, 5))
+        script_entry.grid(row=0, column=1, sticky="w")
         
         # Key field
         key_var = tk.StringVar(value=key)
         key_entry = ttk.Entry(
             row_frame,
             textvariable=key_var,
-            width=15
+            width=12
         )
-        key_entry.pack(side="left", padx=(0, 5))
+        key_entry.grid(row=0, column=2, sticky="w")
         
         # Delete button
         delete_button = ttk.Button(
@@ -195,7 +271,7 @@ class KeyBindingsPage(BasePage):
             width=2,
             command=lambda: self._remove_key_binding_row(row_frame, index)
         )
-        delete_button.pack(side="left", padx=(5, 0))
+        delete_button.grid(row=0, column=3, sticky="w")
         
         # Save reference to variables
         if index >= len(self.key_bindings):
@@ -314,8 +390,8 @@ marquee_image.exe"""
             # Clear key bindings list
             self.key_bindings = []
             
-            # Add key bindings from config
-            scrollable_frame = self.notebook.children["!frame"].winfo_children()[3].winfo_children()[0].winfo_children()[0]
+            # Use the stored reference to the scrollable frame
+            scrollable_frame = self.scrollable_frame
             
             i = 0
             for key, path in key_bindings["key_mappings"].items():
