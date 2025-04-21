@@ -258,8 +258,29 @@ def get_pegasus_binary(installed_games):
         str: Absolute path to the appropriate Pegasus binary for the current OS.
     """
     config = load_toml_config('default_config.toml')
-    # Adjust the base path to point directly to the pegasus-fe directory
-    pegasus_base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../pegasus-fe'))
+    
+    # First try to find pegasus-fe in a relative path (installed environment)
+    # Try different possible locations
+    potential_paths = [
+        # Standard installed location
+        os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../pegasus-fe')),
+        # Alternative installed location (one level up)
+        os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pegasus-fe')),
+        # Directly in the same directory as the executable
+        os.path.abspath(os.path.join(os.path.dirname(sys.executable), 'pegasus-fe'))
+    ]
+    
+    pegasus_base_path = None
+    for path in potential_paths:
+        if os.path.exists(path):
+            pegasus_base_path = path
+            log_message(f"Found Pegasus base path: {pegasus_base_path}", "GAME")
+            break
+    
+    if not pegasus_base_path:
+        log_message("Could not find Pegasus base path in any expected location", "GAME")
+        # Default to the original path as a fallback
+        pegasus_base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../pegasus-fe'))
     
     os_type = platform.system()
     if os_type == "Windows":
@@ -269,6 +290,7 @@ def get_pegasus_binary(installed_games):
     else:
         binary_path = os.path.join(pegasus_base_path, installed_games['pegasus']['linux_binary'])
     
+    log_message(f"Resolved Pegasus binary path: {binary_path}", "GAME")
     return binary_path
 
 def start_pegasus():
@@ -279,21 +301,101 @@ def start_pegasus():
     and launches the Pegasus frontend. Logs the outcome of the launch attempt.
     
     Returns:
-        None
+        bool: True if Pegasus was launched successfully, False otherwise
     """
-    installed_games = load_installed_games()
-    pegasus_binary = get_pegasus_binary(installed_games)
-    
-    if not os.path.exists(pegasus_binary):
-        log_message(f"Binary not found: {pegasus_binary}", "GAME")
-        return
-
     try:
+        installed_games = load_installed_games()
+        pegasus_binary = get_pegasus_binary(installed_games)
+        
+        if not os.path.exists(pegasus_binary):
+            log_message(f"Binary not found: {pegasus_binary}", "GAME")
+            
+            # Check if we can find the binary manually
+            os_type = platform.system()
+            binary_name = ""
+            if os_type == "Windows":
+                binary_name = installed_games['pegasus']['windows_binary']
+            elif os_type == "Darwin":
+                binary_name = installed_games['pegasus']['mac_binary']
+            else:
+                binary_name = installed_games['pegasus']['linux_binary']
+            
+            log_message(f"Searching for binary with name: {binary_name}", "GAME")
+            
+            # Try to locate the binary in common locations
+            possible_locations = [
+                os.path.abspath("."),  # Current directory
+                os.path.abspath(".."),  # Parent directory
+                os.path.dirname(sys.executable),  # Directory of the Python executable
+                os.path.abspath(os.path.join(os.path.dirname(__file__), "..")),  # Up one level from current file
+                os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")),  # Up two levels
+                os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")),  # Up three levels
+            ]
+            
+            for location in possible_locations:
+                for root, dirs, files in os.walk(location):
+                    if binary_name in files:
+                        found_binary = os.path.join(root, binary_name)
+                        log_message(f"Found binary at: {found_binary}", "GAME")
+                        pegasus_binary = found_binary
+                        break
+                    # Check if pegasus-fe directory exists in this location
+                    if "pegasus-fe" in dirs:
+                        pegasus_dir = os.path.join(root, "pegasus-fe")
+                        possible_binary = os.path.join(pegasus_dir, binary_name)
+                        if os.path.exists(possible_binary):
+                            log_message(f"Found binary in pegasus-fe dir: {possible_binary}", "GAME")
+                            pegasus_binary = possible_binary
+                            break
+                if os.path.exists(pegasus_binary):
+                    break
+            
+            # If still not found, return False
+            if not os.path.exists(pegasus_binary):
+                log_message("Failed to find Pegasus binary after extensive search", "GAME")
+                return False
+        
+        # Try to launch Pegasus with absolute path and working directory
         log_message(f"Starting Pegasus with binary [{pegasus_binary}]...", "GAME")
-        subprocess.Popen(pegasus_binary, shell=True)
-        log_message("Pegasus launched.", "GAME")
+        
+        # Get the directory of the binary to use as working directory
+        working_dir = os.path.dirname(pegasus_binary)
+        log_message(f"Using working directory: {working_dir}", "GAME")
+        
+        # Launch with explicit working directory and full path
+        process = subprocess.Popen(
+            pegasus_binary, 
+            shell=True,
+            cwd=working_dir
+        )
+        
+        # Brief pause to let process start
+        time.sleep(1)
+        
+        # Check if process is running
+        if process.poll() is None:
+            log_message("Pegasus process started successfully", "GAME")
+            return True
+        else:
+            log_message(f"Pegasus process exited immediately with code: {process.returncode}", "GAME")
+            
+            # Try alternative launch method
+            log_message("Trying alternative launch method...", "GAME")
+            if os.name == 'nt':  # Windows
+                try:
+                    os.startfile(pegasus_binary)
+                    log_message("Launched using os.startfile", "GAME")
+                    return True
+                except Exception as e:
+                    log_message(f"Failed to launch with os.startfile: {e}", "GAME")
+            
+            return False
+            
     except Exception as e:
         log_message(f"Failed to start Pegasus: {e}", "GAME")
+        import traceback
+        log_message(traceback.format_exc(), "GAME")
+        return False
 
 def start_app(executable_path):
     """
@@ -422,9 +524,9 @@ def launch_script(script_path, identifier=None, extra_args=None):
     Note:
         Uses the Python executable from the virtual environment.
     """
-    # Path to your venv's Python executable.
-    # TODO: Make this dynamic.
-    python_executable = r"C:/Repositories/arcade_station/.venv/Scripts/python.exe"
+    # Use the current Python executable instead of hardcoding the path
+    python_executable = sys.executable
+    log_message(f"Using Python executable: {python_executable}", "SCRIPT")
     
     # Build the command-line arguments.
     args = [python_executable, script_path]
@@ -443,6 +545,7 @@ def launch_script(script_path, identifier=None, extra_args=None):
         creationflags = 0
         startupinfo = None
 
+    log_message(f"Launching script: {' '.join(args)}", "SCRIPT")
     process = subprocess.Popen(
         args,
         creationflags=creationflags,

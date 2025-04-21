@@ -102,7 +102,31 @@ if %ERRORLEVEL% neq 0 (
 
 echo Starting Arcade Station with virtual environment...
 echo.
+
+REM Run the standard startup script
 python src\arcade_station\start_frontend_apps.py %*
+
+REM Check if Pegasus started successfully by looking for its process
+echo Checking if Pegasus started successfully...
+timeout /t 5 /nobreak >nul
+python -c "import psutil; print(any('pegasus-fe' in p.name().lower() for p in psutil.process_iter()))" > "%TEMP%\pegasus_check.txt"
+set /p PEGASUS_RUNNING=<"%TEMP%\pegasus_check.txt"
+del "%TEMP%\pegasus_check.txt"
+
+if not "%PEGASUS_RUNNING%"=="True" (
+    echo.
+    echo WARNING: Pegasus does not appear to be running!
+    echo Running diagnostic tool to troubleshoot...
+    echo.
+    python src\arcade_station\debug_pegasus_launch.py --create-launcher
+    echo.
+    echo If Pegasus still fails to start, you can:
+    echo 1. Run the diagnostic script manually with: python src\arcade_station\debug_pegasus_launch.py
+    echo 2. Use the direct launcher script created in the src\arcade_station directory
+    echo 3. Check the logs for more information
+    echo.
+)
+
 exit /b
 
 :useDefaultScript
