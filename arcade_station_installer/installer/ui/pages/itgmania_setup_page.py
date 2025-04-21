@@ -460,12 +460,59 @@ class ITGManiaSetupPage(BasePage):
                     
                     # Call the setup function directly
                     logging.info(f"Setting up ITGMania integration with path: {itgmania_path}")
+                    logging.info(f"Using banner path: {banner_path}")
+                    
+                    # First clear any existing configuration to force update
+                    try:
+                        # Try to access and modify the config file directly
+                        config_path = os.path.join(self.app.user_config["install_path"], "config", "display_config.toml")
+                        if os.path.exists(config_path):
+                            logging.info(f"Found config file at: {config_path}, clearing ITGMania path")
+                            
+                            # Check if we need to use tomli_w or manual writing
+                            try:
+                                import tomli_w
+                                
+                                # Read existing config
+                                with open(config_path, "rb") as f:
+                                    config = tomllib.load(f)
+                                
+                                # Clear the existing path
+                                if "dynamic_marquee" in config:
+                                    if "itgmania_display_file_path" in config["dynamic_marquee"]:
+                                        config["dynamic_marquee"]["itgmania_display_file_path"] = ""
+                                        logging.info("Cleared the existing ITGMania display file path")
+                                
+                                # Write back
+                                with open(config_path, "wb") as f:
+                                    tomli_w.dump(config, f)
+                            except ImportError:
+                                logging.info("tomli_w not available, will rely on setup script")
+                    except Exception as e:
+                        logging.error(f"Error clearing config: {e}")
+                    
+                    # Run the setup
                     success = setup_itgmania_integration(itgmania_path, banner_path)
                     
                     if not success:
                         logging.error("ITGMania integration setup failed")
                     else:
                         logging.info("ITGMania integration setup completed successfully")
+                        
+                        # Verify the configuration was updated
+                        try:
+                            config_path = os.path.join(self.app.user_config["install_path"], "config", "display_config.toml")
+                            if os.path.exists(config_path):
+                                with open(config_path, "rb") as f:
+                                    config = tomllib.load(f)
+                                
+                                if "dynamic_marquee" in config and "itgmania_display_file_path" in config["dynamic_marquee"]:
+                                    path = config["dynamic_marquee"]["itgmania_display_file_path"]
+                                    logging.info(f"Verified config - itgmania_display_file_path: {path}")
+                                else:
+                                    logging.error("itgmania_display_file_path not found in config after setup!")
+                        except Exception as e:
+                            logging.error(f"Error verifying config: {e}")
                     
                 except Exception as e:
                     logging.error(f"Failed to run ITGMania setup script: {e}")

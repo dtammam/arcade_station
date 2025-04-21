@@ -2,8 +2,13 @@
 Setup ITGMania Dynamic Marquee Integration
 
 This script sets up the integration between Arcade Station and ITGMania by:
-1. Copying module files to the ITGMania installation
-2. Configuring the display_config.toml with the correct log file path
+1. Finding the correct ITGMania installation base directory
+2. Copying module files to the ITGMania installation
+3. Determining the proper log file path
+4. Configuring the display_config.toml with the correct paths
+
+The script handles both portable and standard installations, as well as situations
+where users provide paths to executables instead of the base directory.
 """
 
 import os
@@ -78,64 +83,6 @@ except ImportError:
     log_message = fallback_log_message
 
 
-def validate_itgmania_path(path):
-    """
-    Validate that the provided path exists and looks like an ITGMania installation.
-    If the path is to an executable, it will check the parent directories for a Themes folder.
-    
-    Args:
-        path (Path): The path to validate.
-        
-    Returns:
-        bool: True if valid, False otherwise.
-        Path: The corrected base path to the ITGMania installation.
-    """
-    if not path.exists():
-        log_message(f"Error: The path {path} does not exist.", "SETUP")
-        return False, path
-    
-    # If the path is to a file (executable), navigate up to find the ITGMania base directory
-    base_path = path
-    if path.is_file():
-        log_message(f"Path points to a file, looking for ITGMania base directory...", "SETUP")
-        # The executable is typically in a Program subdirectory, so we need to go up at least one level
-        parent_dir = path.parent
-        
-        # First try the immediate parent directory (Program directory)
-        if (parent_dir / "Themes").exists():
-            log_message(f"Found Themes directory at {parent_dir}", "SETUP")
-            return True, parent_dir
-        
-        # Then try one level up (ITGMania root)
-        root_dir = parent_dir.parent
-        if (root_dir / "Themes").exists():
-            log_message(f"Found Themes directory at {root_dir}", "SETUP")
-            return True, root_dir
-        
-        # If we still haven't found it, check two levels up (unusual but possible)
-        grandparent_dir = root_dir.parent
-        if (grandparent_dir / "Themes").exists():
-            log_message(f"Found Themes directory at {grandparent_dir}", "SETUP")
-            return True, grandparent_dir
-        
-        log_message(f"Warning: Could not find a Themes directory in parent directories of {path}.", "SETUP")
-        return False, path
-    
-    # If the path is already a directory, check if it has a Themes subdirectory
-    if (base_path / "Themes").exists():
-        log_message(f"Valid ITGMania installation found at {base_path}", "SETUP")
-        return True, base_path
-    
-    # Check if the parent directory has a Themes subdirectory (in case we're in a subdirectory)
-    parent_dir = base_path.parent
-    if (parent_dir / "Themes").exists():
-        log_message(f"Found Themes directory at parent directory {parent_dir}", "SETUP")
-        return True, parent_dir
-    
-    log_message(f"Warning: The path {path} doesn't appear to be a valid ITGMania installation (no Themes folder found).", "SETUP")
-    return False, path
-
-
 def copy_shim_files(itgmania_path):
     """
     Copy the module file to the appropriate ITGMania location.
@@ -163,6 +110,16 @@ def copy_shim_files(itgmania_path):
         if not source_png.exists():
             log_message(f"Fallback image {source_png} does not exist.", "SETUP")
             log_message(f"Warning: Fallback image {source_png} not found. Will use default theme image.", "WARNING")
+        
+        # Ensure itgmania_path is a Path object
+        if not isinstance(itgmania_path, Path):
+            itgmania_path = Path(itgmania_path)
+        
+        # Verify that itgmania_path looks correct
+        if not itgmania_path.exists():
+            log_message(f"ITGMania path {itgmania_path} does not exist.", "SETUP")
+            log_message(f"Error: ITGMania path {itgmania_path} not found.", "ERROR")
+            return False, (None, None, False)
         
         # Check if ITGMania is running in portable mode
         portable_ini = itgmania_path / "Portable.ini"
@@ -238,6 +195,20 @@ def determine_log_file_path(itgmania_path, dest_file=None, is_portable=False):
     Returns:
         str: The path to the log file.
     """
+    log_message(f"Determining log file path for ITGMania at: {itgmania_path}", "SETUP")
+    
+    # Ensure we're working with a Path object
+    itgmania_path = Path(itgmania_path)
+    
+    # Make sure we're using the base directory, not an executable
+    if itgmania_path.is_file():
+        log_message(f"Warning: Log path determination was given an executable: {itgmania_path}", "SETUP")
+        itgmania_path = itgmania_path.parent
+        # If in a Program directory, go up one level
+        if itgmania_path.name.lower() == "program":
+            itgmania_path = itgmania_path.parent
+            log_message(f"Adjusted to parent directory: {itgmania_path}", "SETUP")
+    
     if dest_file:
         # If we have the destination file path, use that directory
         log_file_path = dest_file.parent / "ArcadeStationMarquee.log"
@@ -266,94 +237,231 @@ def determine_log_file_path(itgmania_path, dest_file=None, is_portable=False):
                 
             log_message(f"Using standard mode log path: {log_file_path}", "SETUP")
     
+    # Double-check that the log file's parent directory is not an executable
+    # This is a safeguard against paths like "C:/ITGMania/Program/ITGmania.exe/Themes/..."
+    log_path_parts = list(log_file_path.parts)
+    new_log_path_parts = []
+    executable_found = False
+    
+    for part in log_path_parts:
+        if part.lower().endswith(('.exe', '.app')):
+            log_message(f"Warning: Log path contains executable part: {part}", "SETUP")
+            executable_found = True
+            # Skip this part
+            continue
+        new_log_path_parts.append(part)
+    
+    if executable_found:
+        log_file_path = Path(*new_log_path_parts)
+        log_message(f"Corrected log path: {log_file_path}", "SETUP")
+    
     # Create an empty log file if it doesn't exist (though the module will do this too)
-    if not log_file_path.exists():
-        log_file_path.parent.mkdir(parents=True, exist_ok=True)
-        log_file_path.touch()
-        log_message(f"Created empty log file at {log_file_path}", "SETUP")
-    else:
-        log_message(f"Log file already exists at {log_file_path}", "SETUP")
+    try:
+        if not log_file_path.exists():
+            log_file_path.parent.mkdir(parents=True, exist_ok=True)
+            log_file_path.touch()
+            log_message(f"Created empty log file at {log_file_path}", "SETUP")
+        else:
+            log_message(f"Log file already exists at {log_file_path}", "SETUP")
+    except Exception as e:
+        log_message(f"Warning: Could not create log file: {e}", "SETUP")
     
     return str(log_file_path)
 
 
-def update_config(log_file_path, itgmania_path=None, banner_image_path=None):
-    """
-    Update the display_config.toml with the ITGMania log file path.
+def update_config(config_path: str, log_file_path: str, banner_path: str) -> bool:
+    """Update display_config.toml with ITGMania log file and banner paths.
     
     Args:
-        log_file_path (str): The path to the ITGMania log file.
-        itgmania_path (Path, optional): The path to the ITGMania installation.
-        banner_image_path (Path, optional): The path to the banner image.
-    
+        config_path: Path to display_config.toml
+        log_file_path: Path to ITGMania log file
+        banner_path: Path to banner image
+        
     Returns:
-        bool: True if successful, False otherwise.
+        bool: True if successful, False otherwise
     """
     try:
-        # Find the config file path
-        config_path = ROOT_DIR / "config" / "display_config.toml"
-        
-        if not config_path.exists():
-            log_message(f"Config file {config_path} does not exist.", "SETUP")
-            log_message(f"Error: Config file {config_path} not found.", "ERROR")
+        if not os.path.exists(config_path):
+            log_message(f"Config file not found at {config_path}", "SETUP")
             return False
-        
-        # Load the config file using tomllib
-        with open(config_path, "rb") as f:
-            config = tomllib.load(f)
-        
-        # Convert backslashes to forward slashes for TOML-friendliness
+            
+        # Ensure the log file path uses forward slashes for TOML
         log_file_path = log_file_path.replace('\\', '/')
+        log_message(f"Using normalized log file path: {log_file_path}", "SETUP")
         
-        # Update the config
+        # Read current config
+        with open(config_path, "rb") as f:
+            try:
+                config = tomllib.load(f)
+            except tomllib.TOMLDecodeError as e:
+                log_message(f"Error decoding TOML: {e}", "SETUP")
+                return False
+        
+        # Ensure dynamic_marquee section exists
         if "dynamic_marquee" not in config:
             config["dynamic_marquee"] = {}
         
-        # Always overwrite the settings
+        # Update settings - explicitly set each field to ensure they're all updated
         config["dynamic_marquee"]["enabled"] = True
         config["dynamic_marquee"]["itgmania_display_enabled"] = True
         config["dynamic_marquee"]["itgmania_display_file_path"] = log_file_path
         
-        # Add the banner image path if provided
-        if banner_image_path:
-            banner_path_str = str(banner_image_path).replace('\\', '/')
-            config["dynamic_marquee"]["itgmania_banner_path"] = banner_path_str
-            log_message(f"Added ITGMania banner path: {banner_path_str}", "SETUP")
+        # Set banner path if provided
+        if banner_path:
+            banner_path = banner_path.replace('\\', '/')
+            config["dynamic_marquee"]["itgmania_banner_path"] = banner_path
+            log_message(f"Setting banner path: {banner_path}", "SETUP")
         
-        # Add the ITGMania base path if provided
-        if itgmania_path:
-            # Convert backslashes to forward slashes for TOML-friendliness
-            itgmania_path_str = str(itgmania_path).replace('\\', '/')
-            config["dynamic_marquee"]["itgmania_base_path"] = itgmania_path_str
-            log_message(f"Added ITGMania base path: {itgmania_path_str}", "SETUP")
-        
-        # Save the updated config - tomllib doesn't provide a writer, so we write manually
-        with open(config_path, "w", encoding="utf-8") as f:
-            # Write each section with proper formatting
-            for section_idx, (section, values) in enumerate(config.items()):
+        # Write updated config
+        with open(config_path, "w") as f:
+            # Since tomllib doesn't support writing, we'll manually write the file
+            for section, values in config.items():
                 f.write(f"[{section}]\n")
-                
-                for key_idx, (key, value) in enumerate(values.items()):
+                for key, value in values.items():
                     if isinstance(value, bool):
-                        value_str = str(value).lower()
+                        f.write(f"{key} = {str(value).lower()}\n")
+                    elif isinstance(value, (int, float)):
+                        f.write(f"{key} = {value}\n")
                     elif isinstance(value, str):
-                        value_str = f'"{value}"'
+                        f.write(f'{key} = "{value}"\n')
                     else:
-                        value_str = str(value)
-                    
-                    f.write(f"{key} = {value_str}\n")
-                
-                # Only add newline between sections (not after the last section)
-                if section_idx < len(config) - 1:
-                    f.write("\n")
+                        f.write(f"{key} = {value}\n")
+                f.write("\n")
         
-        log_message(f"Updated display_config.toml with log file path and banner path", "SETUP")
-        return True
-    
+        # Verify the file was written correctly
+        if os.path.exists(config_path):
+            log_message(f"Config updated successfully at {config_path}", "SETUP")
+            
+            # Verify the log path was set correctly
+            with open(config_path, "rb") as f:
+                try:
+                    updated_config = tomllib.load(f)
+                    if "dynamic_marquee" in updated_config and "itgmania_display_file_path" in updated_config["dynamic_marquee"]:
+                        actual_path = updated_config["dynamic_marquee"]["itgmania_display_file_path"]
+                        log_message(f"Verified log path in config: {actual_path}", "SETUP")
+                        if actual_path != log_file_path:
+                            log_message(f"Log path mismatch! Expected: {log_file_path}, Got: {actual_path}", "SETUP")
+                    else:
+                        log_message("Could not find itgmania_display_file_path in updated config", "SETUP")
+                except Exception as e:
+                    log_message(f"Error verifying config update: {e}", "SETUP")
+            
+            return True
+        else:
+            log_message(f"Config file not found after writing: {config_path}", "SETUP")
+            return False
     except Exception as e:
-        log_message(f"Error updating config: {str(e)}", "SETUP")
-        log_message(f"Error: Failed to update config: {str(e)}", "ERROR")
+        log_message(f"Error updating config: {e}", "SETUP")
         return False
+
+
+def find_correct_itgmania_path(input_path):
+    """
+    Directly find the correct ITGMania base path by checking for the Themes directory.
+    This is a more direct approach than trying to parse paths.
+    
+    Args:
+        input_path (str or Path): The user-provided path to ITGMania
+        
+    Returns:
+        Path: The corrected ITGMania base path
+    """
+    # Convert to Path object if it's a string
+    if isinstance(input_path, str):
+        input_path = Path(input_path)
+    
+    log_message(f"Finding correct ITGMania path from: {input_path}", "SETUP")
+    
+    # If it's a file (executable), start with its parent directory
+    if input_path.is_file():
+        log_message(f"Input is a file, starting with parent directory", "SETUP")
+        current_dir = input_path.parent
+    else:
+        current_dir = input_path
+    
+    # Check the current directory for Themes
+    if (current_dir / "Themes").exists():
+        log_message(f"Found Themes in current directory: {current_dir}", "SETUP")
+        return current_dir
+    
+    # Check if we're in a Program directory and the parent has Themes
+    if current_dir.name.lower() == "program":
+        parent_dir = current_dir.parent
+        if (parent_dir / "Themes").exists():
+            log_message(f"Found Themes in parent directory: {parent_dir}", "SETUP")
+            return parent_dir
+    
+    # Check parent directory
+    parent_dir = current_dir.parent
+    if (parent_dir / "Themes").exists():
+        log_message(f"Found Themes in parent directory: {parent_dir}", "SETUP")
+        return parent_dir
+    
+    # Search subdirectories for Themes (limited depth)
+    for root, dirs, files in os.walk(current_dir):
+        if "Themes" in dirs:
+            themes_dir = Path(root) / "Themes"
+            if themes_dir.exists():
+                log_message(f"Found Themes directory in subdirectory: {Path(root)}", "SETUP")
+                return Path(root)
+    
+    # If we still haven't found it, look for the structure in common locations
+    common_locations = [
+        Path("C:/Games/ITGmania"),
+        Path("C:/ITGmania"),
+        Path(os.path.expanduser("~/ITGmania")),
+        Path("D:/Games/ITGmania"),
+        Path("/Applications/ITGmania")
+    ]
+    
+    for location in common_locations:
+        if location.exists() and (location / "Themes").exists():
+            log_message(f"Found ITGMania in common location: {location}", "SETUP")
+            return location
+    
+    # If all else fails, return the original directory but log a warning
+    log_message(f"Could not find Themes directory, using original path: {current_dir}", "SETUP")
+    return current_dir
+
+
+def get_correct_log_file_path(itgmania_base_path, is_portable=False):
+    """
+    Determine the correct log file path based on a validated ITGMania base path.
+    
+    Args:
+        itgmania_base_path (Path): The validated ITGMania base path
+        is_portable (bool): Whether ITGMania is running in portable mode
+    
+    Returns:
+        str: The correct log file path
+    """
+    log_message(f"Determining log file path from base: {itgmania_base_path}", "SETUP")
+    
+    # The correct log path should always be in the Modules directory under Themes/Simply Love
+    if is_portable:
+        # For portable mode, use the installation directory
+        log_path = itgmania_base_path / "Themes" / "Simply Love" / "Modules" / "ArcadeStationMarquee.log"
+        log_message(f"Using portable log path: {log_path}", "SETUP")
+    else:
+        # For standard mode, use the AppData location
+        system = platform.system().lower()
+        if system == "windows":
+            appdata_dir = Path(os.path.expandvars("%APPDATA%")) / "ITGmania"
+        elif system == "darwin":
+            appdata_dir = Path.home() / "Library" / "Preferences" / "ITGmania"
+        elif system == "linux":
+            appdata_dir = Path.home() / ".itgmania"
+        else:
+            appdata_dir = itgmania_base_path / "AppData"
+        
+        log_path = appdata_dir / "Themes" / "Simply Love" / "Modules" / "ArcadeStationMarquee.log"
+        log_message(f"Using standard mode log path: {log_path}", "SETUP")
+    
+    # Ensure the directory exists
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Return a properly formatted path string
+    return str(log_path).replace("\\", "/")
 
 
 def setup_itgmania_integration(itgmania_path, banner_image_path=None):
@@ -372,30 +480,32 @@ def setup_itgmania_integration(itgmania_path, banner_image_path=None):
         log_message("   Arcade Station - ITGMania Integration Setup", "SETUP")
         log_message("==================================================", "SETUP")
         
-        # Convert string paths to Path objects
-        itgmania_path = Path(itgmania_path)
+        # Find the correct ITGMania base path directly
+        log_message(f"Input ITGMania path: {itgmania_path}", "SETUP")
+        itgmania_base_path = find_correct_itgmania_path(itgmania_path)
+        log_message(f"Using ITGMania base path: {itgmania_base_path}", "SETUP")
+        
         if banner_image_path:
             banner_image_path = Path(banner_image_path)
+            log_message(f"Using custom banner image: {banner_image_path}", "SETUP")
         
-        # Validate the ITGMania path and get the corrected base path
-        is_valid, base_path = validate_itgmania_path(itgmania_path)
-        if not is_valid:
-            log_message("Proceeding despite validation issues.", "SETUP")
-        
-        # Use the corrected base path from validation
-        itgmania_path = base_path
-        
-        log_message(f"Using ITGMania installation at: {itgmania_path}", "SETUP")
+        # Check for portable mode
+        is_portable = (itgmania_base_path / "Portable.ini").exists()
+        if is_portable:
+            log_message("Detected portable mode installation", "SETUP")
+        else:
+            log_message("Detected standard installation (using AppData)", "SETUP")
         
         # Copy module files
         log_message("Step 1: Copying module file to ITGMania installation...", "SETUP")
-        success, (dest_file, dest_image, is_portable) = copy_shim_files(itgmania_path)
+        success, (dest_file, dest_image, _) = copy_shim_files(itgmania_base_path)
         if not success:
             return False
         
-        # Determine log file path
+        # Determine log file path directly
         log_message("Step 2: Determining log file path...", "SETUP")
-        log_file_path = determine_log_file_path(itgmania_path, dest_file, is_portable)
+        log_file_path = get_correct_log_file_path(itgmania_base_path, is_portable)
+        log_message(f"Final log file path: {log_file_path}", "SETUP")
         
         # Update config
         log_message("Step 3: Updating configuration...", "SETUP")
@@ -403,7 +513,7 @@ def setup_itgmania_integration(itgmania_path, banner_image_path=None):
         # Use the provided banner image if specified, otherwise use the copied one
         banner_path = banner_image_path if banner_image_path else dest_image
         
-        if not update_config(log_file_path, itgmania_path, banner_path):
+        if not update_config(ROOT_DIR / "config" / "display_config.toml", log_file_path, str(banner_path)):
             return False
         
         log_message("==================================================", "SETUP")

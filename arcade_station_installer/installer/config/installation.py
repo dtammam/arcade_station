@@ -274,6 +274,10 @@ class InstallationManager:
             elif self.is_mac:
                 self._setup_mac_specific(config, install_path)
             
+            # Final step: make sure ITGMania integration is set up properly if enabled
+            if config.get("itgmania", {}).get("enabled", False):
+                self._ensure_itgmania_integration(config, install_path)
+            
             self.logger.info(f"Arcade Station installation completed successfully to {install_path}")
             return True
         
@@ -522,10 +526,13 @@ class InstallationManager:
         
         # Update ITGMania paths if configured
         if config.get("itgmania", {}).get("enabled", False):
+            # Just enable the ITGMania integration, but don't set the log file path
+            # The integration script will handle that when it runs
+            display_config["dynamic_marquee"]["enabled"] = True
+            display_config["dynamic_marquee"]["itgmania_display_enabled"] = True
+            
+            # Store the path for the integration script to use
             display_config["dynamic_marquee"]["itgmania_base_path"] = config["itgmania"]["path"]
-            display_config["dynamic_marquee"]["itgmania_display_file_path"] = os.path.join(
-                config["itgmania"]["path"], "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log"
-            )
             
             # Set banner path based on whether using default or custom
             if config["itgmania"].get("use_default_image", True):
@@ -1001,4 +1008,91 @@ Categories=Game;
                 elif isinstance(value, bool):
                     file.write(f"{key} = {str(value).lower()}\n")
                 else:
-                    file.write(f"{key} = {value}\n") 
+                    file.write(f"{key} = {value}\n")
+    
+    def _ensure_itgmania_integration(self, config: Dict[str, Any], install_path: str) -> None:
+        """Make sure ITGMania integration is set up properly.
+        
+        Args:
+            config: User configuration from the wizard
+            install_path: Installation directory
+        """
+        if not config.get("itgmania", {}).get("enabled", False):
+            return
+            
+        self.logger.info("Performing final ITGMania integration verification")
+        
+        try:
+            # Check if the ITGMania integration script should have been run
+            itgmania_path = config["itgmania"]["path"]
+            self.logger.info(f"ITGMania path: {itgmania_path}")
+            
+            # Determine the correct log file path directly
+            log_file_path = ""
+            
+            # Check if the path is to an executable
+            if os.path.isfile(itgmania_path):
+                # Get the parent directory
+                itgmania_base_path = os.path.dirname(itgmania_path)
+                
+                # If the parent directory is named 'Program', go up one more level
+                if os.path.basename(itgmania_base_path).lower() == 'program':
+                    itgmania_base_path = os.path.dirname(itgmania_base_path)
+                    self.logger.info(f"Adjusted to go up from Program directory: {itgmania_base_path}")
+            else:
+                itgmania_base_path = itgmania_path
+                
+            self.logger.info(f"Using ITGMania base path: {itgmania_base_path}")
+            
+            # Check for portable mode
+            is_portable = os.path.exists(os.path.join(itgmania_base_path, "Portable.ini"))
+            
+            # Determine the correct log file path
+            if is_portable:
+                # For portable mode, use the installation directory
+                log_file_path = os.path.join(itgmania_base_path, "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log")
+                self.logger.info(f"Using portable log path: {log_file_path}")
+            else:
+                # For standard mode, use the AppData location
+                if self.is_windows:
+                    appdata_dir = os.path.join(os.path.expandvars("%APPDATA%"), "ITGmania")
+                    log_file_path = os.path.join(appdata_dir, "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log")
+                elif self.is_mac:
+                    appdata_dir = os.path.join(os.path.expanduser("~/Library/Preferences"), "ITGmania")
+                    log_file_path = os.path.join(appdata_dir, "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log")
+                else:
+                    appdata_dir = os.path.join(os.path.expanduser("~/.itgmania"))
+                    log_file_path = os.path.join(appdata_dir, "Themes", "Simply Love", "Modules", "ArcadeStationMarquee.log")
+                    
+                self.logger.info(f"Using standard mode log path: {log_file_path}")
+            
+            # Convert to forward slashes for TOML
+            log_file_path = log_file_path.replace('\\', '/')
+            
+            # Update the display_config.toml directly
+            display_config_path = os.path.join(install_path, "config", "display_config.toml")
+            if os.path.exists(display_config_path):
+                self.logger.info(f"Updating display_config.toml with log file path: {log_file_path}")
+                
+                # Read the existing config
+                with open(display_config_path, "rb") as f:
+                    display_config = tomllib.load(f)
+                
+                # Update the log file path
+                if "dynamic_marquee" not in display_config:
+                    display_config["dynamic_marquee"] = {}
+                    
+                display_config["dynamic_marquee"]["enabled"] = True
+                display_config["dynamic_marquee"]["itgmania_display_enabled"] = True
+                display_config["dynamic_marquee"]["itgmania_display_file_path"] = log_file_path
+                
+                # Also set base path
+                display_config["dynamic_marquee"]["itgmania_base_path"] = itgmania_base_path.replace('\\', '/')
+                
+                # Write the updated config - use manual writing since tomllib can't write
+                self._write_toml(display_config_path, display_config)
+                
+                self.logger.info("Updated display_config.toml with ITGMania settings")
+        except Exception as e:
+            self.logger.error(f"Error ensuring ITGMania integration: {e}", exc_info=True)
+            # Non-fatal error, continue installation 
