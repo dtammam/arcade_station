@@ -37,12 +37,14 @@ class DisplayConfigPage(BasePage):
         This method is called before __init__ is completed, so we pass app as a parameter.
         """
         try:
-            # Try more advanced detection if available
+            # Try Qt screen detection
             try:
-                import screeninfo
-                monitors = screeninfo.get_monitors()
-                return len(monitors)
-            except (ImportError, AttributeError):
+                from PyQt5.QtWidgets import QApplication
+                qt_app = QApplication.instance()
+                if not qt_app:
+                    qt_app = QApplication([])
+                return len(qt_app.screens())
+            except Exception:
                 # Fallback: assume at least one monitor
                 return max(1, app.install_manager.get_monitor_count())
                 
@@ -53,17 +55,14 @@ class DisplayConfigPage(BasePage):
     def get_monitor_count(self):
         """Get the number of monitors connected to the system."""
         try:
-            # Use Tkinter's winfo_screenwidth/height for basic detection
-            root = self.app.root
-            width = root.winfo_screenwidth()
-            height = root.winfo_screenheight()
-            
-            # Try more advanced detection if available
+            # Try Qt screen detection
             try:
-                import screeninfo
-                monitors = screeninfo.get_monitors()
-                return len(monitors)
-            except (ImportError, AttributeError):
+                from PyQt5.QtWidgets import QApplication
+                qt_app = QApplication.instance()
+                if not qt_app:
+                    qt_app = QApplication([])
+                return len(qt_app.screens())
+            except Exception:
                 # Fallback: assume at least one monitor
                 return max(1, self.app.install_manager.get_monitor_count())
                 
@@ -118,12 +117,12 @@ class DisplayConfigPage(BasePage):
         )
         monitor_label.pack(side="left", padx=(0, 5))
         
-        self.monitor_var = tk.StringVar(value="1")
+        self.monitor_var = tk.StringVar(value="0")
         
         # Generate monitor values
-        monitor_values = [str(i+1) for i in range(self.monitor_count)]
+        monitor_values = [str(i) for i in range(self.monitor_count)]
         if not monitor_values:  # Ensure there's at least one value
-            monitor_values = ["1"]
+            monitor_values = ["0"]
             
         monitor_options = ttk.Combobox(
             monitor_frame,
@@ -141,6 +140,14 @@ class DisplayConfigPage(BasePage):
             foreground="#555555"
         )
         monitor_help.pack(side="left", padx=10)
+        
+        # Add monitor identification button
+        self.identify_button = ttk.Button(
+            monitor_frame,
+            text="Show Monitor Numbers",
+            command=self.show_monitor_numbers
+        )
+        self.identify_button.pack(side="left", padx=10)
         
         # Default background color
         color_frame = ttk.Frame(self.marquee_settings)
@@ -253,10 +260,10 @@ class DisplayConfigPage(BasePage):
         # Validate monitor selection
         try:
             monitor = int(self.monitor_var.get())
-            if monitor < 1 or monitor > self.monitor_count:
+            if monitor < 0 or monitor >= self.monitor_count:
                 messagebox.showerror(
                     "Invalid Monitor", 
-                    f"Please select a valid monitor (1-{self.monitor_count})."
+                    f"Please select a valid monitor (0-{self.monitor_count-1})."
                 )
                 return False
         except ValueError:
@@ -370,3 +377,48 @@ class DisplayConfigPage(BasePage):
             except Exception as e:
                 print(f"Error updating display config: {str(e)}")
                 # Continue without crashing the installer 
+
+    def show_monitor_numbers(self):
+        """Show a temporary window on each monitor displaying its number."""
+        try:
+            from PyQt5.QtWidgets import QApplication
+            from PyQt5.QtCore import Qt
+            
+            # Create a Qt application to get screen info
+            app = QApplication.instance()
+            if not app:
+                app = QApplication([])
+            
+            screens = app.screens()
+            
+            # Create a temporary window for each monitor
+            for i, screen in enumerate(screens):
+                # Create a new window
+                window = tk.Toplevel(self.app.root)
+                window.overrideredirect(True)  # Remove window decorations
+                window.attributes('-topmost', True)  # Keep on top
+                
+                # Get screen geometry
+                geometry = screen.geometry()
+                
+                # Position window in the center of the monitor
+                window.geometry(f"200x100+{geometry.x() + (geometry.width() - 200) // 2}+{geometry.y() + (geometry.height() - 100) // 2}")
+                
+                # Add monitor number label - use 0-based index
+                label = ttk.Label(
+                    window,
+                    text=f"Monitor {i}",
+                    font=("Arial", 24, "bold"),
+                    background="white",
+                    padding=20
+                )
+                label.pack(expand=True, fill="both")
+                
+                # Close window after 3 seconds
+                window.after(3000, window.destroy)
+                
+        except Exception as e:
+            messagebox.showerror(
+                "Error",
+                f"Could not display monitor numbers: {str(e)}"
+            ) 
