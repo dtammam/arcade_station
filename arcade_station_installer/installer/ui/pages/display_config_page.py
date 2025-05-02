@@ -245,10 +245,17 @@ class DisplayConfigPage(BasePage):
     def toggle_default_image(self):
         """Enable or disable the image entry based on default image checkbox."""
         if self.use_default_image_var.get():
-            self.image_var.set("")
+            # Set the default image path in the entry
+            if "install_path" in self.app.user_config:
+                default_path = os.path.join(
+                    self.app.user_config["install_path"],
+                    "assets", "images", "banners", "arcade_station.png"
+                )
+                self.image_var.set(default_path)
             self.image_entry.config(state="disabled")
             self.browse_button.config(state="disabled")
         else:
+            self.image_var.set("")
             self.image_entry.config(state="normal")
             self.browse_button.config(state="normal")
     
@@ -294,6 +301,10 @@ class DisplayConfigPage(BasePage):
                 "assets", "images", "banners", "arcade_station.png"
             )
             self.default_image_path = asset_path
+            
+            # Set the default image path in the entry if using default image
+            if self.use_default_image_var.get():
+                self.image_var.set(asset_path)
         
         # Pre-populate fields if in reconfiguration mode
         if hasattr(self.app, 'is_reconfigure_mode') and self.app.is_reconfigure_mode:
