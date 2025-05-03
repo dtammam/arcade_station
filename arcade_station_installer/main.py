@@ -63,6 +63,29 @@ def setup_styles():
                    foreground="white", 
                    font=("Arial", 10))
 
+def set_application_icon(root):
+    """Set the application icon for the window.
+    
+    Args:
+        root: The tkinter root window
+    """
+    # Get the absolute path to the icon file
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "installer", "icon.ico")
+    
+    if os.path.exists(icon_path):
+        try:
+            if sys.platform == "win32":
+                root.iconbitmap(icon_path)
+            else:
+                # For Linux/Mac, try to use PNG if available
+                png_path = icon_path.replace('.ico', '.png')
+                if os.path.exists(png_path):
+                    img = tk.PhotoImage(file=png_path)
+                    root.tk.call('wm', 'iconphoto', root._w, img)
+        except Exception:
+            pass  # Silently fail if icon can't be set
+
 def main():
     """Run the Arcade Station Installer."""
     # Create the root window
@@ -72,19 +95,7 @@ def main():
     root.minsize(900, 700)     # Increased minimum size
     
     # Set application icon
-    if sys.platform == "win32":
-        # Windows icon
-        try:
-            root.iconbitmap("installer/resources/icon.ico")
-        except tk.TclError:
-            pass
-    else:
-        # Linux/Mac icon
-        try:
-            img = tk.PhotoImage(file="installer/resources/icon.png")
-            root.tk.call('wm', 'iconphoto', root._w, img)
-        except tk.TclError:
-            pass
+    set_application_icon(root)
     
     # Set up styles
     setup_styles()
