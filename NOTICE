@@ -1,0 +1,44 @@
+NOTICE
+
+This product, arcade station, includes software developed by Dean Tammam in 2025, with assistance from Cursor and ChatGPT.
+
+Copyright © 2025 Dean Tammam
+
+This software is distributed under the terms of the GNU General Public License v3.0 (GPL-3.0), as described in the LICENSE file.
+
+arcade station includes dependencies licensed under their respective open source licenses. Where required, relevant license notices are reproduced below.
+
+This project is intended for personal, non-commercial use only. No affiliation or endorsement is implied with any of the projects or publishers referenced herein.
+
+---
+
+Third-Party Notices:
+
+1. **Pegasus Frontend (pegasus-fe)**
+   - Source: https://github.com/mmatyas/pegasus-frontend  
+   - License: GPL-3.0  
+   - Use: Game launcher interface
+
+2. **AudioSwitcher**
+   - Source: https://github.com/xenolightning/AudioSwitcher  
+   - License: MIT  
+   - Use: Volume control on Windows
+
+3. **MAME2LIT and LightsTest**
+   - Source: https://github.com/dinsfire64  
+   - License: [license not specified – please clarify if known]  
+   - Use: LED control board management
+
+4. **ITGMania**
+   - Source: https://github.com/itgmania/itgmania  
+   - License: GPL-3.0  
+   - Use: Dance game simulator
+
+5. **Game Art Assets**
+   - Source: Various, including original game publishers  
+   - License: Used under fair use for non-commercial purposes  
+   - Note: All rights belong to their respective owners
+
+---
+
+The full text of each license can be found in the LICENSES directory or in the relevant source files.
