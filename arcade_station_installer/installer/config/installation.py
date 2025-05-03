@@ -607,17 +607,16 @@ class InstallationManager:
         # Generate screenshot config
         screenshot_config = {
             "screenshot": {
-                "monitor_index": config.get("screenshot_monitor", 0),
-                "file_location": os.path.join(config["install_path"], "screenshots"),
+                "monitor_index": config.get("screenshot", {}).get("monitor_index", 0),
+                "file_location": config.get("screenshot", {}).get("file_location", os.path.join(config["install_path"], "screenshots")),
                 "file_name": "",
                 "quality": "High",
-                "sound_file": os.path.join(config["install_path"], "assets", "sounds", "megatouch_yahoo.wav")
+                "sound_file": config.get("screenshot", {}).get("sound_file", os.path.join(config["install_path"], "assets", "sounds", "megatouch_yahoo.wav"))
             },
             "icloud_upload": {
                 "enabled": config.get("use_icloud", False),
                 "interval_seconds": 360,
                 "delete_after_upload": True,
-                "upload_directory": os.path.join(config["install_path"], "screenshots"),
                 "apple_services_path": "C:/Program Files (x86)/Common Files/Apple/Internet Services/",
                 "processes_to_restart": [
                     "iCloudServices",
