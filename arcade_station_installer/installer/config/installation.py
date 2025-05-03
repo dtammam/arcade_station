@@ -563,7 +563,7 @@ class InstallationManager:
         # Generate processes_to_kill.toml
         processes_to_kill = {
             "processes": {
-                "names": [
+                "names": config.get("processes_to_kill", {}).get("processes", {}).get("names", [
                     "cmd",
                     "explorer",
                     "gslauncher",
@@ -588,7 +588,7 @@ class InstallationManager:
                     "Taskmgr",
                     "timeout",
                     "marquee_image"
-                ]
+                ])
             }
         }
         self._write_toml(os.path.join(config_dir, "processes_to_kill.toml"), processes_to_kill)
