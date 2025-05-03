@@ -14,7 +14,7 @@ enabled = true
 vpn_application_directory = "C:/Program Files/OpenVPN/bin" 
 vpn_application = "openvpn-gui.exe" 
 vpn_process = "openvpn" 
-vpn_config_profile = "gradius-DRDOOFUS-phaseii-config.ovpn" 
+vpn_config_profile = "" 
 seconds_to_wait = 10 
 
 [osd]
