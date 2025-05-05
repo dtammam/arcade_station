@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 # Get the current directory where the script is located
 $scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
-$batchFilePath = Join-Path -Path $scriptDir -ChildPath "arcade_station_start.bat"
+$batchFilePath = Join-Path -Path $scriptDir -ChildPath "launch_arcade_station.bat"
 
 # Import core functions module
 $coreFunctionsModule = Join-Path -Path $scriptDir -ChildPath "core_functions.psm1"
@@ -15,7 +15,7 @@ Import-Module -Name $coreFunctionsModule -Force
 
 # Ensure the batch file exists
 if (-not (Test-Path -Path $batchFilePath)) {
-    Write-Error "The arcade_station_start.bat file was not found in the directory: [$scriptDir]"
+    Write-Error "The launch_arcade_station.bat file was not found in the directory: [$scriptDir]"
     exit 1
 }
 
