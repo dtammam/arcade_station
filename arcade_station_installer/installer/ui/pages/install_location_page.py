@@ -81,7 +81,7 @@ class InstallLocationPage(BasePage):
         
         space_label = ttk.Label(
             requirements_frame,
-            text="Disk space required: Approximately 50 MB (excluding games)",
+            text="Disk space required: Approximately 500 MB (excluding games)",
             wraplength=500,
             justify="left"
         )
