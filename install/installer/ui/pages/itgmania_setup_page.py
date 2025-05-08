@@ -448,7 +448,7 @@ class ITGManiaSetupPage(BasePage):
                     from pathlib import Path
                     
                     # Import the setup function using an absolute import path that will work with the installer structure
-                    from arcade_station_installer.installer.resources.itgmania_integration.itgmania_dynamic_marquee_setup import setup_itgmania_integration
+                    from installer.resources.itgmania_integration.itgmania_dynamic_marquee_setup import setup_itgmania_integration
                     
                     # Get the ITGMania installation path from the UI
                     itgmania_path = self.path_var.get().strip()

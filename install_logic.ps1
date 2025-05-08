@@ -80,7 +80,7 @@ try {
 Write-Host ""
 
 # --- Launch the Wizard ---
-$WizardScript = Join-Path -Path $ProjectDir -ChildPath "arcade_station_installer\main.py"
+$WizardScript = Join-Path -Path $ProjectDir -ChildPath "install\main.py"
 Write-Host "Launching Arcade Station Setup Wizard..."
 try {
     # Run the python script using the interpreter from the activated venv

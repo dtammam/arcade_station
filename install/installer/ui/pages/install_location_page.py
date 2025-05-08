@@ -335,7 +335,7 @@ class InstallLocationPage(BasePage):
                     # Copy each item (except the installer while it's running)
                     for item in all_items:
                         # Skip the installer for now to avoid copying it while it's running
-                        if item.name == "arcade_station_installer":
+                        if item.name == "installer":
                             continue
                             
                         dst_path = Path(install_path) / item.name
@@ -374,8 +374,8 @@ class InstallLocationPage(BasePage):
                             total_files_copied += 1
                     
                     # Now copy the installer directory (without locking it up)
-                    installer_src = current_dir / "arcade_station_installer"
-                    installer_dst = Path(install_path) / "arcade_station_installer"
+                    installer_src = current_dir / "installer"
+                    installer_dst = Path(install_path) / "installer"
                     
                     if installer_src.exists():
                         update_status("Copying installer files...")
