@@ -19,6 +19,12 @@ if not exist "%PYTHON_EXE%" (
     exit /b 1
 )
 
+REM Ensure all dependencies are installed
+if exist requirements.txt (
+    echo Installing/updating dependencies from requirements.txt
+    "%PYTHON_EXE%" -m pip install -r requirements.txt
+)
+
 REM Run the launcher
 echo Launching Arcade Station...
 "%PYTHON_EXE%" src\arcade_station\start_frontend_apps.py %*
