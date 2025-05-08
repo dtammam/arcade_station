@@ -4,6 +4,7 @@ Main application class for the Arcade Station Installer
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
+import logging
 
 from ..config.installation import InstallationManager
 from .pages import (
@@ -356,6 +357,13 @@ class InstallerApp:
             self.root.config(cursor="wait")
             self.root.update()
             
+            # Log the start of installation
+            logging.info("=== Starting Arcade Station Installation ===")
+            logging.info("User Configuration:")
+            for key, value in self.user_config.items():
+                if key != "kiosk_password":  # Don't log sensitive data
+                    logging.info(f"  {key}: {value}")
+            
             # Perform the installation
             success = self.install_manager.perform_installation(self.user_config)
             
@@ -363,18 +371,21 @@ class InstallerApp:
             self.root.config(cursor="")
             
             if success:
+                logging.info("Installation completed successfully")
                 messagebox.showinfo(
                     "Installation Complete", 
                     "Arcade Station has been successfully installed!"
                 )
                 self.root.destroy()
             else:
+                logging.error("Installation failed")
                 messagebox.showerror(
                     "Installation Failed", 
                     "There was a problem during installation. Please check the logs."
                 )
         except Exception as e:
             self.root.config(cursor="")
+            logging.error(f"Unexpected error during installation: {str(e)}", exc_info=True)
             messagebox.showerror(
                 "Error", 
                 f"An unexpected error occurred: {str(e)}"

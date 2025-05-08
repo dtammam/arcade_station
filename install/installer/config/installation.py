@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 import tomllib
 from typing import Dict, Any, Optional, List, Tuple
+from datetime import datetime
 
 # Try to import tomli_w for writing TOML files
 try:
@@ -30,16 +31,23 @@ class InstallationManager:
         self.resources_dir = RESOURCES_DIR
         self.files_copied = False  # Track if files have been copied
         
-        # Set up logging
+        # Set up logging with more detailed format
+        log_dir = os.path.join(os.path.dirname(INSTALLER_DIR), "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, f"installation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+        
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
                 logging.StreamHandler(),
-                logging.FileHandler(os.path.join(os.path.dirname(INSTALLER_DIR), "installation.log"))
+                logging.FileHandler(log_file)
             ]
         )
         self.logger = logging.getLogger("InstallationManager")
+        self.logger.info("=== Starting Arcade Station Installation ===")
+        self.logger.info(f"Platform: {'Windows' if self.is_windows else 'Linux' if self.is_linux else 'Mac'}")
+        self.logger.info(f"Resources directory: {self.resources_dir}")
     
     def check_if_installed(self) -> bool:
         """Check if Arcade Station is already installed.
@@ -221,21 +229,29 @@ class InstallationManager:
                 return False
             
             self.logger.info(f"Starting installation to {install_path}")
+            self.logger.info("Configuration:")
+            for key, value in config.items():
+                if key != "kiosk_password":  # Don't log sensitive data
+                    self.logger.info(f"  {key}: {value}")
             
             # Create installation directory structure
+            self.logger.info("Creating installation directory structure...")
             os.makedirs(install_path, exist_ok=True)
             
             # Get source directory (where our project files are)
             src_dir = os.path.join(install_path, "src")
             os.makedirs(src_dir, exist_ok=True)
+            self.logger.info(f"Created source directory: {src_dir}")
             
             # Create config directory
             config_dir = os.path.join(install_path, "config")
             os.makedirs(config_dir, exist_ok=True)
+            self.logger.info(f"Created config directory: {config_dir}")
             
             # Create venv directory
             venv_dir = os.path.join(install_path, ".venv")
             os.makedirs(venv_dir, exist_ok=True)
+            self.logger.info(f"Created virtual environment directory: {venv_dir}")
             
             # Copy project files to installation directory if not already done
             if not self.files_copied:
@@ -837,6 +853,8 @@ assets.box_front: {}
         if not self.is_windows:
             return
             
+        self.logger.info("Setting up Windows-specific components...")
+        
         # Check for admin privileges
         try:
             import ctypes
@@ -844,12 +862,14 @@ assets.box_front: {}
             if not is_admin:
                 self.logger.error("Administrator privileges required for Windows-specific setup")
                 return
+            self.logger.info("Administrator privileges confirmed")
         except Exception as e:
             self.logger.error(f"Error checking admin privileges: {str(e)}")
             return
             
         # Set up auto-logon if kiosk mode is enabled
         if config.get("enable_kiosk_mode"):
+            self.logger.info("Setting up Windows auto-logon for kiosk mode...")
             self._setup_windows_autologon(
                 config.get("kiosk_username", ""),
                 config.get("kiosk_password", "")
@@ -857,6 +877,7 @@ assets.box_front: {}
             
             # Replace explorer.exe with Arcade Station if requested
             if config.get("kiosk_replace_shell"):
+                self.logger.info("Setting up Windows shell replacement...")
                 self._setup_windows_shell_replacement(install_path)
     
     def _setup_windows_autologon(self, username: str, password: str) -> None:
@@ -1061,6 +1082,7 @@ Categories=Game;
             install_path: Installation directory
         """
         if not config.get("itgmania", {}).get("enabled", False):
+            self.logger.info("ITGMania integration not enabled, skipping")
             return
             
         self.logger.info("Performing final ITGMania integration verification")
@@ -1089,6 +1111,7 @@ Categories=Game;
             
             # Check for portable mode
             is_portable = os.path.exists(os.path.join(itgmania_base_path, "Portable.ini"))
+            self.logger.info(f"ITGMania installation is {'portable' if is_portable else 'standard'}")
             
             # Determine the correct log file path
             if is_portable:
