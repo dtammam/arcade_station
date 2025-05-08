@@ -22,7 +22,7 @@ arcade station is a front-end interface for managing and interacting with the ga
 ![Python options](assets/images/readme/python.png)
 2. Download the zip of this branch `arcade_station-feature-simple-installer`, keeping all content in one folder.
 3. Run `install_arcade_station.bat` If warned about Windows proecting your PC, select more options and `Run anyway`.
-![Security warning](assets/images/readme/security-warning.png)
+![Security warning](assets/images/readme/warning.png)
 4. Follow the installation wizard to configure your setup
 5. Once installation is complete, navigate to the installation directory you chose. Congrats, you're setup!
 6. Launch `launch_arcade_station.bat` whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to this directory to reconfigure it.
