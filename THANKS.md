@@ -24,6 +24,8 @@ THANKS
     - Piry
     - Eric Z.
     - Trent
+    - DeWitt G.
+    - Ray T. (thank you for test hardware!)
 
 - Last but not least, Marcy and Daisy for putting up with me programming furiously without knowing what it was about but trusting me when I said it was cool and important
 <p align="center">
