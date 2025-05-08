@@ -1,10 +1,16 @@
-# Arcade Station Installer
+<h1 align="center">Arcade Station</h1>
 
-arcade station is a front-end interface for managing and interacting with the games you love.
+<p align="center"><img src="assets/images/readme/logo.png" width="300" alt="Logo" /></p>
 
-*While the core codebase supports Windows, Linux, and macOS, this MVP release provides a streamlined Windows installation experience. Support for Mac and Linux installers will be available in upcoming releases.*
+<h2 align="center">arcade station is a front-end interface for managing and interacting with the games you love.</h2>
 
-![Logo](assets/images/readme/logo.png)
+<p align="center"><img src="assets/images/readme/collage.png" width="900" alt="Logo" /></p>
+
+<h3 align="center">While the core codebase supports Windows, Linux, and macOS, this MVP release provides a streamlined Windows installation experience.</h3>
+<h3 align="center">Support for Mac and Linux installers will be available in upcoming releases..</h3>
+
+
+
 
 ## Features
 
@@ -19,17 +25,28 @@ arcade station is a front-end interface for managing and interacting with the ga
 
 ### Quick Start (Windows - Current Release)
 
+
 1. Download and install [Python 3.12.9](https://www.python.org/downloads/release/python-3129/). *You must select install as Admin and add to PATH options!*
-![Python options](assets/images/readme/python.png)
+
+   <img src="assets/images/readme/python.png" width="500" alt="Python options" />
+
 2. Download Arcade Station by clicking `Code/Download ZIP`
-![Download ZIP](assets/images/readme/download.png)
+
+   <img src="assets/images/readme/download.png" width="500" alt="Download ZIP" />
+
 3. Extract the folder in Downloads
+
 4. Right-click and run `install_arcade_station.bat` as Administrator. If warned about Windows protecting your PC, select more options and `Run anyway`.
-![Security warning](assets/images/readme/warning.png)
+
+   <img src="assets/images/readme/warning.png" width="500" alt="Security warning" />
+
 4. Follow the installation wizard to configure your setup
+
 5. Once installation is complete, navigate to the installation directory you chose 
+
 6. Run `launch_arcade_station.bat`. If warned about Windows protecting your PC, select more options and `Run anyway`.
-![Security warning](assets/images/readme/warning.png)
+
+   <img src="assets/images/readme/warning.png" width="500" alt="Security warning" />
 
 Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to this directory to reconfigure it.
 
@@ -47,16 +64,8 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 This project incorporates several third-party components. See [NOTICE](NOTICE) for detailed attribution and licensing information.
 
-## Credits
+## Thanks
 
 ![Text](assets/images/readme/text.png)
 
-- This guy 👉🏼😉👈🏼
-- The current state of generative AI (most specifically, ChatGPT, Cursor, Anthropic's Claude 3.7 with thinking - Jesus Christ, did that make this possible). Deepseek R1 for helping me come up with a framework to use for [planning this effort](PLAN.md)
-- clue for the original [ddr-picker](https://github.com/evanclue/ddr-picker) which inspired my [PowerShell rewritten fork](https://github.com/dtammam/ddr-picker) and ongoing developments which led to Arcade Station
-- also clue for the awesome art assets
-- My friend JMK for being a constant source of inspiration
-- din and teej for being awesome about sharing ideas, recommendations, feedback for things like ITGmania compatible modules, art, user experience considerations, STAC board firmware and lights reset utilities
-- Ashley Philbrick for listening to me ramble about progress on an endless to-do list for the last few months anbd providing encouragement
-- Pegasus-fe and the Discord community for answering my questions about QML formatting and why their thing worked
-- Last but not least, Marcy and Daisy for putting up with me programming furiously without knowing what it was about but trusting me when I said it was cool and important
+Please reference the [thank you](THANKS.md) note.

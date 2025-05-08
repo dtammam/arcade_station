@@ -9,6 +9,9 @@ REM Set script working directory
 set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%"
 
+REM Activate the virtual environment
+call "%SCRIPT_DIR%.venv\Scripts\activate.bat"
+
 REM Set path to Python executable in the bundled virtual environment
 set "PYTHON_EXE=%SCRIPT_DIR%.venv\Scripts\python.exe"
 
