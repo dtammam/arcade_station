@@ -1,9 +1,10 @@
 # Arcade Station Installer
 
 arcade station is a front-end interface for managing and interacting with the games you love.
+
 *While the core codebase supports Windows, Linux, and macOS, this MVP release provides a streamlined Windows installation experience. Support for Mac and Linux installers will be available in upcoming releases.*
 
-![Logo](assets/images/banners/arcade_station_no_text.png)
+![Logo](assets/images/readme/logo.png)
 
 ## Features
 
@@ -18,15 +19,19 @@ arcade station is a front-end interface for managing and interacting with the ga
 
 ### Quick Start (Windows - Current Release)
 
-1. Download and install Python 3.12.9 (what this was built and tested on). Here's the [download link](https://www.python.org/downloads/release/python-3129/). When asked, explicitly install as Admin and add to PATH (or the rest of the app won't work.)
+1. Download and install [Python 3.12.9](https://www.python.org/downloads/release/python-3129/). *You must select install as Admin and add to PATH options!*
 ![Python options](assets/images/readme/python.png)
-2. Download the zip of this branch `arcade_station-feature-simple-installer`, keeping all content in one folder.
-3. Run `install_arcade_station.bat` If warned about Windows proecting your PC, select more options and `Run anyway`.
+2. Download Arcade Station by clicking `Code/Download ZIP`
+![Download ZIP](assets/images/readme/download.png)
+3. Extract the folder in Downloads
+4. Run `install_arcade_station.bat`. If warned about Windows protecting your PC, select more options and `Run anyway`.
 ![Security warning](assets/images/readme/warning.png)
 4. Follow the installation wizard to configure your setup
-5. Once installation is complete, navigate to the installation directory you chose. Congrats, you're setup!
-6. Launch `launch_arcade_station.bat` whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to this directory to reconfigure it.
-You may also see a security warning similar to the first and will need to `Run anyway` for the first time you launch it.
+5. Once installation is complete, navigate to the installation directory you chose 
+6. Run `launch_arcade_station.bat`. If warned about Windows protecting your PC, select more options and `Run anyway`.
+![Security warning](assets/images/readme/warning.png)
+
+Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to this directory to reconfigure it.
 
 **Note:** While the core codebase is cross-platform, this initial release focuses on Windows installation. Mac and Linux installers are in development and will be available soon.
 
@@ -44,7 +49,7 @@ This project incorporates several third-party components. See [NOTICE](NOTICE) f
 
 ## Credits
 
-![Text](assets/images/banners/arcade_station_only_text.png)
+![Text](assets/images/readme/text.png)
 
 - This guy 👉🏼😉👈🏼
 - The current state of generative AI (most specifically, ChatGPT, Cursor, Anthropic's Claude 3.7 with thinking - Jesus Christ, did that make this possible). Deepseek R1 for helping me come up with a framework to use for [planning this effort](PLAN.md)
