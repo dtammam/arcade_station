@@ -510,8 +510,8 @@ class InstallationManager:
                 "monitor_index": config.get("marquee_monitor", 1)
             },
             "dynamic_marquee": {
-                "enabled": config.get("use_dynamic_marquee", True),
-                "itgmania_display_enabled": config.get("enable_itgmania_display", True),
+                "enabled": config.get("use_dynamic_marquee", False),
+                "itgmania_display_enabled": config.get("enable_itgmania_display", False),
                 "itgmania_display_file_path": "",
                 "itgmania_base_path": "",
                 "itgmania_banner_path": ""
@@ -519,7 +519,7 @@ class InstallationManager:
         }
         
         # If using default image, make sure the path is set to the standard location
-        if config.get("use_default_marquee_image", True):
+        if config.get("use_default_marquee_image", False):
             display_config["display"]["default_image_path"] = os.path.join(
                 config["install_path"], "assets", "images", "banners", "arcade_station.png"
             )
@@ -528,8 +528,6 @@ class InstallationManager:
         if config.get("itgmania", {}).get("enabled", False):
             # Just enable the ITGMania integration, but don't set the log file path
             # The integration script will handle that when it runs
-            display_config["dynamic_marquee"]["enabled"] = True
-            display_config["dynamic_marquee"]["itgmania_display_enabled"] = True
             
             # Store the path for the integration script to use
             display_config["dynamic_marquee"]["itgmania_base_path"] = config["itgmania"]["path"]
@@ -1081,7 +1079,6 @@ Categories=Game;
                 if "dynamic_marquee" not in display_config:
                     display_config["dynamic_marquee"] = {}
                     
-                display_config["dynamic_marquee"]["enabled"] = True
                 display_config["dynamic_marquee"]["itgmania_display_enabled"] = True
                 display_config["dynamic_marquee"]["itgmania_display_file_path"] = log_file_path
                 

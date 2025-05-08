@@ -1,7 +1,7 @@
 [lights]
 enabled = true
-light_reset_executable_path = "C:/Repositories/arcade_station/bin/windows/LightsTest.exe"
-light_mame_executable_path = "C:/Repositories/arcade_station/bin/windows/mame2lit.exe"
+light_reset_executable_path = "../../../../arcade_station/bin/windows/LightsTest.exe"
+light_mame_executable_path = "../../../../arcade_station/bin/windows/mame2lit.exe"
 
 [streaming]
 webcam_management_enabled = false
@@ -19,4 +19,4 @@ seconds_to_wait = 10
 
 [osd]
 enabled = true
-sound_osd_executable = "C:/Program Files (x86)/AudioSwitch/AudioSwitch.exe"
+sound_osd_executable = "../../../../bin/windows/AudioSwitch.exe"
