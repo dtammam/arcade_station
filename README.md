@@ -1,7 +1,5 @@
 # Arcade Station Installer
 
-![Text](assets/images/banners/arcade_station_only_text.png)
-
 arcade station is a front-end interface for managing and interacting with the games you love.
 *While the core codebase supports Windows, Linux, and macOS, this MVP release provides a streamlined Windows installation experience. Support for Mac and Linux installers will be available in upcoming releases.*
 
@@ -45,6 +43,9 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 This project incorporates several third-party components. See [NOTICE](NOTICE) for detailed attribution and licensing information.
 
 ## Credits
+
+![Text](assets/images/banners/arcade_station_only_text.png)
+
 - This guy 👉🏼😉👈🏼
 - The current state of generative AI (most specifically, ChatGPT, Cursor, Anthropic's Claude 3.7 with thinking - Jesus Christ, did that make this possible). Deepseek R1 for helping me come up with a framework to use for [planning this effort](PLAN.md)
 - clue for the original [ddr-picker](https://github.com/evanclue/ddr-picker) which inspired my [PowerShell rewritten fork](https://github.com/dtammam/ddr-picker) and ongoing developments which led to Arcade Station
