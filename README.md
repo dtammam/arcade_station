@@ -66,6 +66,4 @@ This project incorporates several third-party components. See [NOTICE](NOTICE) f
 
 ## Thanks
 
-![Text](assets/images/readme/text.png)
-
-Please reference the [thank you](THANKS.md) note.
+Please reference the [THANKS](THANKS.md) file.
