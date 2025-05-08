@@ -898,7 +898,7 @@ assets.box_front: {}
             import winreg
             
             # Create a startup script
-            startup_path = os.path.join(install_path, "start_arcade_station.bat")
+            startup_path = os.path.join(install_path, "launch_arcade_station.bat")
             startup_content = f"""@echo off
 cd /d "{install_path}"
 if not exist ".venv\\Scripts\\pythonw.exe" (
