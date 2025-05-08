@@ -120,7 +120,7 @@ class KioskModePage(BasePage):
                  "providing a dedicated arcade experience without the standard Windows desktop.",
             wraplength=450,
             justify="left",
-            font=("Arial", 9),
+            font=("Segoe UI", 9),
             foreground="#555555"
         )
         shell_info.pack(anchor="w", padx=(25, 0))

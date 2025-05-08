@@ -45,7 +45,7 @@ class WelcomePage(BasePage):
             logo_label = ttk.Label(
                 welcome_frame, 
                 text="ARCADE STATION",
-                font=("Arial", 24, "bold")
+                font=("Segoe UI", 24, "bold")
             )
             logo_label.pack(pady=20)
         

@@ -86,7 +86,7 @@ class SummaryPage(BasePage):
             wrap="word",
             width=80,
             height=25,
-            font=("TkDefaultFont", 10),
+            font=("Segoe UI", 10),
             padx=10,
             pady=10,
             state="disabled"
@@ -114,7 +114,7 @@ class SummaryPage(BasePage):
         ready_label = ttk.Label(
             main_frame,
             text="When you're ready to install, click 'Install' to begin the installation process.",
-            font=("TkDefaultFont", 10, "bold"),
+            font=("Segoe UI", 10, "bold"),
             wraplength=500,
             justify="left"
         )
@@ -198,8 +198,8 @@ class SummaryPage(BasePage):
         self.summary_text.insert("end", "\n")
         
         # Style the text
-        self.summary_text.tag_configure("header", font=("Arial", 12, "bold"))
-        self.summary_text.tag_configure("section", font=("Arial", 10, "bold"))
+        self.summary_text.tag_configure("header", font=("Segoe UI", 12, "bold"))
+        self.summary_text.tag_configure("section", font=("Segoe UI", 10, "bold"))
         
         # Disable editing
         self.summary_text.config(state="disabled")
@@ -239,7 +239,7 @@ class SummaryPage(BasePage):
         header_label = ttk.Label(
             progress_window,
             text="Installing Arcade Station",
-            font=("Arial", 12, "bold")
+            font=("Segoe UI", 12, "bold")
         )
         header_label.pack(pady=(10, 5))
         

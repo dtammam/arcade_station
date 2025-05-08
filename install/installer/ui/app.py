@@ -82,15 +82,15 @@ class InstallerApp:
         
         # Make the sidebar have a different background
         style = ttk.Style()
-        style.configure("Sidebar.TFrame", background="#2c3e50")
+        style.configure("Sidebar.TFrame", background="#0d1117")
         
         # Add logo at the top
         logo_frame = ttk.Frame(self.sidebar, style="Sidebar.TFrame")
         logo_frame.pack(fill="x", padx=10, pady=20)
         
         logo_label = ttk.Label(logo_frame, text="Arcade Station", 
-                             foreground="white", background="#2c3e50",
-                             font=("Arial", 16, "bold"))
+                             foreground="white", background="#0d1117",
+                             font=("Segoe UI", 16, "bold"))
         logo_label.pack(anchor="center")
         
         # Create frame for step indicators
@@ -114,13 +114,13 @@ class InstallerApp:
         indicator = ttk.Label(step_frame, text=f"{index + 1}", 
                             width=2, anchor="center",
                             foreground="white", background="#7f8c8d",
-                            font=("Arial", 9))
+                            font=("Segoe UI", 9))
         indicator.pack(side="left", padx=(0, 10))
         
         # Create the step text
         label = ttk.Label(step_frame, text=text, 
-                        foreground="#bdc3c7", background="#2c3e50",
-                        font=("Arial", 10))
+                        foreground="#bdc3c7", background="#0d1117",
+                        font=("Segoe UI", 10))
         label.pack(side="left", fill="x", expand=True)
         
         self.step_labels.append((indicator, label))
@@ -135,17 +135,21 @@ class InstallerApp:
             elif i == self.current_page:
                 # Current step
                 indicator.configure(background="#3498db", foreground="white")
-                label.configure(foreground="white", font=("Arial", 10, "bold"))
+                label.configure(foreground="white", font=("Segoe UI", 10, "bold"))
             else:
                 # Future steps
                 indicator.configure(background="#7f8c8d", foreground="white")
-                label.configure(foreground="#bdc3c7", font=("Arial", 10))
+                label.configure(foreground="#bdc3c7", font=("Segoe UI", 10))
     
     def setup_pages(self):
         """Create all wizard pages."""
         # Content frame
-        self.content = ttk.Frame(self.container)
+        self.content = ttk.Frame(self.container, style="Content.TFrame")
         self.content.pack(fill="both", expand=True, side="right", padx=0, pady=0)
+        
+        # Configure content frame style
+        style = ttk.Style()
+        style.configure("Content.TFrame", background="#0d1117")
         
         # Create the different pages
         self.pages = [

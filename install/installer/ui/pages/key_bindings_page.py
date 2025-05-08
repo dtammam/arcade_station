@@ -32,8 +32,8 @@ class HyperlinkLabel(ttk.Label):
         self.bind("<Button-1>", self._open_url)
         
         # Underline the text when mouse enters
-        self.bind("<Enter>", lambda e: self.configure(font=("Arial", 9, "underline")))
-        self.bind("<Leave>", lambda e: self.configure(font=("Arial", 9)))
+        self.bind("<Enter>", lambda e: self.configure(font=("Segoe UI", 9, "underline")))
+        self.bind("<Leave>", lambda e: self.configure(font=("Segoe UI", 9)))
     
     def _open_url(self, event):
         """Open the URL in the default browser."""
@@ -131,19 +131,19 @@ class KeyBindingsPage(BasePage):
         ttk.Label(
             header_frame, 
             text="Function",
-            font=("Arial", 9, "bold")
+            font=("Segoe UI", 9, "bold")
         ).grid(row=0, column=0, sticky="w")
         
         ttk.Label(
             header_frame,
             text="Script Path",
-            font=("Arial", 9, "bold")
+            font=("Segoe UI", 9, "bold")
         ).grid(row=0, column=1, sticky="w")
         
         ttk.Label(
             header_frame,
             text="Hotkey",
-            font=("Arial", 9, "bold")
+            font=("Segoe UI", 9, "bold")
         ).grid(row=0, column=2, sticky="w")
         
         # Separator
@@ -214,7 +214,7 @@ class KeyBindingsPage(BasePage):
         help_text = ttk.Label(
             keybindings_frame,
             text="Format: 'ctrl+key', 'alt+key', 'shift+key', or just 'key'.",
-            font=("Arial", 9),
+            font=("Segoe UI", 9),
             foreground="#555555"
         )
         help_text.pack(anchor="w", pady=5, padx=5)
@@ -369,7 +369,7 @@ marquee_image.exe"""
             process_frame,
             text="These processes will be terminated when returning to Pegasus or when using the "
                  "kill hotkey.",
-            font=("Arial", 9),
+            font=("Segoe UI", 9),
             foreground="#555555",
             wraplength=450
         )

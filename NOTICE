@@ -26,7 +26,7 @@ Third-Party Notices:
 
 3. **MAME2LIT and LightsTest**
    - Source: https://github.com/dinsfire64  
-   - License: [license not specified – please clarify if known]  
+   - License: N/A
    - Use: LED control board management
 
 4. **ITGMania**
@@ -41,4 +41,4 @@ Third-Party Notices:
 
 ---
 
-The full text of each license can be found in the LICENSES directory or in the relevant source files.
+The full text of each license can be found in the LICENSE files of the individual projects.

@@ -7,10 +7,7 @@
 <p align="center"><img src="assets/images/readme/collage.png" width="900" alt="Logo" /></p>
 
 <h3 align="center">While the core codebase supports Windows, Linux, and macOS, this MVP release provides a streamlined Windows installation experience.</h3>
-<h3 align="center">Support for Mac and Linux installers will be available in upcoming releases..</h3>
-
-
-
+<h3 align="center">Support for Mac and Linux installers will be available in upcoming releases.</h3>
 
 ## Features
 
@@ -34,7 +31,7 @@
 
    <img src="assets/images/readme/download.png" width="500" alt="Download ZIP" />
 
-3. Extract the folder in Downloads
+3. Extract the folder in Downloads as-is (make sure everything from the .zip remains in one folder).
 
 4. Right-click and run `install_arcade_station.bat` as Administrator. If warned about Windows protecting your PC, select more options and `Run anyway`.
 
