@@ -24,7 +24,7 @@ arcade station is a front-end interface for managing and interacting with the ga
 2. Download Arcade Station by clicking `Code/Download ZIP`
 ![Download ZIP](assets/images/readme/download.png)
 3. Extract the folder in Downloads
-4. Run `install_arcade_station.bat`. If warned about Windows protecting your PC, select more options and `Run anyway`.
+4. Right-click and run `install_arcade_station.bat` as Administrator. If warned about Windows protecting your PC, select more options and `Run anyway`.
 ![Security warning](assets/images/readme/warning.png)
 4. Follow the installation wizard to configure your setup
 5. Once installation is complete, navigate to the installation directory you chose 

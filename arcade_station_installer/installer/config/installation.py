@@ -834,6 +834,20 @@ assets.box_front: {}
             config: User configuration from the wizard
             install_path: Installation directory
         """
+        if not self.is_windows:
+            return
+            
+        # Check for admin privileges
+        try:
+            import ctypes
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+            if not is_admin:
+                self.logger.error("Administrator privileges required for Windows-specific setup")
+                return
+        except Exception as e:
+            self.logger.error(f"Error checking admin privileges: {str(e)}")
+            return
+            
         # Set up auto-logon if kiosk mode is enabled
         if config.get("enable_kiosk_mode"):
             self._setup_windows_autologon(
@@ -864,6 +878,8 @@ assets.box_front: {}
                 winreg.SetValueEx(key, "DefaultUserName", 0, winreg.REG_SZ, username)
                 winreg.SetValueEx(key, "DefaultPassword", 0, winreg.REG_SZ, password)
                 winreg.SetValueEx(key, "AutoAdminLogon", 0, winreg.REG_SZ, "1")
+                # Add ForceAutoLogon to prevent password changes from breaking auto-logon
+                winreg.SetValueEx(key, "ForceAutoLogon", 0, winreg.REG_SZ, "1")
             
             self.logger.info(f"Configured Windows auto-logon for user '{username}'")
         except Exception as e:
@@ -885,6 +901,11 @@ assets.box_front: {}
             startup_path = os.path.join(install_path, "start_arcade_station.bat")
             startup_content = f"""@echo off
 cd /d "{install_path}"
+if not exist ".venv\\Scripts\\pythonw.exe" (
+    echo Error: Python virtual environment not found
+    pause
+    exit /b 1
+)
 start "" ".venv\\Scripts\\pythonw.exe" "src\\arcade_station\\core\\common\\start_pegasus.py"
 """
             with open(startup_path, "w") as f:
@@ -894,13 +915,14 @@ start "" ".venv\\Scripts\\pythonw.exe" "src\\arcade_station\\core\\common\\start
             shell_reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
             with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, shell_reg_path, 0, 
                                winreg.KEY_WRITE) as key:
-                winreg.SetValueEx(key, "Shell", 0, winreg.REG_SZ, startup_path)
+                # Ensure the path is properly quoted
+                winreg.SetValueEx(key, "Shell", 0, winreg.REG_SZ, f'"{startup_path}"')
             
             # Also add to startup for non-shell replacement mode
             startup_reg_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, startup_reg_path, 0, 
                                winreg.KEY_WRITE) as key:
-                winreg.SetValueEx(key, "ArcadeStation", 0, winreg.REG_SZ, startup_path)
+                winreg.SetValueEx(key, "ArcadeStation", 0, winreg.REG_SZ, f'"{startup_path}"')
                 
             self.logger.info("Configured Windows shell replacement")
         except Exception as e:

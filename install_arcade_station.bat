@@ -1,5 +1,14 @@
 @echo off
-echo Attempting to run installer script with PowerShell...
+:: Check for admin rights
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo This installer requires administrator privileges.
+    echo Please right-click and select "Run as administrator"
+    pause
+    exit /b 1
+)
+
+echo Running installer with administrator privileges...
 powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "%~dp0install_logic.ps1"
 if %ERRORLEVEL% neq 0 (
     echo Script finished with errors or was cancelled.
