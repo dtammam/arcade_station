@@ -237,6 +237,36 @@ class InstallationManager:
             venv_dir = os.path.join(install_path, ".venv")
             os.makedirs(venv_dir, exist_ok=True)
             
+            # Copy project files to installation directory if not already done
+            if not self.files_copied:
+                self._copy_project_files(install_path)
+            else:
+                self.logger.info("Project files already copied, skipping copy step")
+            
+            # Create and set up virtual environment
+            self.logger.info("Setting up Python virtual environment...")
+            try:
+                import subprocess
+                import sys
+                
+                # Create virtual environment
+                subprocess.run([sys.executable, "-m", "venv", venv_dir], check=True)
+                
+                # Get the pip path
+                if self.is_windows:
+                    pip_path = os.path.join(venv_dir, "Scripts", "pip.exe")
+                else:
+                    pip_path = os.path.join(venv_dir, "bin", "pip")
+                
+                # Install requirements
+                requirements_path = os.path.join(install_path, "requirements.txt")
+                subprocess.run([pip_path, "install", "-r", requirements_path], check=True)
+                
+                self.logger.info("Virtual environment set up successfully")
+            except Exception as e:
+                self.logger.error(f"Failed to set up virtual environment: {str(e)}")
+                raise
+            
             # Create core directories
             arcade_station_dir = os.path.join(src_dir, "arcade_station")
             os.makedirs(arcade_station_dir, exist_ok=True)
@@ -253,12 +283,6 @@ class InstallationManager:
             # Create the assets directory
             assets_dir = os.path.join(install_path, "assets")
             os.makedirs(os.path.join(assets_dir, "images", "banners"), exist_ok=True)
-            
-            # Copy project files to installation directory if not already done
-            if not self.files_copied:
-                self._copy_project_files(install_path)
-            else:
-                self.logger.info("Project files already copied, skipping copy step")
             
             # Generate configuration files
             self._generate_config_files(config, config_dir)

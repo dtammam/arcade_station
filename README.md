@@ -28,6 +28,7 @@ arcade station is a front-end interface for managing and interacting with the ga
 4. Follow the installation wizard to configure your setup
 5. Once installation is complete, navigate to the installation directory you chose. Congrats, you're setup!
 6. Launch `launch_arcade_station.bat` whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to this directory to reconfigure it.
+You may also see a security warning similar to the first and will need to `Run anyway` for the first time you launch it.
 
 **Note:** While the core codebase is cross-platform, this initial release focuses on Windows installation. Mac and Linux installers are in development and will be available soon.
 
