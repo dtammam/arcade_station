@@ -88,7 +88,7 @@ class KeyBindingsPage(BasePage):
         # First part of text
         ttk.Label(
             intro_frame,
-            text="Configure global hotkeys for Arcade Station. These keys will work from anywhere in the system, including during gameplay. Examples below that are used by the original author of Arcade Station.",
+            text="Configure global hotkeys for Arcade Station which work at all times. Select Process Management to add new processes for games you add. Defaults are provided, select Next to accept all defaults",
             wraplength=500,
             justify="left"
         ).pack(anchor="w", fill="x")

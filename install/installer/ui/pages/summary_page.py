@@ -99,17 +99,6 @@ class SummaryPage(BasePage):
             lambda e: self.canvas.configure(width=e.width - 50)
         )
         
-        # Export configuration button
-        export_frame = ttk.Frame(main_frame)
-        export_frame.pack(fill="x", pady=10)
-        
-        export_button = ttk.Button(
-            export_frame,
-            text="Export Configuration",
-            command=self.export_config
-        )
-        export_button.pack(side="right")
-        
         # Ready to install label
         ready_label = ttk.Label(
             main_frame,
@@ -194,8 +183,66 @@ class SummaryPage(BasePage):
         if kiosk_mode:
             self.summary_text.insert("end", f"Replace Shell: {'Yes' if self.app.user_config.get('kiosk_replace_shell', False) else 'No'}\n")
         
-        # Add tag configuration
-        self.summary_text.insert("end", "\n")
+        # Key Bindings
+        key_bindings = self.app.user_config.get('key_bindings', [])
+        if key_bindings:
+            self.summary_text.insert("end", "\nKey Bindings:\n")
+            for binding in key_bindings:
+                if binding.get('function') and binding.get('script_path') and binding.get('key'):
+                    self.summary_text.insert("end", f"- {binding['function']}: {binding['key']} -> {binding['script_path']}\n")
+        
+        # Process Management
+        process_management = self.app.user_config.get('process_management', {})
+        if process_management:
+            self.summary_text.insert("end", "\nProcess Management:\n")
+            for process_name, process_info in process_management.items():
+                self.summary_text.insert("end", f"- {process_name}: {process_info.get('path', 'No path')}\n")
+        
+        # Utility Configuration
+        self.summary_text.insert("end", "\nUtility Configuration:\n", "section")
+        
+        utilities_config = self.app.user_config.get('utilities', {})
+        
+        # Lights Configuration
+        lights_config = utilities_config.get('lights', {})
+        if lights_config.get('enabled', False):
+            self.summary_text.insert("end", "\nLights Configuration:\n")
+            self.summary_text.insert("end", f"Lights Reset Program: {lights_config.get('light_reset_executable_path', 'Not specified')}\n")
+            self.summary_text.insert("end", f"Lights MAME Executable: {lights_config.get('light_mame_executable_path', 'Not specified')}\n")
+        
+        # Streaming Configuration
+        streaming_config = utilities_config.get('streaming', {})
+        if streaming_config.get('obs_executable'):
+            self.summary_text.insert("end", "\nStreaming Configuration:\n")
+            self.summary_text.insert("end", f"OBS Executable: {streaming_config.get('obs_executable', 'Not specified')}\n")
+            if streaming_config.get('obs_arguments'):
+                self.summary_text.insert("end", f"OBS Arguments: {streaming_config.get('obs_arguments', 'Not specified')}\n")
+            if streaming_config.get('webcam_management_enabled', False):
+                self.summary_text.insert("end", f"Webcam Executable: {streaming_config.get('webcam_management_executable', 'Not specified')}\n")
+        
+        # VPN Configuration
+        vpn_config = utilities_config.get('vpn', {})
+        if vpn_config.get('enabled', False):
+            self.summary_text.insert("end", "\nVPN Configuration:\n")
+            self.summary_text.insert("end", f"VPN Directory: {vpn_config.get('vpn_application_directory', 'Not specified')}\n")
+            self.summary_text.insert("end", f"VPN Application: {vpn_config.get('vpn_application', 'Not specified')}\n")
+            self.summary_text.insert("end", f"VPN Process: {vpn_config.get('vpn_process', 'Not specified')}\n")
+            self.summary_text.insert("end", f"VPN Config: {vpn_config.get('vpn_config_profile', 'Not specified')}\n")
+            self.summary_text.insert("end", f"Wait Time: {vpn_config.get('seconds_to_wait', 'Not specified')} seconds\n")
+        
+        # OSD Configuration
+        osd_config = utilities_config.get('osd', {})
+        if osd_config.get('enabled', False):
+            self.summary_text.insert("end", "\nOSD Configuration:\n")
+            self.summary_text.insert("end", f"OSD Executable: {osd_config.get('sound_osd_executable', 'Not specified')}\n")
+        
+        # Screenshot Configuration
+        screenshot_config = self.app.user_config.get('screenshot', {})
+        if screenshot_config.get('enabled', False):
+            self.summary_text.insert("end", "\nScreenshot Configuration:\n")
+            self.summary_text.insert("end", f"Screenshot Location: {screenshot_config.get('file_location', 'Not specified')}\n")
+            self.summary_text.insert("end", f"Monitor Index: {screenshot_config.get('monitor_index', 'Not specified')}\n")
+            self.summary_text.insert("end", f"Sound File: {screenshot_config.get('sound_file', 'Not specified')}\n")
         
         # Style the text
         self.summary_text.tag_configure("header", font=("Segoe UI", 12, "bold"))

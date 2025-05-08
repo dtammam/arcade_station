@@ -336,7 +336,8 @@ class BinaryGamesPage(BasePage):
             main_frame,
             text="Add games that are launched directly from executable files. "
                  "These can include OpenITG, NotITG, DDR Grand Prix, or any other "
-                 "standalone game.",
+                 "standalone game."
+                 "Select Delete on the blank entry and Next to skip this page.",
             wraplength=500,
             justify="left"
         )

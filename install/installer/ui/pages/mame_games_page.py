@@ -323,7 +323,8 @@ class MAMEGamesPage(BasePage):
         intro_text = ttk.Label(
             main_frame,
             text="Add arcade games that run using the MAME emulator. "
-                 "You'll need to provide the ROM name and save state for each game.",
+                 "You'll need to provide the ROM name and save state for each game."
+                 "Select Next with the box unchecked to skip this page.",
             wraplength=500,
             justify="left"
         )
