@@ -19,4 +19,4 @@ seconds_to_wait = 10
 
 [osd]
 enabled = true
-sound_osd_executable = "../../../../bin/windows/AudioSwitch.exe"
+sound_osd_executable = "../../../../bin/windows/AudioSwitch/AudioSwitch.exe"
