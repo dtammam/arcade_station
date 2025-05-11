@@ -182,11 +182,11 @@ class KeyBindingsPage(BasePage):
         # Default key bindings
         default_bindings = [
             ("Reset back to menu", "../arcade_station/core/common/kill_all_and_reset_pegasus.py", "ctrl+space"),
-            ("Take screenshot (Windows)", "../../bin/windows/take_screenshot.vbs", "+"),
-            ("Take screenshot (Windows)", "../../bin/windows/take_screenshot.vbs", "/"),
+            ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "+"),
+            ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "/"),
             ("Start streaming", "../arcade_station/core/common/start_streaming.py", "ctrl+f4"),
-            ("Restart to kiosk mode (Windows)", "../arcade_station/core/windows/setup_windows_shell.ps1", "ctrl+f3"),
-            ("Restart to PC mode (Windows)", "../arcade_station/core/windows/restore_windows_shell.ps1", "ctrl+f2"),
+            ("Restart to kiosk mode (Windows)", "../arcade_station/core/windows/auto_setup_shell.ps1", "ctrl+f3"),
+            ("Restart to PC mode (Windows)", "../arcade_station/core/windows/auto_restore_shell.ps1", "ctrl+f2"),
             ("Restart computer (Windows)", "../arcade_station/core/windows/restart_computer.ps1", "ctrl+`"),
             ("Start explorer.exe (Windows)", "C:/Windows/explorer.exe", "ctrl+f6"),
             ("", "", "")  # Empty row for user to add custom binding

@@ -379,7 +379,7 @@ class InstallationManager:
             
             # Copy each item
             for item in all_items:
-                # Skip the installer for now to avoid copying it while it's running
+                # Skip copying the installer directory while it's running
                 if item.name == "installer":
                     continue
                     
@@ -394,31 +394,15 @@ class InstallationManager:
                     else:
                         os.remove(dst_path)
                 
-                # Copy directory or file with detailed logging
+                # Copy directory or file
                 if item.is_dir():
-                    # Create custom copy function for counting items
-                    def copy_dir_recursive(src, dst):
-                        nonlocal total_dirs_copied, total_files_copied
-                        if os.path.isdir(src):
-                            total_dirs_copied += 1
-                            os.makedirs(dst, exist_ok=True)
-                            self.logger.info(f"Copying directory: {os.path.basename(src)}")
-                            items = os.listdir(src)
-                            for item in items:
-                                s = os.path.join(src, item)
-                                d = os.path.join(dst, item)
-                                copy_dir_recursive(s, d)
-                        else:
-                            total_files_copied += 1
-                            shutil.copy2(src, dst)
-                    
-                    # Use our custom copy function
-                    copy_dir_recursive(str(item), str(dst_path))
+                    shutil.copytree(item, dst_path)
+                    total_dirs_copied += 1
                 else:
                     shutil.copy2(item, dst_path)
                     total_files_copied += 1
             
-            # Now copy the installer directory without the running executable
+            # Now copy the installer directory
             installer_src = current_dir / "installer"
             installer_dst = Path(install_path) / "installer"
             
@@ -433,34 +417,13 @@ class InstallationManager:
                     dst_item = installer_dst / item.name
                     try:
                         if item.is_dir():
-                            # Custom function to copy installer directories
-                            def copy_installer_dir(src, dst):
-                                nonlocal total_dirs_copied, total_files_copied
-                                os.makedirs(dst, exist_ok=True)
-                                total_dirs_copied += 1
-                                
-                                for item in os.listdir(src):
-                                    s = os.path.join(src, item)
-                                    d = os.path.join(dst, item)
-                                    
-                                    if os.path.isdir(s):
-                                        copy_installer_dir(s, d)
-                                    else:
-                                        try:
-                                            shutil.copy2(s, d)
-                                            total_files_copied += 1
-                                        except (PermissionError, OSError) as e:
-                                            self.logger.warning(f"Skipping locked file: {os.path.basename(s)}")
-                            
-                            copy_installer_dir(str(item), str(dst_item))
+                            shutil.copytree(item, dst_item)
+                            total_dirs_copied += 1
                         else:
-                            try:
-                                shutil.copy2(item, dst_item)
-                                total_files_copied += 1
-                            except (PermissionError, OSError):
-                                self.logger.warning(f"Skipping locked file: {item.name}")
-                    except Exception as e:
-                        self.logger.error(f"Error copying {item.name}: {str(e)}")
+                            shutil.copy2(item, dst_item)
+                            total_files_copied += 1
+                    except (PermissionError, OSError) as e:
+                        self.logger.warning(f"Skipping locked file: {item.name}")
             
             # Ensure these specific directories exist even if not in source
             required_dirs = [
