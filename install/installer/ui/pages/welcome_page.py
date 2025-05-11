@@ -132,7 +132,7 @@ class WelcomePage(BasePage):
         # Reset all installation mode flags
         self.app.is_reset_mode = False
         self.app.is_reconfigure_mode = False
-        self.app.install_manager.files_copied = False  # Reset files_copied flag
+        self.app.install_manager.files_copied = False
         self.app.is_installed = False
         
         # Proceed to next page
