@@ -7,6 +7,9 @@ if %errorLevel% neq 0 (
     exit /b
 )
 
+REM Set PowerShell execution policy to RemoteSigned
+powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope LocalMachine -Force"
+
 REM Arcade Station Launcher
 
 echo Arcade Station Launcher

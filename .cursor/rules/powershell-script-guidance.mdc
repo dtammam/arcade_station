@@ -12,6 +12,11 @@ language: powershell
 
 # PowerShell Scripts Guidelines
 
+## Execution Policy
+- System is configured to use `Bypass` execution policy for all PowerShell scripts
+- This is set during installation via `launch_arcade_station.bat`
+- No need to add `-ExecutionPolicy Bypass` to individual script calls
+
 ## Formatting
 - Use an indent size of 4 spaces.
 - Ensure there is a newline at the end of the file.
