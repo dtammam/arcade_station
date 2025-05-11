@@ -22,9 +22,22 @@ if (-not (Test-Path -Path $batchFilePath)) {
 # Convert to absolute path and ensure proper quoting
 $batchFileAbsPath = (Resolve-Path -Path $batchFilePath).Path
 
+# Create scheduled task to run batch file with highest privileges
+$taskName = "ArcadeStationShell"
+$taskAction = New-ScheduledTaskAction -Execute $batchFileAbsPath
+$taskTrigger = New-ScheduledTaskTrigger -AtStartup
+$taskPrincipal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+$taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+
+# Remove existing task if it exists
+Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+
+# Create the task
+Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Principal $taskPrincipal -Settings $taskSettings
+
 # Registry key for the Windows shell
 $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-$shellValue = "`"$batchFileAbsPath`""
+$shellValue = "schtasks.exe /run /tn `"$taskName`""
 
 # Window flicker management
 $foregroundLockTimeout = 3000

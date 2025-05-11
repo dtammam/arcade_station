@@ -1,4 +1,12 @@
 @echo off
+REM Check for admin privileges
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo Requesting administrator privileges...
+    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    exit /b
+)
+
 REM Arcade Station Launcher
 
 echo Arcade Station Launcher

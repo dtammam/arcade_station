@@ -1,7 +1,7 @@
 [key_mappings]
 "ctrl+`" = "../arcade_station/core/windows/restart_computer.ps1"
-"ctrl+f2" = "../arcade_station/core/windows/restore_windows_shell.ps1"
-"ctrl+f3" = "../arcade_station/core/windows/setup_windows_shell.ps1"
+"ctrl+f2" = "../arcade_station/core/windows/auto_restore_shell.ps1"
+"ctrl+f3" = "../arcade_station/core/windows/auto_setup_shell.ps1"
 "ctrl+f4" = "../arcade_station/core/common/start_streaming.py" 
 "ctrl+f5" = "C:/Users/me/AppData/Local/Programs/cursor/Cursor.exe" 
 "ctrl+f6" = "C:/Windows/explorer.exe"
