@@ -7,15 +7,9 @@ import platform
 import logging
 from pathlib import Path
 import tomllib
+import tomli_w
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime
-
-# Try to import tomli_w for writing TOML files
-try:
-    import tomli_w
-except ImportError:
-    # If tomli_w is not available, we'll handle it when writing TOML files
-    pass
 
 from .. import IS_WINDOWS, IS_LINUX, IS_MAC, INSTALLER_DIR, RESOURCES_DIR
 from ..utils.game_id import get_display_name
@@ -234,6 +228,40 @@ class InstallationManager:
                 if key != "kiosk_password":  # Don't log sensitive data
                     self.logger.info(f"  {key}: {value}")
             
+            # Backup existing configs if this is a reinstallation
+            config_backup = {}
+            if os.path.exists(install_path):
+                config_dir = os.path.join(install_path, "config")
+                if os.path.exists(config_dir):
+                    self.logger.info("Backing up existing configuration files...")
+                    for config_file in ["default_config.toml", "display_config.toml", "installed_games.toml", 
+                                     "key_listener.toml", "processes_to_kill.toml", "mame_config.toml",
+                                     "screenshot_config.toml", "utility_config.toml"]:
+                        config_path = os.path.join(config_dir, config_file)
+                        if os.path.exists(config_path):
+                            try:
+                                with open(config_path, "rb") as f:
+                                    config_backup[config_file] = tomllib.load(f)
+                                self.logger.info(f"Backed up {config_file}")
+                            except Exception as e:
+                                self.logger.warning(f"Could not backup {config_file}: {e}")
+            
+            # Clean up existing installation if it exists
+            if os.path.exists(install_path):
+                self.logger.info(f"Cleaning up existing installation at {install_path}")
+                try:
+                    # Remove everything except .git directory and config backup
+                    for item in os.listdir(install_path):
+                        item_path = os.path.join(install_path, item)
+                        if item != '.git':
+                            if os.path.isfile(item_path):
+                                os.remove(item_path)
+                            elif os.path.isdir(item_path):
+                                shutil.rmtree(item_path)
+                except Exception as e:
+                    self.logger.error(f"Error cleaning up existing installation: {str(e)}")
+                    raise
+            
             # Create installation directory structure
             self.logger.info("Creating installation directory structure...")
             os.makedirs(install_path, exist_ok=True)
@@ -300,8 +328,8 @@ class InstallationManager:
             assets_dir = os.path.join(install_path, "assets")
             os.makedirs(os.path.join(assets_dir, "images", "banners"), exist_ok=True)
             
-            # Generate configuration files
-            self._generate_config_files(config, config_dir)
+            # Generate configuration files, merging with existing configs if available
+            self._generate_config_files(config, config_dir, config_backup)
             
             # Generate Pegasus metadata
             self._generate_pegasus_metadata(config, pegasus_metafiles_dir)
@@ -455,12 +483,13 @@ class InstallationManager:
             self.logger.error(f"Error copying project files: {str(e)}", exc_info=True)
             raise
     
-    def _generate_config_files(self, config: Dict[str, Any], config_dir: str) -> None:
+    def _generate_config_files(self, config: Dict[str, Any], config_dir: str, config_backup: Dict[str, Any] = None) -> None:
         """Generate the configuration files.
         
         Args:
             config: The configuration dictionary
             config_dir: The directory to write the config files to
+            config_backup: Existing configuration files to merge with
         """
         # Create config directory if it doesn't exist
         os.makedirs(config_dir, exist_ok=True)
@@ -468,12 +497,18 @@ class InstallationManager:
         # Load existing installed_games.toml if it exists
         installed_games_path = os.path.join(config_dir, "installed_games.toml")
         installed_games = {"games": {}}
-        if os.path.exists(installed_games_path):
+        
+        # Try to load from backup first, then from existing file
+        if config_backup and "installed_games.toml" in config_backup:
+            installed_games = config_backup["installed_games.toml"]
+            self.logger.info("Loaded installed_games.toml from backup")
+        elif os.path.exists(installed_games_path):
             try:
                 with open(installed_games_path, "rb") as f:
                     installed_games = tomllib.load(f)
+                self.logger.info("Loaded existing installed_games.toml")
             except Exception as e:
-                logging.warning(f"Failed to load existing installed_games.toml: {e}")
+                self.logger.warning(f"Failed to load existing installed_games.toml: {e}")
         
         # Only update games if we're not skipping configuration
         if not config.get("skip_games", False):
@@ -539,6 +574,13 @@ class InstallationManager:
                 "pegasus_base_path": "../../../pegasus-fe"
             }
         }
+        
+        # Merge with existing default_config if available
+        if config_backup and "default_config.toml" in config_backup:
+            existing_config = config_backup["default_config.toml"]
+            default_config = self._deep_merge(default_config, existing_config)
+            self.logger.info("Merged with existing default_config.toml")
+            
         self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)
         
         # Generate display_config.toml
@@ -580,6 +622,12 @@ class InstallationManager:
             elif config["itgmania"].get("custom_image"):
                 display_config["dynamic_marquee"]["itgmania_banner_path"] = config["itgmania"]["custom_image"]
         
+        # Merge with existing display_config if available
+        if config_backup and "display_config.toml" in config_backup:
+            existing_config = config_backup["display_config.toml"]
+            display_config = self._deep_merge(display_config, existing_config)
+            self.logger.info("Merged with existing display_config.toml")
+            
         self._write_toml(os.path.join(config_dir, "display_config.toml"), display_config)
         
         # Generate installed_games.toml
@@ -595,6 +643,12 @@ class InstallationManager:
             key_listener["key_mappings"] = {
                 "ctrl+space": "../arcade_station/core/common/kill_all_and_reset_pegasus.py"
             }
+        
+        # Merge with existing key_listener if available
+        if config_backup and "key_listener.toml" in config_backup:
+            existing_config = config_backup["key_listener.toml"]
+            key_listener = self._deep_merge(key_listener, existing_config)
+            self.logger.info("Merged with existing key_listener.toml")
             
         self._write_toml(os.path.join(config_dir, "key_listener.toml"), key_listener)
         
@@ -629,6 +683,13 @@ class InstallationManager:
                 ])
             }
         }
+        
+        # Merge with existing processes_to_kill if available
+        if config_backup and "processes_to_kill.toml" in config_backup:
+            existing_config = config_backup["processes_to_kill.toml"]
+            processes_to_kill = self._deep_merge(processes_to_kill, existing_config)
+            self.logger.info("Merged with existing processes_to_kill.toml")
+            
         self._write_toml(os.path.join(config_dir, "processes_to_kill.toml"), processes_to_kill)
         
         # Generate MAME config if MAME games are configured
@@ -640,6 +701,13 @@ class InstallationManager:
                     "inipath": config.get("mame_inipath", "")
                 }
             }
+            
+            # Merge with existing mame_config if available
+            if config_backup and "mame_config.toml" in config_backup:
+                existing_config = config_backup["mame_config.toml"]
+                mame_config = self._deep_merge(mame_config, existing_config)
+                self.logger.info("Merged with existing mame_config.toml")
+                
             self._write_toml(os.path.join(config_dir, "mame_config.toml"), mame_config)
         
         # Generate screenshot config
@@ -662,6 +730,13 @@ class InstallationManager:
                 ]
             }
         }
+        
+        # Merge with existing screenshot_config if available
+        if config_backup and "screenshot_config.toml" in config_backup:
+            existing_config = config_backup["screenshot_config.toml"]
+            screenshot_config = self._deep_merge(screenshot_config, existing_config)
+            self.logger.info("Merged with existing screenshot_config.toml")
+            
         self._write_toml(os.path.join(config_dir, "screenshot_config.toml"), screenshot_config)
         
         # Generate utility config
@@ -697,6 +772,13 @@ class InstallationManager:
                     "sound_osd_executable": config.get("audio_switcher_path", "")
                 }
             }
+            
+        # Merge with existing utility_config if available
+        if config_backup and "utility_config.toml" in config_backup:
+            existing_config = config_backup["utility_config.toml"]
+            utility_config = self._deep_merge(utility_config, existing_config)
+            self.logger.info("Merged with existing utility_config.toml")
+            
         self._write_toml(os.path.join(config_dir, "utility_config.toml"), utility_config)
         
         # Generate Pegasus binaries config
@@ -708,6 +790,26 @@ class InstallationManager:
             }
         }
         self._write_toml(os.path.join(config_dir, "pegasus_binaries.toml"), pegasus_binaries)
+    
+    def _deep_merge(self, dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep merge two dictionaries, with dict2 taking precedence.
+        
+        Args:
+            dict1: First dictionary
+            dict2: Second dictionary (takes precedence)
+            
+        Returns:
+            Dict[str, Any]: Merged dictionary
+        """
+        result = dict1.copy()
+        
+        for key, value in dict2.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = self._deep_merge(result[key], value)
+            else:
+                result[key] = value
+                
+        return result
     
     def _generate_pegasus_metadata(self, config: Dict[str, Any], metadata_dir: str) -> None:
         """Generate the Pegasus metadata files.
@@ -1020,59 +1122,8 @@ Categories=Game;
             file_path: Path to write the file
             data: Data to write
         """
-        try:
-            # Try to use tomli_w if available
-            import tomli_w
-            with open(file_path, "wb") as f:
-                tomli_w.dump(data, f)
-        except ImportError:
-            # Fallback to manual TOML writing
-            self._write_toml_manually(file_path, data)
-    
-    def _write_toml_manually(self, file_path: str, data: Dict[str, Any], indent: int = 0) -> None:
-        """Write a TOML file manually if tomli_w is not available.
-        
-        Args:
-            file_path: Path to write the file
-            data: Data to write
-            indent: Current indentation level
-        """
-        with open(file_path, "w", encoding="utf-8") as f:
-            self._write_toml_section(f, data, indent)
-    
-    def _write_toml_section(self, file, data: Dict[str, Any], indent: int = 0, section_path: str = "") -> None:
-        """Write a section of a TOML file.
-        
-        Args:
-            file: File to write to
-            data: Data to write
-            indent: Current indentation level
-            section_path: Current section path for context
-        """
-        for key, value in data.items():
-            if isinstance(value, dict):
-                # Write a table header
-                current_section = f"{section_path}.{key}" if section_path else key
-                file.write(f"[{current_section}]\n")
-                self._write_toml_section(file, value, indent + 2, current_section)
-                file.write("\n")
-            else:
-                # Write a key-value pair
-                # Check if we're in the key_mappings section and need to quote the key
-                if section_path == "key_mappings":
-                    # Ensure the key is quoted properly
-                    if not (key.startswith('"') and key.endswith('"')):
-                        key = f'"{key}"'
-                
-                if isinstance(value, str):
-                    # Convert backslashes to forward slashes for paths
-                    if any(path_key in key.lower() for path_key in ['path', 'banner', 'rom', 'state']):
-                        value = value.replace('\\', '/')
-                    file.write(f'{key} = "{value}"\n')
-                elif isinstance(value, bool):
-                    file.write(f"{key} = {str(value).lower()}\n")
-                else:
-                    file.write(f"{key} = {value}\n")
+        with open(file_path, "wb") as f:
+            tomli_w.dump(data, f)
     
     def _ensure_itgmania_integration(self, config: Dict[str, Any], install_path: str) -> None:
         """Make sure ITGMania integration is set up properly.

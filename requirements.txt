@@ -5,6 +5,7 @@
 
 # Core dependencies
 tomllib;python_version<'3.11'  # For parsing TOML files, built-in starting in Python 3.11
+tomli_w>=1.0.0  # For writing TOML files
 keyboard>=0.13.5  # For key bindings and hotkeys
 psutil>=5.9.0  # For process management
 PyQt5>=5.15.0  # For GUI elements and image display

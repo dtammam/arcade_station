@@ -5,6 +5,8 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
+import subprocess
+import platform
 
 from .base_page import BasePage
 
@@ -258,11 +260,21 @@ class SummaryPage(BasePage):
             self.install()
         else:
             # Files already copied, just finish
-            messagebox.showinfo(
-                "Installation Complete",
-                "Arcade Station has been successfully installed and configured!\n\n"
-                "You can now start using it."
-            )
+            message = "Arcade Station has been successfully installed and configured!\n\nYou can now start using it."
+            if platform.system().lower() == "windows":
+                message += "\nPlease launch `launch_arcade_station.bat` to accept the security prompt before switching to kiosk mode."
+            
+            messagebox.showinfo("Installation Complete", message)
+            
+            # Open the installation directory
+            install_path = self.app.user_config.get('install_path')
+            if install_path and os.path.exists(install_path):
+                if platform.system().lower() == "windows":
+                    os.startfile(install_path)
+                elif platform.system().lower() == "darwin":  # macOS
+                    subprocess.run(["open", install_path])
+                else:  # Linux
+                    subprocess.run(["xdg-open", install_path])
             super().on_next()
     
     def install(self):
