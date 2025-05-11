@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 # Get the current directory where the script is located
 $scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
-$launchExePath = Join-Path -Path $scriptDir -ChildPath "launch_arcade_station.exe"
+$launchExePath = Join-Path -Path $scriptDir -ChildPath "launch_arcade_station.bat"
 
 # Import core functions module
 $coreFunctionsModule = Join-Path -Path $scriptDir -ChildPath "core_functions.psm1"
