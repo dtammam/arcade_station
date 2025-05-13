@@ -182,6 +182,7 @@ class KeyBindingsPage(BasePage):
         # Default key bindings
         default_bindings = [
             ("Reset back to menu", "../arcade_station/core/common/kill_all_and_reset_pegasus.py", "ctrl+space"),
+            ("Kill all processes", "../arcade_station/core/common/kill_all.py", "ctrl+f9"),
             ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "+"),
             ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "/"),
             ("Start streaming", "../arcade_station/core/common/start_streaming.py", "ctrl+f4"),
@@ -403,6 +404,8 @@ marquee_image.exe"""
                 display_name = ""
                 if "kill_all_and_reset_pegasus" in path:
                     display_name = "Kill all processes and reset pegasus"
+                elif "kill_all" in path:
+                    display_name = "Kill all processes"
                 elif "take_screenshot" in path:
                     display_name = "Take screenshot (Windows)"
                 elif "start_streaming" in path:
