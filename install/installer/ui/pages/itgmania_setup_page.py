@@ -315,7 +315,11 @@ class ITGManiaSetupPage(BasePage):
                             
                             # Set banner image
                             if "banner" in itgmania_config:
-                                self.use_default_image_var.set(False)
+                                # Only set to False if the banner is not the default
+                                if self.default_image_path and itgmania_config["banner"] == self.default_image_path:
+                                    self.use_default_image_var.set(True)
+                                else:
+                                    self.use_default_image_var.set(False)
                                 self.image_var.set(itgmania_config["banner"])
                             
                             # Set module installation
