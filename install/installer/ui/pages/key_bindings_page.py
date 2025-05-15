@@ -49,6 +49,8 @@ class KeyBindingsPage(BasePage):
         self.key_bindings = []
         # Flag to track if we've loaded custom processes
         self.custom_processes_loaded = False
+        # Flag to track if we've loaded custom key bindings
+        self.custom_key_bindings_loaded = False
         super().__init__(container, app)
         self.set_title(
             "Key Bindings Setup",
@@ -90,10 +92,46 @@ class KeyBindingsPage(BasePage):
         
         return False
     
+    def _read_existing_key_bindings_toml(self):
+        """Read existing key bindings from the key_listener.toml file if it exists."""
+        # Determine the path to the existing key_listener.toml file
+        install_path = self.app.user_config.get("install_path", "")
+        if not install_path:
+            print("DEBUG: No install_path found in user_config")
+            return False
+        
+        # Check the correct file location
+        key_bindings_file = os.path.join(install_path, "config", "key_listener.toml")
+        print(f"DEBUG: Checking for key bindings file at {key_bindings_file}")
+        
+        # Check if the file exists
+        if not os.path.exists(key_bindings_file):
+            print(f"DEBUG: File does not exist: {key_bindings_file}")
+            return False
+        
+        try:
+            # Read the TOML file
+            with open(key_bindings_file, "rb") as f:
+                key_bindings_data = tomllib.load(f)
+            
+            print(f"DEBUG: Successfully loaded TOML file from {key_bindings_file}: {key_bindings_data}")
+            
+            # Update the user_config with the key bindings from the file
+            if "key_mappings" in key_bindings_data:
+                self.app.user_config["key_listener"] = key_bindings_data
+                self.custom_key_bindings_loaded = True
+                print(f"DEBUG: Updated user_config with key bindings: {key_bindings_data['key_mappings']}")
+                return True
+        except Exception as e:
+            print(f"ERROR: Error reading {key_bindings_file}: {e}")
+        
+        return False
+    
     def create_widgets(self):
         """Create page-specific widgets."""
-        # Try to load existing processes first
+        # Try to load existing processes and key bindings first
         self._read_existing_processes_toml()
+        self._read_existing_key_bindings_toml()
         
         main_frame = ttk.Frame(self.content_frame)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
@@ -234,9 +272,24 @@ class KeyBindingsPage(BasePage):
             ("", "", "")  # Empty row for user to add custom binding
         ]
         
-        # Add key bindings
-        for i, (display_name, script_path, key) in enumerate(default_bindings):
-            self._add_key_binding_row(self.scrollable_frame, i, display_name, script_path, key)
+        # Check if we have existing key bindings from the config
+        key_bindings = self.app.user_config.get("key_listener", {})
+        if key_bindings and "key_mappings" in key_bindings and self.custom_key_bindings_loaded:
+            print("DEBUG: Using custom key bindings from config")
+            # Display the custom key bindings
+            i = 0
+            for key, path in key_bindings["key_mappings"].items():
+                # Try to determine a display name based on the path
+                display_name = self._get_display_name_for_path(path)
+                self._add_key_binding_row(self.scrollable_frame, i, display_name, path, key)
+                i += 1
+            # Add an empty row for new bindings
+            self._add_key_binding_row(self.scrollable_frame, i, "", "", "")
+        else:
+            print("DEBUG: Using default key bindings")
+            # Add default key bindings
+            for i, (display_name, script_path, key) in enumerate(default_bindings):
+                self._add_key_binding_row(self.scrollable_frame, i, display_name, script_path, key)
         
         # Create a container frame for the button to ensure proper positioning
         button_frame = ttk.Frame(keybindings_frame)
@@ -260,6 +313,27 @@ class KeyBindingsPage(BasePage):
             foreground="#555555"
         )
         help_text.pack(anchor="w", pady=5, padx=5)
+    
+    def _get_display_name_for_path(self, path):
+        """Get a display name for a script path."""
+        display_name = ""
+        if "kill_all_and_reset_pegasus" in path:
+            display_name = "Reset back to menu"
+        elif "kill_all" in path:
+            display_name = "Kill all processes"
+        elif "screenshot" in path:
+            display_name = "Take screenshot (Windows)"
+        elif "start_streaming" in path:
+            display_name = "Start streaming"
+        elif "setup_windows_shell" in path:
+            display_name = "Restart to kiosk mode (Windows)"
+        elif "restore_windows_shell" in path:
+            display_name = "Restart to PC mode (Windows)"
+        elif "restart_computer" in path:
+            display_name = "Restart computer (Windows)"
+        elif "explorer.exe" in path:
+            display_name = "Start explorer.exe (Windows)"
+        return display_name
     
     def _add_key_binding_row(self, parent, index, display_name, script_path, key):
         """Add a row for key binding configuration.
@@ -432,12 +506,16 @@ marquee_image.exe"""
 
     def on_enter(self):
         """Override base class method for page-specific actions when entering the page."""
-        # Always try to read the existing processes_to_kill.toml file
-        # This is needed whether we're in reconfiguration or not
+        # Always try to read the existing files
         if self._read_existing_processes_toml():
             print("DEBUG: Successfully read existing processes_to_kill.toml")
         else:
             print("DEBUG: No processes_to_kill.toml found or failed to read")
+            
+        if self._read_existing_key_bindings_toml():
+            print("DEBUG: Successfully read existing key_listener.toml")
+        else:
+            print("DEBUG: No key_listener.toml found or failed to read")
         
         # Check if there are existing key bindings
         key_bindings = self.app.user_config.get("key_listener", {})
@@ -461,24 +539,8 @@ marquee_image.exe"""
                 if key.startswith('"') and key.endswith('"'):
                     key = key[1:-1]
                 
-                # Try to determine a display name based on the path
-                display_name = ""
-                if "kill_all_and_reset_pegasus" in path:
-                    display_name = "Kill all processes and reset pegasus"
-                elif "kill_all" in path:
-                    display_name = "Kill all processes"
-                elif "take_screenshot" in path:
-                    display_name = "Take screenshot (Windows)"
-                elif "start_streaming" in path:
-                    display_name = "Start streaming"
-                elif "setup_windows_shell" in path:
-                    display_name = "Restart to kiosk mode (Windows)"
-                elif "restore_windows_shell" in path:
-                    display_name = "Restart to PC mode (Windows)"
-                elif "restart_computer" in path:
-                    display_name = "Restart computer (Windows)"
-                elif "explorer.exe" in path:
-                    display_name = "Start explorer.exe (Windows)"
+                # Get display name for the path
+                display_name = self._get_display_name_for_path(path)
                 
                 self._add_key_binding_row(scrollable_frame, i, display_name, path, key)
                 i += 1
