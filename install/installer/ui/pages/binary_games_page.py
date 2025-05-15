@@ -163,7 +163,7 @@ class GameEntry:
     def browse_executable(self):
         """Browse for a game executable."""
         filetypes = [
-            ("Executable files", "*.exe")
+            ("Executable files", "*.exe *.bat *.vbs *.ps1"),
         ] if self.app.install_manager.is_windows else [
             ("All files", "*")
         ]
