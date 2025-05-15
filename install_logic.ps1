@@ -14,7 +14,6 @@ if (-not $Python312Info) {
     Write-Host "ERROR: The 'py' command (Python Launcher) was not found." -ForegroundColor Red
     Write-Host "Please install Python 3.12 (recommend 3.12.9) from python.org" -ForegroundColor Yellow
     Write-Host "Ensure it was added to your system PATH during installation." -ForegroundColor Yellow
-    Read-Host "Press Enter to exit"
     exit 1
 }
 
@@ -27,7 +26,6 @@ try {
     Write-Host "ERROR: Python 3.12 was not found or failed using the 'py -3.12' command." -ForegroundColor Red
     Write-Host "Ensure Python 3.12 (recommend 3.12.9) is installed and accessible via 'py -3.12'." -ForegroundColor Yellow
     Write-Host "Error details: $($_.Exception.Message)" -ForegroundColor Gray
-    Read-Host "Press Enter to exit"
     exit 1
 }
 Write-Host ""
@@ -50,7 +48,6 @@ if (-not (Test-Path -Path $VenvActivateScript)) {
     } catch {
         Write-Host "ERROR: Failed to create virtual environment. Check Python installation." -ForegroundColor Red
         Write-Host "Error details: $($_.Exception.Message)" -ForegroundColor Gray
-        Read-Host "Press Enter to exit"
         exit 1
     }
 } else {
@@ -74,7 +71,6 @@ try {
     Write-Host "ERROR: Failed during environment activation or dependency installation." -ForegroundColor Red
     Write-Host "Check .\venv folder, requirements.txt, and network connection." -ForegroundColor Yellow
     Write-Host "Error details: $($_.Exception.Message)" -ForegroundColor Gray
-    Read-Host "Press Enter to exit"
     exit 1
 }
 Write-Host ""
@@ -89,7 +85,6 @@ try {
 } catch {
     Write-Host "ERROR: Failed to launch the setup wizard." -ForegroundColor Red
     Write-Host "Error details: $($_.Exception.Message)" -ForegroundColor Gray
-    Read-Host "Press Enter to exit"
     exit 1
 }
 

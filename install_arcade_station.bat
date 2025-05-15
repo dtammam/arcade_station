@@ -12,9 +12,6 @@ echo Running installer with administrator privileges...
 powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "%~dp0install_logic.ps1"
 if %ERRORLEVEL% neq 0 (
     echo Script finished with errors or was cancelled.
-) else (
-    echo Script finished successfully.
+    pause
 )
-echo.
-pause
 exit /b %ERRORLEVEL%

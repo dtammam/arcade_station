@@ -266,7 +266,7 @@ class SummaryPage(BasePage):
             
             messagebox.showinfo("Installation Complete", message)
             
-            # Open the installation directory
+            # Open the installation directory after the message box is closed
             install_path = self.app.user_config.get('install_path')
             if install_path and os.path.exists(install_path):
                 if platform.system().lower() == "windows":
@@ -349,6 +349,15 @@ class SummaryPage(BasePage):
                 "Arcade Station has been successfully installed!\n\n"
                 "You can now start using it."
             )
+            # Open the installation directory after the message box is closed
+            install_path = self.app.user_config.get('install_path')
+            if install_path and os.path.exists(install_path):
+                if platform.system().lower() == "windows":
+                    os.startfile(install_path)
+                elif platform.system().lower() == "darwin":  # macOS
+                    subprocess.run(["open", install_path])
+                else:  # Linux
+                    subprocess.run(["xdg-open", install_path])
             super().on_next()
         else:
             messagebox.showerror(
