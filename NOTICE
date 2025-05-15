@@ -20,8 +20,8 @@ Third-Party Notices:
    - Use: Game launcher interface
 
 2. **AudioSwitcher**
-   - Source: https://github.com/xenolightning/AudioSwitcher  
-   - License: MIT  
+   - Source: https://github.com/sirWest/AudioSwitch 
+   - License: Apache-2.0
    - Use: Volume control on Windows
 
 3. **MAME2LIT and LightsTest**
