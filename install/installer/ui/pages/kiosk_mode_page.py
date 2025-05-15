@@ -46,6 +46,30 @@ class KioskModePage(BasePage):
         )
         explanation.pack(anchor="w", pady=(0, 20))
         
+        # UAC Warning
+        uac_warning_frame = ttk.LabelFrame(
+            main_frame,
+            text="🔒 UAC & Kiosk Mode Recommendation",
+            padding=(10, 5)
+        )
+        uac_warning_frame.pack(fill="x", pady=(0, 20))
+        
+        uac_warning = ttk.Label(
+            uac_warning_frame,
+            text="While scripts may function with UAC enabled, the full experience - including "
+                 "shell replacement and seamless startup - only works reliably with UAC disabled.\n\n"
+                 "Recommended Setup:\n"
+                 "• UAC disabled\n"
+                 "• Trusted software only\n"
+                 "• No general-purpose use\n"
+                 "• Physical access limited to trusted users\n\n"
+                 "This configuration ensures the system behaves as intended and delivers a smooth, "
+                 "arcade-style experience.",
+            wraplength=500,
+            justify="left"
+        )
+        uac_warning.pack(anchor="w", padx=10, pady=10)
+        
         # Enable Kiosk Mode checkbox
         self.enable_kiosk_var = tk.BooleanVar(value=False)
         enable_kiosk = ttk.Checkbutton(
