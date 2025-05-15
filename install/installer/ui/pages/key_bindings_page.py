@@ -47,6 +47,8 @@ class KeyBindingsPage(BasePage):
         """Initialize the key bindings configuration page."""
         # Initialize key_bindings list before super().__init__ which calls create_widgets
         self.key_bindings = []
+        # Flag to track if we've loaded custom processes
+        self.custom_processes_loaded = False
         super().__init__(container, app)
         self.set_title(
             "Key Bindings Setup",
@@ -55,14 +57,11 @@ class KeyBindingsPage(BasePage):
     
     def _read_existing_processes_toml(self):
         """Read existing processes from the processes_to_kill.toml file if it exists."""
-        # Only attempt to read if we're in reconfiguration mode
-        if not self.app.is_reconfiguration:
-            return
-        
         # Determine the path to the existing processes_to_kill.toml file
         install_path = self.app.user_config.get("install_path", "")
         if not install_path:
-            return
+            print("DEBUG: No install_path found in user_config")
+            return False
         
         processes_file = os.path.join(
             install_path, 
@@ -72,26 +71,36 @@ class KeyBindingsPage(BasePage):
             "processes_to_kill.toml"
         )
         
+        print(f"DEBUG: Checking for processes file at {processes_file}")
+        
         # Check if the file exists
         if not os.path.exists(processes_file):
-            return
+            print(f"DEBUG: File does not exist: {processes_file}")
+            return False
         
         try:
             # Read the TOML file
             with open(processes_file, "rb") as f:
                 processes_data = tomllib.load(f)
             
+            print(f"DEBUG: Successfully loaded TOML file: {processes_data}")
+            
             # Update the user_config with the processes from the file
             if "processes" in processes_data and "names" in processes_data["processes"]:
                 self.app.user_config["processes_to_kill"] = processes_data
+                self.custom_processes_loaded = True
+                print(f"DEBUG: Updated user_config with processes: {processes_data['processes']['names']}")
                 return True
         except Exception as e:
-            print(f"Error reading processes_to_kill.toml: {e}")
+            print(f"ERROR: Error reading processes_to_kill.toml: {e}")
         
         return False
     
     def create_widgets(self):
         """Create page-specific widgets."""
+        # Try to load existing processes first
+        self._read_existing_processes_toml()
+        
         main_frame = ttk.Frame(self.content_frame)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
@@ -407,9 +416,11 @@ marquee_image.exe"""
         
         if process_names:
             # Use existing processes from config
+            print(f"DEBUG: Using existing processes from config: {process_names}")
             self.processes_text.insert("1.0", "\n".join(process_names))
         else:
             # Use default processes if no existing config
+            print(f"DEBUG: Using default processes list")
             self.processes_text.insert("1.0", default_processes)
         
         scrollbar.config(command=self.processes_text.yview)
@@ -427,8 +438,12 @@ marquee_image.exe"""
 
     def on_enter(self):
         """Override base class method for page-specific actions when entering the page."""
-        # First, attempt to read existing processes_to_kill.toml file during reconfiguration
-        self._read_existing_processes_toml()
+        # Always try to read the existing processes_to_kill.toml file
+        # This is needed whether we're in reconfiguration or not
+        if self._read_existing_processes_toml():
+            print("DEBUG: Successfully read existing processes_to_kill.toml")
+        else:
+            print("DEBUG: No processes_to_kill.toml found or failed to read")
         
         # Check if there are existing key bindings
         key_bindings = self.app.user_config.get("key_listener", {})
@@ -477,12 +492,17 @@ marquee_image.exe"""
             # Add an empty row for new bindings
             self._add_key_binding_row(scrollable_frame, i, "", "", "")
         
-        # Check if there are existing process settings
+        # Check if there are existing process settings and update the text field
+        self._update_processes_text()
+
+    def _update_processes_text(self):
+        """Update the processes text field with current config values."""
         process_config = self.app.user_config.get("processes_to_kill", {})
         process_names = process_config.get("processes", {}).get("names", [])
         
         if process_names:
             # Clear existing text and set from configuration
+            print(f"DEBUG: Updating processes text with: {process_names}")
             self.processes_text.delete("1.0", tk.END)
             self.processes_text.insert("1.0", "\n".join(process_names))
 
