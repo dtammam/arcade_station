@@ -911,7 +911,7 @@ class UtilityConfigPage(BasePage):
         if self.is_windows:
             utilities_config["osd"] = {
                 "enabled": self.enable_osd_var.get(),
-                "sound_osd_executable": "../bin/windows/AudioSwitch/AudioSwitch.exe"
+                "sound_osd_executable": "bin/windows/AudioSwitch/AudioSwitch.exe"
             }
         
         # Save screenshot configuration directly to user_config

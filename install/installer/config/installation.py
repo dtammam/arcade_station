@@ -688,7 +688,7 @@ class InstallationManager:
                 },
                 "osd": {
                     "enabled": config.get("enable_volume_control", False) and self.is_windows,
-                    "sound_osd_executable": config.get("audio_switcher_path", "")
+                    "sound_osd_executable": os.path.join(install_path, "bin", "windows", "AudioSwitch", "AudioSwitch.exe")
                 }
             }
         self._write_toml(os.path.join(config_dir, "utility_config.toml"), utility_config)

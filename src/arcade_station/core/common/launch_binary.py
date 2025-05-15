@@ -19,6 +19,7 @@ import sys
 import argparse
 import psutil
 import shutil
+import subprocess
 
 # Add the parent directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
@@ -107,6 +108,29 @@ def launch_osd():
     if not executable_path:
         log_message("OSD executable path not defined in configuration.", "OSD")
         return False
+    
+    # Resolve relative paths to absolute
+    if not os.path.isabs(executable_path):
+        # Get the root directory of the application (up 4 levels from this script)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.abspath(os.path.join(script_dir, '..', '..', '..', '..'))
+        
+        # Try both with and without the leading .. path components
+        paths_to_try = [
+            os.path.join(root_dir, executable_path),                           # Try with full relative path
+            os.path.join(root_dir, executable_path.lstrip('.').lstrip('/')),    # Try removing leading ../
+            os.path.join(root_dir, "bin", "windows", "AudioSwitch", "AudioSwitch.exe") # Hardcoded fallback
+        ]
+        
+        for path in paths_to_try:
+            log_message(f"Checking for AudioSwitch at: {path}", "OSD")
+            if os.path.exists(path):
+                executable_path = path
+                log_message(f"Found AudioSwitch at: {path}", "OSD")
+                break
+        else:
+            log_message("Could not locate AudioSwitch executable at any expected location", "OSD")
+            return False
     
     # Check if file exists
     if not os.path.exists(executable_path):
