@@ -436,7 +436,14 @@ def start_app(executable_path):
         else:
             # Logic to handle different operating systems for other executables
             if os_type == "Windows":
-                subprocess.Popen(f'start "" "{executable_path}"', shell=True)
+                # Special handling for AudioSwitcher in kiosk mode (when explorer.exe is not the shell)
+                if "audioswitch" in executable_path.lower():
+                    log_message("Detected AudioSwitch - using direct launch method for kiosk mode compatibility", "MENU")
+                    # Create process directly instead of using 'start' command which relies on explorer
+                    subprocess.Popen([executable_path])
+                else:
+                    # Standard method using 'start' command
+                    subprocess.Popen(f'start "" "{executable_path}"', shell=True)
             elif os_type == "Darwin":
                 subprocess.Popen(['open', executable_path])
             else:
