@@ -31,19 +31,7 @@ class InstallationManager:
         self.resources_dir = RESOURCES_DIR
         self.files_copied = False  # Track if files have been copied
         
-        # Set up logging with more detailed format
-        log_dir = os.path.join(os.path.dirname(INSTALLER_DIR), "logs")
-        os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, f"installation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-        
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.StreamHandler(),
-                logging.FileHandler(log_file)
-            ]
-        )
+        # Get an instance of logger without reconfiguring the root logger
         self.logger = logging.getLogger("InstallationManager")
         self.logger.info("=== Starting Arcade Station Installation ===")
         self.logger.info(f"Platform: {'Windows' if self.is_windows else 'Linux' if self.is_linux else 'Mac'}")
