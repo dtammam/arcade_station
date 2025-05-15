@@ -5,6 +5,7 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 import webbrowser
+import tomllib
 
 from .base_page import BasePage
 
@@ -51,6 +52,43 @@ class KeyBindingsPage(BasePage):
             "Key Bindings Setup",
             "Configure global hotkeys and manage processes"
         )
+    
+    def _read_existing_processes_toml(self):
+        """Read existing processes from the processes_to_kill.toml file if it exists."""
+        # Only attempt to read if we're in reconfiguration mode
+        if not self.app.is_reconfiguration:
+            return
+        
+        # Determine the path to the existing processes_to_kill.toml file
+        install_path = self.app.user_config.get("install_path", "")
+        if not install_path:
+            return
+        
+        processes_file = os.path.join(
+            install_path, 
+            "src", 
+            "arcade_station", 
+            "config", 
+            "processes_to_kill.toml"
+        )
+        
+        # Check if the file exists
+        if not os.path.exists(processes_file):
+            return
+        
+        try:
+            # Read the TOML file
+            with open(processes_file, "rb") as f:
+                processes_data = tomllib.load(f)
+            
+            # Update the user_config with the processes from the file
+            if "processes" in processes_data and "names" in processes_data["processes"]:
+                self.app.user_config["processes_to_kill"] = processes_data
+                return True
+        except Exception as e:
+            print(f"Error reading processes_to_kill.toml: {e}")
+        
+        return False
     
     def create_widgets(self):
         """Create page-specific widgets."""
@@ -389,6 +427,9 @@ marquee_image.exe"""
 
     def on_enter(self):
         """Override base class method for page-specific actions when entering the page."""
+        # First, attempt to read existing processes_to_kill.toml file during reconfiguration
+        self._read_existing_processes_toml()
+        
         # Check if there are existing key bindings
         key_bindings = self.app.user_config.get("key_listener", {})
         
