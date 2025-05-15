@@ -1,14 +1,14 @@
 @echo off
-REM Check for admin privileges
+REM Check for admin privileges and elevate if needed
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo Requesting administrator privileges...
-    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs -Wait"
     exit /b
 )
 
-REM Set PowerShell execution policy to RemoteSigned
-powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope LocalMachine -Force"
+REM Set PowerShell execution policy to Bypass for this session
+powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force"
 
 REM Arcade Station Launcher
 
