@@ -262,13 +262,13 @@ class KeyBindingsPage(BasePage):
         default_bindings = [
             ("Reset back to menu", "../arcade_station/core/common/kill_all_and_reset_pegasus.py", "ctrl+space"),
             ("Kill all processes", "../arcade_station/core/common/kill_all.py", "ctrl+f9"),
-            ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "+"),
-            ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "/"),
+            ("Take screenshot", "../arcade_station/screenshot.py", "+"),
+            ("Take screenshot", "../arcade_station/screenshot.py", "/"),
             ("Start streaming", "../arcade_station/core/common/start_streaming.py", "ctrl+f4"),
-            ("Restart to kiosk mode (Windows)", "../arcade_station/core/windows/setup_kiosk_mode.ps1", "ctrl+f3"),
-            ("Restart to PC mode (Windows)", "../arcade_station/core/windows/restore_pc_mode.ps1", "ctrl+f2"),
+            ("Setup kiosk mode (Windows)", "../arcade_station/core/windows/setup_kiosk_mode.ps1", "ctrl+f3"),
+            ("Restore PC mode (Windows)", "../arcade_station/core/windows/restore_pc_mode.ps1", "ctrl+f2"),
             ("Restart computer (Windows)", "../arcade_station/core/windows/restart_computer.ps1", "ctrl+`"),
-            ("Start explorer.exe (Windows)", "C:/Windows/explorer.exe", "ctrl+f6"),
+            ("Start Explorer (Windows)", "C:/Windows/explorer.exe", "ctrl+f6"),
             ("", "", "")  # Empty row for user to add custom binding
         ]
         
@@ -322,17 +322,21 @@ class KeyBindingsPage(BasePage):
         elif "kill_all" in path:
             display_name = "Kill all processes"
         elif "screenshot" in path:
-            display_name = "Take screenshot (Windows)"
+            display_name = "Take screenshot"
         elif "start_streaming" in path:
             display_name = "Start streaming"
         elif "setup_kiosk_mode" in path:
-            display_name = "Restart to kiosk mode (Windows)"
+            display_name = "Setup kiosk mode (Windows)"
         elif "restore_pc_mode" in path:
-            display_name = "Restart to PC mode (Windows)"
+            display_name = "Restore PC mode (Windows)"
         elif "restart_computer" in path:
             display_name = "Restart computer (Windows)"
         elif "explorer.exe" in path:
-            display_name = "Start explorer.exe (Windows)"
+            display_name = "Start Explorer (Windows)"
+        elif "msedge.exe" in path:
+            display_name = "Start Edge (Windows)"
+        elif "cursor.exe" in path:
+            display_name = "Start Cursor (Windows)"
         return display_name
     
     def _add_key_binding_row(self, parent, index, display_name, script_path, key):
