@@ -627,6 +627,7 @@ class InstallationManager:
                     "pegasus-fe_windows",
                     "regedit",
                     "spice",
+                    "spice64",
                     "StepMania",
                     "Taskmgr",
                     "timeout",

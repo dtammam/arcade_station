@@ -325,6 +325,7 @@ OpenITG.exe
 In The Groove.exe
 NotITG-v4.2.0.exe
 spice.exe
+spice64.exe
 mame.exe
 obs64.exe
 i_view64.exe
@@ -361,7 +362,17 @@ marquee_image.exe"""
             yscrollcommand=scrollbar.set
         )
         self.processes_text.pack(side="left", fill="both", expand=True)
-        self.processes_text.insert("1.0", default_processes)
+        
+        # Check if there are existing process settings
+        process_config = self.app.user_config.get("processes_to_kill", {})
+        process_names = process_config.get("processes", {}).get("names", [])
+        
+        if process_names:
+            # Use existing processes from config
+            self.processes_text.insert("1.0", "\n".join(process_names))
+        else:
+            # Use default processes if no existing config
+            self.processes_text.insert("1.0", default_processes)
         
         scrollbar.config(command=self.processes_text.yview)
         
