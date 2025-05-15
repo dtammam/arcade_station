@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 
-# Script to restore the original Windows shell
+# Script to restore Windows to normal PC mode
 # Must be run as Administrator
 
 $ErrorActionPreference = "Stop"
@@ -31,7 +31,7 @@ try {
     Write-Host "Set ForegroundLockTimeout to [$foregroundLockTimeout] and ForegroundFlashCount to [$foregroundFlashCount]"
 }
 catch {
-    Write-Error "Failed to restore original shell: [$_]"
+    Write-Error "Failed to restore PC mode: [$_]"
     exit 1
 }
 

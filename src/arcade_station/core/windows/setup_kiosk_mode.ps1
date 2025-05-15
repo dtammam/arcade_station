@@ -1,13 +1,15 @@
 #Requires -RunAsAdministrator
 
-# Script to configure the Windows shell to use Arcade Station as a replacement
+# Script to configure Windows to use Arcade Station in kiosk mode
 # Must be run as Administrator
 
 $ErrorActionPreference = "Stop"
 
 # Get the current directory where the script is located
 $scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
-$launchExePath = Join-Path -Path $scriptDir -ChildPath "launch_arcade_station.bat"
+# Navigate up from core/windows to the root directory
+$rootDir = (Resolve-Path -Path (Join-Path -Path $scriptDir -ChildPath "..\..\..\..")).Path
+$launchExePath = Join-Path -Path $rootDir -ChildPath "launch_arcade_station.bat"
 
 # Import core functions module
 $coreFunctionsModule = Join-Path -Path $scriptDir -ChildPath "core_functions.psm1"
@@ -15,16 +17,13 @@ Import-Module -Name $coreFunctionsModule -Force
 
 # Ensure the launch executable exists
 if (-not (Test-Path -Path $launchExePath)) {
-    Write-Error "The launch_arcade_station.exe file was not found in the directory: [$scriptDir]"
+    Write-Error "The launch_arcade_station.bat file was not found in the root directory: [$rootDir]"
     exit 1
 }
 
-# Convert to absolute path and ensure proper quoting
-$launchExeAbsPath = (Resolve-Path -Path $launchExePath).Path
-
 # Registry key for the Windows shell
 $shellKey = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-$shellValue = "`"$launchExeAbsPath`""
+$shellValue = "`"$launchExePath`""
 
 # Window flicker management
 $foregroundLockTimeout = 3000
@@ -41,7 +40,7 @@ try {
     Write-Host "Set ForegroundLockTimeout to [$foregroundLockTimeout] and ForegroundFlashCount to [$foregroundFlashCount]"
 }
 catch {
-    Write-Error "Failed to restore original shell: [$_]"
+    Write-Error "Failed to set up kiosk mode: [$_]"
     exit 1
 }
 

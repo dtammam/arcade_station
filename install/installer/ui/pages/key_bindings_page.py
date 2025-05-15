@@ -265,8 +265,8 @@ class KeyBindingsPage(BasePage):
             ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "+"),
             ("Take screenshot (Windows)", "../arcade_station/screenshot.py", "/"),
             ("Start streaming", "../arcade_station/core/common/start_streaming.py", "ctrl+f4"),
-            ("Restart to kiosk mode (Windows)", "../arcade_station/core/windows/setup_windows_shell.ps1", "ctrl+f3"),
-            ("Restart to PC mode (Windows)", "../arcade_station/core/windows/restore_windows_shell.ps1", "ctrl+f2"),
+            ("Restart to kiosk mode (Windows)", "../arcade_station/core/windows/setup_kiosk_mode.ps1", "ctrl+f3"),
+            ("Restart to PC mode (Windows)", "../arcade_station/core/windows/restore_pc_mode.ps1", "ctrl+f2"),
             ("Restart computer (Windows)", "../arcade_station/core/windows/restart_computer.ps1", "ctrl+`"),
             ("Start explorer.exe (Windows)", "C:/Windows/explorer.exe", "ctrl+f6"),
             ("", "", "")  # Empty row for user to add custom binding
@@ -325,9 +325,9 @@ class KeyBindingsPage(BasePage):
             display_name = "Take screenshot (Windows)"
         elif "start_streaming" in path:
             display_name = "Start streaming"
-        elif "setup_windows_shell" in path:
+        elif "setup_kiosk_mode" in path:
             display_name = "Restart to kiosk mode (Windows)"
-        elif "restore_windows_shell" in path:
+        elif "restore_pc_mode" in path:
             display_name = "Restart to PC mode (Windows)"
         elif "restart_computer" in path:
             display_name = "Restart computer (Windows)"
