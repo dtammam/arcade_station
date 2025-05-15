@@ -873,6 +873,11 @@ assets.box_front: {}
             if config.get("kiosk_replace_shell"):
                 self.logger.info("Setting up Windows shell replacement...")
                 self._setup_windows_shell_replacement(install_path)
+        
+        # Set up AudioSwitch settings
+        if config.get("utilities", {}).get("osd", {}).get("enabled", False):
+            self.logger.info("Setting up AudioSwitch settings...")
+            self._setup_audioswitch_settings(install_path)
     
     def _setup_windows_autologon(self, username: str, password: str) -> None:
         """Set up Windows auto-logon.
@@ -980,6 +985,51 @@ exit /b
             self.logger.info("Configured Windows shell replacement")
         except Exception as e:
             self.logger.error(f"Error setting up shell replacement: {str(e)}")
+    
+    def _setup_audioswitch_settings(self, install_path: str) -> None:
+        """Set up AudioSwitch settings by copying the Settings.xml file to %LOCALAPPDATA%\AudioSwitch.
+        
+        Args:
+            install_path: Installation directory
+        """
+        try:
+            import os
+            
+            # Get the %LOCALAPPDATA% directory
+            local_app_data = os.environ.get('LOCALAPPDATA')
+            if not local_app_data:
+                self.logger.error("LOCALAPPDATA environment variable not found")
+                return
+            
+            # Create the AudioSwitch directory
+            audioswitch_dir = os.path.join(local_app_data, "AudioSwitch")
+            if not os.path.exists(audioswitch_dir):
+                self.logger.info(f"Creating AudioSwitch directory: {audioswitch_dir}")
+                os.makedirs(audioswitch_dir)
+            
+            # Source Settings.xml from resources
+            resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "resources")
+            settings_xml_source = os.path.join(resources_dir, "audioswitch_settings", "Settings.xml")
+            
+            # If not found in resources, look in the bin directory
+            if not os.path.exists(settings_xml_source):
+                self.logger.info("Settings.xml not found in resources, checking bin directory")
+                settings_xml_source = os.path.join(install_path, "bin", "windows", "AudioSwitch", "Settings.xml")
+            
+            # Destination path
+            settings_xml_dest = os.path.join(audioswitch_dir, "Settings.xml")
+            
+            # Copy the file if source exists
+            if os.path.exists(settings_xml_source):
+                import shutil
+                self.logger.info(f"Copying Settings.xml from {settings_xml_source} to {settings_xml_dest}")
+                shutil.copy2(settings_xml_source, settings_xml_dest)
+                self.logger.info("AudioSwitch settings configured successfully")
+            else:
+                self.logger.error(f"Settings.xml not found at {settings_xml_source}")
+        
+        except Exception as e:
+            self.logger.error(f"Error setting up AudioSwitch settings: {str(e)}")
     
     def _setup_linux_specific(self, config: Dict[str, Any], install_path: str) -> None:
         """Set up Linux-specific components.

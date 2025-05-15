@@ -18,11 +18,74 @@ import os
 import sys
 import argparse
 import psutil
+import shutil
 
 # Add the parent directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from arcade_station.core.common.core_functions import start_app, log_message, open_header, load_toml_config, determine_operating_system
+
+def prepare_audioswitch_settings():
+    """Prepare the AudioSwitch settings directory and copy the Settings.xml file."""
+    try:
+        # Get the %LOCALAPPDATA% directory
+        local_app_data = os.environ.get('LOCALAPPDATA')
+        if not local_app_data:
+            log_message("LOCALAPPDATA environment variable not found", "OSD")
+            return False
+        
+        # Create the AudioSwitch directory path
+        audioswitch_dir = os.path.join(local_app_data, "AudioSwitch")
+        
+        # Create the directory if it doesn't exist
+        if not os.path.exists(audioswitch_dir):
+            log_message(f"Creating AudioSwitch directory: {audioswitch_dir}", "OSD")
+            os.makedirs(audioswitch_dir)
+        
+        # Define the source path for the Settings.xml file
+        # Look for it in the same directory as the AudioSwitch executable
+        config = load_toml_config('utility_config.toml')
+        audioswitch_exe_path = config.get('osd', {}).get('sound_osd_executable')
+        if not audioswitch_exe_path:
+            log_message("AudioSwitch executable path not defined in configuration", "OSD")
+            return False
+        
+        source_dir = os.path.dirname(audioswitch_exe_path)
+        settings_xml_source = os.path.join(source_dir, "Settings.xml")
+        
+        # If Settings.xml doesn't exist in the same directory as the executable,
+        # look for it in the bin/windows/AudioSwitch directory
+        if not os.path.exists(settings_xml_source):
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+            settings_xml_source = os.path.join(base_dir, "bin", "windows", "AudioSwitch", "Settings.xml")
+        
+        settings_xml_dest = os.path.join(audioswitch_dir, "Settings.xml")
+        
+        # Check if source Settings.xml exists
+        if not os.path.exists(settings_xml_source):
+            log_message(f"Settings.xml not found at: {settings_xml_source}", "OSD")
+            return False
+        
+        # Copy the Settings.xml file if it doesn't exist or if it's different
+        if not os.path.exists(settings_xml_dest) or not files_are_identical(settings_xml_source, settings_xml_dest):
+            log_message(f"Copying Settings.xml to: {settings_xml_dest}", "OSD")
+            shutil.copy2(settings_xml_source, settings_xml_dest)
+        else:
+            log_message("Settings.xml already exists and is up to date", "OSD")
+        
+        return True
+    
+    except Exception as e:
+        log_message(f"Error preparing AudioSwitch settings: {e}", "OSD")
+        return False
+
+def files_are_identical(file1, file2):
+    """Compare two files to check if they're identical."""
+    try:
+        with open(file1, 'rb') as f1, open(file2, 'rb') as f2:
+            return f1.read() == f2.read()
+    except Exception:
+        return False
 
 def launch_osd():
     """Launch the OSD executable if enabled in config and platform is Windows."""
@@ -49,6 +112,10 @@ def launch_osd():
     if not os.path.exists(executable_path):
         log_message(f"OSD executable not found at: {executable_path}", "OSD")
         return False
+    
+    # Prepare AudioSwitch settings before launching
+    if not prepare_audioswitch_settings():
+        log_message("Warning: Failed to prepare AudioSwitch settings, but continuing with launch", "OSD")
     
     # Launch the application
     log_message(f"Launching OSD application: {executable_path}", "OSD")
