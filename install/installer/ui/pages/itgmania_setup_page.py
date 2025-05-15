@@ -315,12 +315,21 @@ class ITGManiaSetupPage(BasePage):
                             
                             # Set banner image
                             if "banner" in itgmania_config:
-                                # Only set to False if the banner is not the default
-                                if self.default_image_path and itgmania_config["banner"] == self.default_image_path:
+                                self.image_var.set(itgmania_config["banner"])
+                                
+                                # Check if the banner path is the default by checking if it ends with the default relative path
+                                banner_path = itgmania_config["banner"]
+                                default_relative_path = os.path.join("assets", "images", "banners", "itgmania.png")
+                                
+                                # Normalize both paths to handle different slash styles
+                                banner_path = os.path.normpath(banner_path)
+                                default_relative_path = os.path.normpath(default_relative_path)
+                                
+                                # Check if the banner path ends with the default relative path
+                                if banner_path.lower().endswith(default_relative_path.lower()):
                                     self.use_default_image_var.set(True)
                                 else:
                                     self.use_default_image_var.set(False)
-                                self.image_var.set(itgmania_config["banner"])
                             
                             # Set module installation
                             if "display_module_installed" in itgmania_config:
