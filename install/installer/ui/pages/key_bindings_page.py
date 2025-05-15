@@ -593,8 +593,10 @@ marquee_image.exe"""
         """Save key bindings configuration to the user config."""
         # Save key bindings
         key_mappings = {}
-        for _, script_var, key_var, _ in self.key_bindings:
-            if not script_var or not key_var:
+        for display_var, script_var, key_var, row_frame in self.key_bindings:
+            # Skip entries that have been removed (marked as None)
+            if display_var is None or script_var is None or key_var is None or row_frame is None:
+                print("DEBUG: Skipping removed key binding entry")
                 continue
                 
             key = key_var.get().strip()
@@ -605,6 +607,7 @@ marquee_image.exe"""
                 if key.startswith('"') and key.endswith('"'):
                     key = key[1:-1]
                 
+                print(f"DEBUG: Saving key binding: {key} -> {script}")
                 key_mappings[key] = script
         
         key_config = {
