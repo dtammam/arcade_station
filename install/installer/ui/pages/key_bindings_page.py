@@ -63,14 +63,8 @@ class KeyBindingsPage(BasePage):
             print("DEBUG: No install_path found in user_config")
             return False
         
-        processes_file = os.path.join(
-            install_path, 
-            "src", 
-            "arcade_station", 
-            "config", 
-            "processes_to_kill.toml"
-        )
-        
+        # Check the correct file location
+        processes_file = os.path.join(install_path, "config", "processes_to_kill.toml")
         print(f"DEBUG: Checking for processes file at {processes_file}")
         
         # Check if the file exists
@@ -83,7 +77,7 @@ class KeyBindingsPage(BasePage):
             with open(processes_file, "rb") as f:
                 processes_data = tomllib.load(f)
             
-            print(f"DEBUG: Successfully loaded TOML file: {processes_data}")
+            print(f"DEBUG: Successfully loaded TOML file from {processes_file}: {processes_data}")
             
             # Update the user_config with the processes from the file
             if "processes" in processes_data and "names" in processes_data["processes"]:
@@ -92,7 +86,7 @@ class KeyBindingsPage(BasePage):
                 print(f"DEBUG: Updated user_config with processes: {processes_data['processes']['names']}")
                 return True
         except Exception as e:
-            print(f"ERROR: Error reading processes_to_kill.toml: {e}")
+            print(f"ERROR: Error reading {processes_file}: {e}")
         
         return False
     
