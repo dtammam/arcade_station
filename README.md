@@ -4,16 +4,20 @@
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 
-<p align="center"><img src="assets/images/readme/logo.png" width="300" alt="Logo" /></p>
+<div align="center">
+   <img src="assets/images/readme/logo.png" width="300" alt="Logo"/>
+</div>
 
 <h2 align="center">Arcade Station is a front-end interface for managing and interacting with the games you love.</h2>
 
-<p align="center"><img src="assets/images/readme/collage.png" width="900" alt="Logo" /></p>
+<div align="center">
+   <img src="assets/images/readme/collage.png" width="900" alt="Collage"/>
+</div>
 
 ## Table of Contents
 - [✨ Features](#features)
-- [💾 Installation](#installation)
 - [📋 Requirements](#requirements)
+- [💾 Installation](#installation)
 - [⚖️ License](#license)
 - [🙏 Acknowledgments](#acknowledgments)
 
@@ -34,9 +38,9 @@
 ### 🔒 UAC
 Arcade Station is designed primarily for private, arcade-style machines running in a kiosk-like environment.
 
-While scripts may function with UAC enabled, the full experience - including shell replacement and seamless startup - only works reliably with UAC disabled. In standard desktop setups, functionality may be partial or inconsistent. We recommend:
+While scripts may function with User Access Control (UAC) enabled, the full experience (including shell replacement and seamless startup) only works reliably with UAC disabled. In standard desktop setups, functionality may be partial or inconsistent. We recommend:
 
-- UAC disabled
+- UAC disabled (Never notify)
 - Autologin with the local user
 - Trusted software only
 - No general-purpose use
@@ -46,6 +50,9 @@ This configuration ensures the system behaves as intended and delivers a smooth,
 This recommendation is based on practical needs for stability and predictability in arcade-style deployments. Use at your discretion.
 
 ## 💾 Installation
+
+### ℹ️ Platform Support
+**Note:** While the core codebase is cross-platform, this initial release focuses on Windows installation. Mac and Linux installers are in development and will be available soon.
 
 ### 🪟 (Windows - Current Release)
 
@@ -75,15 +82,8 @@ Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `insta
 ## ⚖️ License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-### Third-Party Components
-
 This project incorporates several third-party components. See [NOTICE](NOTICE) for detailed attribution and licensing information.
 
 ## 🙏 Acknowledgments
 
 Please reference the [THANKS](THANKS.md) file.
-
----
-
-**Note:** While the core codebase is cross-platform, this initial release focuses on Windows installation. Mac and Linux installers are in development and will be available soon.
