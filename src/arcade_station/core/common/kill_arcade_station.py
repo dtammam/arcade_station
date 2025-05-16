@@ -13,13 +13,70 @@ import os
 import platform
 import subprocess
 
-# Add the project root to the Python path
+# Add the project root to the Python path - with multiple approaches to find it
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, '..', '..', '..', '..'))
-sys.path.insert(0, project_root)
+possible_roots = [
+    # Standard path based on script location
+    os.path.abspath(os.path.join(script_dir, '..', '..', '..', '..')),
+    # Path if running from the installed location
+    os.path.abspath(os.path.join(script_dir, '..', '..', '..'))
+]
 
-from arcade_station.core.common.core_functions import log_message, kill_pegasus
-from arcade_station.core.common.kill_all import main as kill_all_processes
+# Try each possible root until we find one that works
+arcade_station_found = False
+for root in possible_roots:
+    sys.path.insert(0, root)
+    try:
+        # Try to import a module to verify path is correct
+        import arcade_station
+        arcade_station_found = True
+        break
+    except ImportError:
+        # Remove the path we just added if it didn't work
+        sys.path.pop(0)
+
+# If all explicit paths failed, try relative to current working directory
+if not arcade_station_found:
+    current_dir = os.getcwd()
+    sys.path.insert(0, current_dir)
+    # Also try adding src directory if it exists
+    src_dir = os.path.join(current_dir, 'src')
+    if os.path.exists(src_dir):
+        sys.path.insert(0, src_dir)
+
+try:
+    from arcade_station.core.common.core_functions import log_message, kill_pegasus
+    from arcade_station.core.common.kill_all import main as kill_all_processes
+except ImportError as e:
+    # Fallback logging if import fails
+    print(f"ERROR: Could not import required modules: {e}")
+    print("Python path:", sys.path)
+    
+    # Define minimal implementations for required functions
+    def log_message(message, category="ERROR"):
+        print(f"[{category}] {message}")
+    
+    def kill_pegasus():
+        print("Attempting to kill Pegasus manually...")
+        for proc_name in ["pegasus-fe_windows", "pegasus-fe_windows.exe"]:
+            try:
+                subprocess.run(["taskkill", "/F", "/IM", proc_name], 
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception:
+                pass
+    
+    def kill_all_processes():
+        print("Attempting to kill processes manually...")
+        process_names = [
+            "cmd.exe", "explorer.exe", "gslauncher.exe", "i_view64.exe", 
+            "LightsTest.exe", "mame.exe", "notepad.exe", "pegasus-fe_windows.exe"
+        ]
+        for proc_name in process_names:
+            try:
+                subprocess.run(["taskkill", "/F", "/IM", proc_name], 
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception:
+                pass
 
 def create_kill_python_script():
     """

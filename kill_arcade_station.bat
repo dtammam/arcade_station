@@ -33,9 +33,18 @@ if not exist "%PYTHON_EXE%" (
     exit /b 1
 )
 
+REM Setup Python path to help find modules
+set "PYTHONPATH=%SCRIPT_DIR%;%SCRIPT_DIR%src;%PYTHONPATH%"
+
 REM Kill all Arcade Station processes
 echo Terminating Arcade Station...
-"%PYTHON_EXE%" src\arcade_station\core\common\kill_arcade_station.py
+"%PYTHON_EXE%" -m arcade_station.core.common.kill_arcade_station 2>nul
+
+REM If the module-style import failed, try direct path
+if %errorLevel% neq 0 (
+    echo Trying alternate method...
+    "%PYTHON_EXE%" "%SCRIPT_DIR%src\arcade_station\core\common\kill_arcade_station.py"
+)
 
 echo All Arcade Station processes have been terminated.
 pause
