@@ -402,8 +402,8 @@ def start_app(executable_path):
     Launch an application based on its executable path.
     
     Handles different types of executables (PowerShell scripts, VBScripts, 
-    and regular executables) with appropriate launching methods based on
-    the operating system.
+    batch files, and regular executables) with appropriate launching methods 
+    based on the operating system.
     
     Args:
         executable_path (str): Path to the executable or script to launch.
@@ -412,7 +412,8 @@ def start_app(executable_path):
         None
         
     Note:
-        PowerShell scripts and VBScripts are only supported on Windows systems.
+        PowerShell scripts, VBScripts, and batch files are only supported 
+        on Windows systems.
     """
     try:
         os_type = determine_operating_system()
@@ -425,6 +426,21 @@ def start_app(executable_path):
                 subprocess.Popen(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', executable_path])
             else:
                 log_message("PowerShell scripts are not supported on non-Windows systems.", "MENU")
+        # Check if the file is a batch file
+        elif executable_path.endswith('.bat') or executable_path.endswith('.cmd'):
+            if os_type == "Windows":
+                # Use cmd to execute the batch file with admin privileges if available
+                log_message(f"Launching batch file: {executable_path}", "MENU")
+                try:
+                    # Try to run as admin for full system access
+                    subprocess.Popen(['powershell.exe', '-ExecutionPolicy', 'Bypass', 
+                                    '-Command', f"Start-Process -FilePath '{executable_path}' -Verb RunAs"])
+                except Exception as batch_error:
+                    log_message(f"Failed to launch batch file with admin rights: {batch_error}", "MENU")
+                    # Fallback - run directly
+                    subprocess.Popen([executable_path], shell=True)
+            else:
+                log_message("Batch files are not supported on non-Windows systems.", "MENU")
         # Check if the file is a VBScript
         elif executable_path.endswith('.vbs'):
             if os_type == "Windows":
