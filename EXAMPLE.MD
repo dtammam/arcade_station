@@ -78,7 +78,7 @@ Let's go through an example - I'll install Arcade Station on my Surface Laptop S
 
 11. I'm asked about setting up Kiosk Mode, which would turn my computer into a purpose built station (when you turn it on, it'll auto-login and start arcade station - nothing else). Since this is just my portable machine, I won't. But if I were to, I'd check the box to `Enable Kiosk Mode` and input the credentials to automatically logon with. I'll select `Next`.
 
-   <img src="assets/images/example/100.png" width="70%">
+    <img src="assets/images/example/100.png" width="70%">
 
 12. I'm asked about utilities to setup:
 - There's a light reset program option, which lets you pick your light controller if you want to reset them between game selections
@@ -92,15 +92,15 @@ Let's go through an example - I'll install Arcade Station on my Surface Laptop S
 
 13. I'll be shown my summary, which will include all of the settings I picked. When ready, I'll select `Finish` and will receive a confirmation dialog, prompting me to launch it for the first time if I setup kiosk mode for any security prompts.
 
-   <img src="assets/images/example/120.png" width="70%">
+    <img src="assets/images/example/120.png" width="70%">
 
-   <img src="assets/images/example/121.png" width="50%">
+    <img src="assets/images/example/121.png" width="35%">
 
 14. My install directory will open and I'll get a final confirmation box. Arcade Station is installed!
 
-   <img src="assets/images/example/130.png" width="70%">
+    <img src="assets/images/example/130.png" width="70%">
 
-   <img src="assets/images/example/131.png" width="50%">
+    <img src="assets/images/example/131.png" width="350%">
 
 ## 🕹️ Basic Usage
 
@@ -120,16 +120,20 @@ Let's go through an example - I'll install Arcade Station on my Surface Laptop S
 
    <img src="assets/images/example/221.jpg" width="70%">
 
-4. Now I'd like to play ITGmania, so I'll do the same thing - pick the entry and launch it.
+4. Once I'm done, I'll use the reset to menu key binding (by default, `Ctrl + Spacebar`) which will close all programs (including the processes we added for Megatouch), closing the game and getting us back to the menu.
+
+   <img src="assets/images/example/200.jpg" width="70%">
+
+5. Now I'd like to play ITGmania, so I'll do the same thing - pick the entry and launch it.
 - The dynamic marquee changed to the banner image for ITGmania and boots into the game.
 
    <img src="assets/images/example/230.jpg" width="70%">
 
-5. I'm going to play the song Kiss Me Red, classic song.
+6. I'm going to play the song Kiss Me Red, classic song.
 - Because we enabled the Simply Love dynamic marquee module, the banner changes to the song art for Kiss Me Red.
 - Once the song ends and we go back to the song selection menu, the ITGmania banner gets set back.
 
    <img src="assets/images/example/240.jpg" width="70%">
    <img src="assets/images/example/250.jpg" width="70%">
 
-6. I've had a great time today, and now that I'm done, I want to close Arcade Station. I do that with the default key binding of (`Ctrl + F10`.)
+7. I've had a great time today, and now that I'm done, I want to close Arcade Station. I do that with the default key binding of (`Ctrl + F10`.)
