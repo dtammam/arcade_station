@@ -69,7 +69,8 @@ This recommendation is based on practical needs for stability and predictability
 
    <img src="assets/images/readme/warning.png" width="500" alt="Security warning" />
 
-5. Follow the installation wizard to configure your setup, choosing the desired install location.
+5. Go through the setup, starting by choosing where you'd want the program installed. For additional information, please see the [USAGE](USAGE.MD) guide.
+
 
 6. Once installation is complete, the location you installed arcade station in will open in Windows Explorer.
 
@@ -78,6 +79,7 @@ This recommendation is based on practical needs for stability and predictability
    <img src="assets/images/readme/warning.png" width="500" alt="Security warning" />
 
 Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to your install directory to reconfigure it.
+
 
 ## ⚖️ License
 
