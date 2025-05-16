@@ -18,6 +18,8 @@
 - [✨ Features](#features)
 - [📋 Requirements](#requirements)
 - [💾 Installation](#installation)
+- [🎮 Example Setup](#example-setup)
+- [🐛 Known Issues](#known-issues)
 - [⚖️ License](#license)
 - [🙏 Acknowledgments](#acknowledgments)
 
@@ -80,6 +82,18 @@ This recommendation is based on practical needs for stability and predictability
 
 Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to your install directory to reconfigure it.
 
+## 🎮 Example Setup
+
+For a detailed walkthrough with examples showing the complete installation and usage flow, check out our [EXAMPLE](EXAMPLE.MD) guide. This demonstration shows how to set up Arcade Station on a laptop with external monitors, configuring games like ITGmania and Megatouch Maxx, and using the dynamic marquee feature.
+
+## 🐛 Known Issues
+
+There are currently two specific bugs being investigated:
+
+- When reconfiguring an existing installation, there may be a blank game field. You must delete this field before adding a new game.
+- At this time, there is a bug preventing the deletion of old games (adding new games works fine). In a pinch, you can go into `config\installed_games.toml` and delete the games.
+
+These issues are being actively investigated and will be fixed in an upcoming update.
 
 ## ⚖️ License
 
