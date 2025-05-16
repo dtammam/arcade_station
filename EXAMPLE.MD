@@ -100,7 +100,7 @@ Let's go through an example - I'll install Arcade Station on my Surface Laptop S
 
     <img src="assets/images/example/130.png" width="70%">
 
-    <img src="assets/images/example/131.png" width="350%">
+    <img src="assets/images/example/131.png" width="35%">
 
 ## 🕹️ Basic Usage
 
