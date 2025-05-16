@@ -262,7 +262,7 @@ class KeyBindingsPage(BasePage):
         default_bindings = [
             ("Reset back to menu", "../arcade_station/core/common/kill_all_and_reset_pegasus.py", "ctrl+space"),
             ("Kill all processes", "../arcade_station/core/common/kill_all.py", "ctrl+f9"),
-            ("Kill Arcade Station", "../kill_arcade_station.bat", "ctrl+f10"),
+            ("Kill Arcade Station", "../arcade_station/core/common/kill_station_wrapper.py", "ctrl+f10"),
             ("Take screenshot", "../arcade_station/screenshot.py", "+"),
             ("Take screenshot", "../arcade_station/screenshot.py", "/"),
             ("Start streaming", "../arcade_station/core/common/start_streaming.py", "ctrl+f4"),
