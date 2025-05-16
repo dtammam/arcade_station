@@ -99,6 +99,19 @@ Get-Process python*, py* | Where-Object { $_.ProcessName -match 'python|py' } | 
 }
 
 Write-Host "All Python processes terminated."
+
+# Start Explorer to ensure the Windows shell is available
+try {
+    $explorerRunning = Get-Process explorer -ErrorAction SilentlyContinue
+    if (-not $explorerRunning) {
+        Write-Host "Starting Windows Explorer..."
+        Start-Process explorer
+    } else {
+        Write-Host "Windows Explorer is already running."
+    }
+} catch {
+    Write-Host "Error checking/starting Explorer: $_"
+}
 """
     else:  # Linux and macOS
         script_path = os.path.join('/tmp', 'kill_python.sh')
