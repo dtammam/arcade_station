@@ -1,15 +1,28 @@
 # 🎮 Arcade Station Example Setup
 
 ## Table of Contents
-- [Example Scenario](#example-scenario)
-- [Install Walkthrough](#install-walkthrough)
-- [Basic Usage](#basic-usage)
+- [Multi-Monitor Laptop Scenario](#multi-monitor-laptop-scenario)
+- [Multi-Monitor Laptop Installation Walkthrough](#multi-monitor-laptop-installation-walkthrough)
+- [A Basic Example Workflow with Arcade Station](#a-basic-example-workflow-with-arcade-station)
+- [Coming Soon: DDR Cabinet Example](#coming-soon-ddr-cabinet-example)
 
-## 🎯 Example Scenario
+## 💻 Multi-Monitor Laptop Scenario
 
-Let's go through an example - I'll install Arcade Station on my Surface Laptop Studio that is connected to two external monitors. My goal is to manage ITGmania and Megatouch Maxx Crown with it as a portable arcade machine setup. I'd also like to use the dynamic marquee to display the game banners and song banners when I pick songs in ITGmania.
+In this example, I'm demonstrating a **portable multi-monitor setup** using a Surface Laptop Studio connected to two external displays. This configuration allows me to:
+- Run Arcade Station as the front-end interface
+- Manage and launch ITGmania (a rhythm game) and Megatouch Maxx Crown (a touchscreen arcade game)
+- Display game banners and song information on a secondary monitor using the dynamic marquee feature
 
-## 🛠️ Install Walkthrough
+**Why a laptop setup?** This demonstrates Arcade Station's flexibility - you don't need dedicated arcade hardware to create an excellent gaming experience. A laptop with external monitors provides:
+- Portability for setting up temporary arcade stations
+- Multi-monitor support for dynamic marquee displays
+- Full functionality without permanent hardware installation
+
+**Important:** Arcade Station works with virtually any hardware configuration - from laptops to dedicated cabinets to home PCs. This example shows just one approach, but you can adapt it to your specific needs, games, and hardware. Whether you're building a full-size MAME cabinet, a rhythm game station, or just want to organize your PC games, the same core functionality applies.
+
+**Coming soon: DDR Cabinet Example** - If you're interested in a dedicated rhythm game setup, we'll be providing a comprehensive guide for DDR cabinet configurations. This will cover specialized hardware like pad sensors, light controllers, specialized monitors, and cabinet specific considerations for rhythm game setups
+
+## 🔧 Multi-Monitor Laptop Installation Walkthrough
 
 1. I've disabled UAC.
 
@@ -102,7 +115,7 @@ Let's go through an example - I'll install Arcade Station on my Surface Laptop S
 
     <img src="assets/images/example/131.png" width="35%">
 
-## 🕹️ Basic Usage
+## 🎲 A Basic Example Workflow with Arcade Station
 
 1. I'll right-click `launch_arcade_station.bat` and run it as administrator to start Arcade Station. If I set kiosk mode up, after this, I'd reboot.
 
@@ -137,3 +150,12 @@ Let's go through an example - I'll install Arcade Station on my Surface Laptop S
    <img src="assets/images/example/250.jpg" width="70%">
 
 7. I've had a great time today, and now that I'm done, I want to close Arcade Station. I do that with the default key binding of (`Ctrl + F10`.)
+
+## 🕺 Coming Soon: DDR Cabinet Example
+
+A dedicated guide for DDR cabinet setups is coming soon. This guide will include:
+
+- **DDR Cabinet Example Scenario**: Setting up Arcade Station on a dedicated DDR cabinet
+- **DDR Cabinet Install Walkthrough**: Step-by-step installation for rhythm game cabinets
+
+Stay tuned for this comprehensive guide focused on rhythm game cabinets!
