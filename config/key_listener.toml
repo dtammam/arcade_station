@@ -6,5 +6,6 @@
 "ctrl+f6" = "C:/Windows/explorer.exe"
 "ctrl+space" = "../arcade_station/core/common/kill_all_and_reset_pegasus.py"
 "ctrl+f9" = "../arcade_station/core/common/kill_all.py"
+"ctrl+f10" = "../kill_arcade_station.bat"
 "+" = "../arcade_station/screenshot.py"
 "/" = "../arcade_station/screenshot.py"
