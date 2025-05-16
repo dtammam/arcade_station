@@ -324,6 +324,8 @@ class KeyBindingsPage(BasePage):
             display_name = "Kill all processes"
         elif "kill_arcade_station.bat" in path:
             display_name = "Kill Arcade Station"
+        elif "kill_station_wrapper.py" in path:
+            display_name = "Kill Arcade Station"
         elif "screenshot" in path:
             display_name = "Take screenshot"
         elif "start_streaming" in path:
