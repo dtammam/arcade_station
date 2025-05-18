@@ -458,13 +458,19 @@ class InstallationManager:
         # Create config directory if it doesn't exist
         os.makedirs(config_dir, exist_ok=True)
         
-        # Load existing installed_games.toml if it exists
+        # Create a fresh installed_games structure
         installed_games_path = os.path.join(config_dir, "installed_games.toml")
         installed_games = {"games": {}}
+        
+        # Load existing installed_games.toml only to preserve structure and metadata
         if os.path.exists(installed_games_path):
             try:
                 with open(installed_games_path, "rb") as f:
-                    installed_games = tomllib.load(f)
+                    existing_config = tomllib.load(f)
+                    # Preserve any top-level keys other than "games"
+                    for key, value in existing_config.items():
+                        if key != "games":
+                            installed_games[key] = value
             except Exception as e:
                 logging.warning(f"Failed to load existing installed_games.toml: {e}")
         
@@ -710,11 +716,17 @@ class InstallationManager:
             config: User configuration from the wizard
             metadata_dir: Directory to write the metadata files
         """
+        # Make sure the metadata directory exists
+        os.makedirs(metadata_dir, exist_ok=True)
+        
         # Basic template for metadata.pegasus.txt
         metadata_content = """collection: arcade_station
 shortname: arcade_station
 
 """
+        
+        # Track the games we've added to avoid duplicates
+        added_game_ids = set()
         
         # Add ITGMania if configured
         # Check first in itgmania config, then in binary_games as fallback
@@ -748,6 +760,7 @@ assets.box_front: {}
 
 """.format(python_path, launcher_path, banner_path)
                 itgmania_configured = True
+                added_game_ids.add("itgmania")
         
         # Add ITGMania from binary_games if not already added
         if not itgmania_configured and config.get("binary_games", {}).get("itgmania"):
@@ -775,6 +788,7 @@ launch:
 assets.box_front: {}
 
 """.format(display_name, display_name, "a", python_path, launcher_path, game_id, asset_path)
+            added_game_ids.add(game_id)
         
         # Add other binary games if configured
         if config.get("binary_games"):
@@ -783,7 +797,7 @@ assets.box_front: {}
             
             for idx, (game_id, game_info) in enumerate(config["binary_games"].items()):
                 # Skip ITGMania as it was already added above
-                if game_id == "itgmania":
+                if game_id == "itgmania" or game_id in added_game_ids:
                     continue
                     
                 display_name = game_info.get("display_name", get_display_name(game_id))
@@ -807,6 +821,7 @@ launch:
 {}
 
 """.format(display_name, display_name, sort_char, python_path, launcher_path, game_id, asset_line)
+                added_game_ids.add(game_id)
         
         # Add MAME games if configured
         if config.get("mame_games"):
@@ -814,9 +829,18 @@ launch:
             python_path = os.path.join(config["install_path"], ".venv", "Scripts", "pythonw.exe" if self.is_windows else "python")
             
             for idx, (game_id, game_info) in enumerate(config["mame_games"].items()):
+                if game_id in added_game_ids:
+                    continue
+                    
                 display_name = game_info.get("display_name", game_id.replace("_", " ").title())
-                asset_path = game_info.get("banner", "").replace(config["install_path"], "../..")
-                if not asset_path:
+                asset_path = game_info.get("banner", "")
+                if asset_path:
+                    # Convert absolute paths to relative if they're in the install directory
+                    if asset_path.startswith(config["install_path"]):
+                        asset_path = asset_path.replace(config["install_path"], "../..").replace("\\", "/")
+                    else:
+                        asset_path = asset_path.replace("\\", "/")
+                else:
                     asset_path = "../../../../assets/images/banners/arcade_station.png"
                 
                 sort_char = chr(ord('m') + idx)  # start with 'm' for MAME games
@@ -831,8 +855,9 @@ launch:
 assets.box_front: {}
 
 """.format(display_name, display_name, sort_char, python_path, launcher_path, game_id, asset_path)
+                added_game_ids.add(game_id)
         
-        # Write the metadata file
+        # Write the metadata file, completely replacing any existing content
         metadata_path = os.path.join(metadata_dir, "metadata.pegasus.txt")
         with open(metadata_path, "w", encoding="utf-8") as f:
             f.write(metadata_content)

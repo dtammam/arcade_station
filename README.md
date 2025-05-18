@@ -88,10 +88,7 @@ For a detailed walkthrough with examples showing the complete installation and u
 
 ## 🐛 Known Issues
 
-There are currently two specific bugs being investigated:
-
 - When reconfiguring an existing installation, there may be a blank game field. You must delete this field before adding a new game.
-- At this time, there is a bug preventing the deletion of old games (adding new games works fine). In a pinch, you can go into `config\installed_games.toml` and delete the games.
 
 These issues are being actively investigated and will be fixed in an upcoming update.
 
