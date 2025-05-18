@@ -692,7 +692,10 @@ class InstallationManager:
                     "vpn_config_profile": "",
                     "seconds_to_wait": 10
                 },
-                                  "osd": {                    "enabled": config.get("enable_volume_control", False) and self.is_windows,                    "sound_osd_executable": os.path.join(config["install_path"], "bin", "windows", "AudioSwitch", "AudioSwitch.exe")                  }
+                "osd": {
+                    "enabled": config.get("enable_volume_control", False) and self.is_windows,
+                    "sound_osd_executable": os.path.join(config["install_path"], "bin", "windows", "AudioSwitch", "AudioSwitch.exe")
+                }
             }
         self._write_toml(os.path.join(config_dir, "utility_config.toml"), utility_config)
         
