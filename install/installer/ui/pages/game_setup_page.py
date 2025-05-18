@@ -90,7 +90,7 @@ class GameSetupPage(BasePage):
         
         binary_text = ttk.Label(
             binary_frame,
-            text="From StepMania to Fortnite, binary games boot via .exe files.",
+            text="Whether it's Call of Duty, Grand Theft Auto, or any other binary game, binary games boot via .exe, .bat, or .ps1 files.",
             wraplength=750,
             justify="left"
         )
@@ -105,7 +105,7 @@ class GameSetupPage(BasePage):
         
         mame_text = ttk.Label(
             mame_frame,
-            text="From DDR EXTREME to Pac-Man, MAME emulates classic arcade games on PC.",
+            text="From Pac Man to Dig Dug, all the way to DDR EXTREME - MAME emulates classic arcade games on PC.",
             wraplength=750,
             justify="left"
         )

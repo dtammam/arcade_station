@@ -10,6 +10,10 @@ if %errorLevel% neq 0 (
 REM Set PowerShell execution policy to Bypass for this session
 powershell -Command "Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force"
 
+REM Unblock all files to prevent Windows security warnings
+echo Unblocking all files - please wait...
+powershell -ExecutionPolicy Bypass -Command "Get-ChildItem -Path '%~dp0' -Recurse | Unblock-File"
+
 REM Arcade Station Launcher
 
 echo Arcade Station Launcher

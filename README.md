@@ -76,7 +76,7 @@ This recommendation is based on practical needs for stability and predictability
 
 6. Once installation is complete, the location you installed arcade station in will open in Windows Explorer.
 
-7. Run `launch_arcade_station.bat`. If warned about Windows protecting your PC, select more options and `Run anyway`.
+7. Run `launch_arcade_station.bat`. The launcher will automatically unblock all files to prevent security warnings.
 
    <img src="assets/images/readme/warning.png" width="500" alt="Security warning" />
 

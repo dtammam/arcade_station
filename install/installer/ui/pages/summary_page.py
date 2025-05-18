@@ -104,7 +104,7 @@ class SummaryPage(BasePage):
         # Ready to install label
         ready_label = ttk.Label(
             main_frame,
-            text="When you're ready to install, click 'Install' to begin the installation process.",
+            text="When you're ready to finalize the installation, select 'Finish'.",
             font=("Segoe UI", 10, "bold"),
             wraplength=500,
             justify="left"
