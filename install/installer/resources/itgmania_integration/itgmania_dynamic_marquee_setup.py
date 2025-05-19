@@ -83,7 +83,7 @@ except ImportError:
     log_message = fallback_log_message
 
 
-def copy_shim_files(itgmania_path):
+def copy_shim_files(itgmania_path, custom_banner_path=None):
     """
     Copy the module file to the appropriate ITGMania location.
     
@@ -92,6 +92,7 @@ def copy_shim_files(itgmania_path):
     
     Args:
         itgmania_path (Path): The path to the ITGMania installation.
+        custom_banner_path (Path, optional): Path to a custom banner image to use.
     
     Returns:
         bool: True if successful, False otherwise.
@@ -102,12 +103,19 @@ def copy_shim_files(itgmania_path):
         source_lua = SCRIPT_DIR / "ArcadeStationMarquee.lua"
         source_png = SCRIPT_DIR / "itgmania.png"
         
+        # Use custom banner if provided
+        has_custom_banner = False
+        if custom_banner_path and os.path.exists(custom_banner_path):
+            source_png = Path(custom_banner_path)
+            has_custom_banner = True
+            log_message(f"Using custom banner image: {source_png}", "SETUP")
+        
         if not source_lua.exists():
             log_message(f"Module file {source_lua} does not exist.", "SETUP")
             log_message(f"Error: Module file {source_lua} not found.", "ERROR")
             return False, (None, None, False)
             
-        if not source_png.exists():
+        if not has_custom_banner and not source_png.exists():
             log_message(f"Fallback image {source_png} does not exist.", "SETUP")
             log_message(f"Warning: Fallback image {source_png} not found. Will use default theme image.", "WARNING")
         
@@ -165,7 +173,12 @@ def copy_shim_files(itgmania_path):
         # Copy the banner image if it exists
         dest_png = None
         if source_png.exists():
-            dest_png = dest_dir / "itgmania.png"
+            # If using a custom banner, keep its original filename
+            if has_custom_banner:
+                dest_png = dest_dir / source_png.name
+            else:
+                dest_png = dest_dir / "itgmania.png"
+            
             shutil.copy2(source_png, dest_png)
             log_message(f"Copied banner image to {dest_png}", "SETUP")
             
@@ -498,7 +511,7 @@ def setup_itgmania_integration(itgmania_path, banner_image_path=None):
         
         # Copy module files
         log_message("Step 1: Copying module file to ITGMania installation...", "SETUP")
-        success, (dest_file, dest_image, _) = copy_shim_files(itgmania_base_path)
+        success, (dest_file, dest_image, _) = copy_shim_files(itgmania_base_path, banner_image_path)
         if not success:
             return False
         
