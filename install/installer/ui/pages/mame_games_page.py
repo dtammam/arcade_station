@@ -182,8 +182,7 @@ class MameGameEntry:
     def browse_banner(self):
         """Browse for a banner image."""
         filetypes = [
-            ("Image files", "*.png *.jpg *.jpeg *.gif *.bmp"),
-            ("All files", "*.*")
+            ("Image files", "*.jpg *.jpeg *.png")
         ]
         
         # Try to use the assets folder as initial directory
