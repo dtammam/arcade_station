@@ -1,4 +1,20 @@
 @echo off
+REM ============================================================================
+REM Arcade Station Process Terminator
+REM ============================================================================
+REM This script safely terminates all Arcade Station processes and services.
+REM It performs the following tasks:
+REM 1. Verifies administrator privileges
+REM 2. Sets up the Python environment
+REM 3. Terminates all Arcade Station processes
+REM 4. Handles both module-style and direct script execution
+REM
+REM The script requires administrator privileges to:
+REM - Terminate system processes
+REM - Access virtual environment
+REM - Modify system state
+REM ============================================================================
+
 REM Check for admin privileges and elevate if needed
 net session >nul 2>&1
 if %errorLevel% neq 0 (
