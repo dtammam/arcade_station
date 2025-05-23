@@ -134,7 +134,21 @@ echo "All Python processes terminated."
     return script_path
 
 def main():
-    """Kill all Arcade Station processes and then terminate all Python processes."""
+    """
+    Main entry point for the Arcade Station termination process.
+    
+    Executes a complete system reset by:
+    1. Killing all standard Arcade Station processes using kill_all_processes()
+    2. Specifically terminating the Pegasus frontend
+    3. Creating and executing a platform-specific script to kill all Python processes
+    4. On Windows, restarts Explorer as the final step
+    
+    The function handles platform-specific differences between Windows and Unix-like
+    systems (Linux/macOS) for process termination.
+    
+    Returns:
+        None. All operations are logged for debugging purposes.
+    """
     
     log_message("Starting full Arcade Station termination", "KILL")
     
