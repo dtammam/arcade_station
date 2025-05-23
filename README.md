@@ -71,7 +71,7 @@ This recommendation is based on practical needs for stability and predictability
 
    <img src="assets/images/readme/warning.png" width="500" alt="Security warning" />
 
-5. Go through the setup, starting by choosing where you'd want the program installed. For additional information, please see the [USAGE](USAGE.MD) guide.
+5. Go through the setup, starting by choosing where you'd want the program installed. For additional information, please see the [USAGE](USAGE.md) guide.
 
 
 6. Once installation is complete, the location you installed arcade station in will open in Windows Explorer.
@@ -84,7 +84,7 @@ Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `insta
 
 ## 🎮 Example Setup
 
-For a detailed walkthrough with examples showing the complete installation and usage flow, check out our [EXAMPLE](EXAMPLE.MD) guide. This demonstration shows how to set up Arcade Station on a laptop with external monitors, configuring games like ITGmania and Megatouch Maxx, and using the dynamic marquee feature.
+For a detailed walkthrough with examples showing the complete installation and usage flow, check out our [LAPTOP](examples/LAPTOP.md) guide. This demonstration shows how to set up Arcade Station on a laptop with external monitors, configuring games like ITGmania and Megatouch Maxx, and using the dynamic marquee feature.
 
 ## 🐛 Known Issues
 

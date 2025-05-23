@@ -4,7 +4,6 @@
 - [Multi-Monitor Laptop Scenario](#multi-monitor-laptop-scenario)
 - [Multi-Monitor Laptop Installation Walkthrough](#multi-monitor-laptop-installation-walkthrough)
 - [A Basic Example Workflow with Arcade Station](#a-basic-example-workflow-with-arcade-station)
-- [Coming Soon: DDR Cabinet Example](#coming-soon-ddr-cabinet-example)
 
 ## 💻 Multi-Monitor Laptop Scenario
 
@@ -19,8 +18,6 @@ In this example, I'm demonstrating a **portable multi-monitor setup** using a Su
 - Full functionality without permanent hardware installation
 
 **Important:** Arcade Station works with virtually any hardware configuration - from laptops to dedicated cabinets to home PCs. This example shows just one approach, but you can adapt it to your specific needs, games, and hardware. Whether you're building a full-size MAME cabinet, a rhythm game station, or just want to organize your PC games, the same core functionality applies.
-
-**Coming soon: DDR Cabinet Example** - If you're interested in a dedicated rhythm game setup, we'll be providing a comprehensive guide for DDR cabinet configurations. This will cover specialized hardware like pad sensors, light controllers, specialized monitors, and cabinet specific considerations for rhythm game setups
 
 ## 🔧 Multi-Monitor Laptop Installation Walkthrough
 
@@ -150,12 +147,3 @@ In this example, I'm demonstrating a **portable multi-monitor setup** using a Su
    <img src="assets/images/example/250.jpg" width="70%">
 
 7. I've had a great time today, and now that I'm done, I want to close Arcade Station. I do that with the default key binding of (`Ctrl + F10`.)
-
-## 🕺 Coming Soon: DDR Cabinet Example
-
-A dedicated guide for DDR cabinet setups is coming soon. This guide will include:
-
-- **DDR Cabinet Example Scenario**: Setting up Arcade Station on a dedicated DDR cabinet
-- **DDR Cabinet Install Walkthrough**: Step-by-step installation for rhythm game cabinets
-
-Stay tuned for this comprehensive guide focused on rhythm game cabinets!
