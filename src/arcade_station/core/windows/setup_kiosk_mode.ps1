@@ -1,3 +1,20 @@
+<#
+.SYNOPSIS
+    Configures Windows to run Arcade Station in kiosk mode.
+.DESCRIPTION
+    This script sets up Windows to automatically launch Arcade Station on startup,
+    effectively creating a kiosk-like environment. It:
+    - Sets Arcade Station as the Windows shell
+    - Configures window focus behavior to minimize flicker
+    - Requires administrative privileges to modify system settings
+.PARAMETER None
+    This script takes no parameters.
+.NOTES
+    This script must be run as Administrator to modify system settings.
+    It will automatically restart the computer after making changes.
+    The script expects launch_arcade_station.bat to be in the project root directory.
+#>
+
 #Requires -RunAsAdministrator
 
 # Script to configure Windows to use Arcade Station in kiosk mode
