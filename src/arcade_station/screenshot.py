@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 """
-Screenshot utility script
+Screenshot Utility for Arcade Station.
 
-This script takes a screenshot without showing a console window.
-It can be called directly or through shortcuts.
+This script provides a console-free screenshot functionality for Arcade Station.
+It uses a double-wrapper approach to ensure no console windows are shown during
+screenshot capture. The script:
+1. Launches a wrapper script that handles the actual screenshot capture
+2. Uses process identifiers for proper tracking and management
+3. Exits immediately to prevent console window display
+
+This script can be called directly or through system shortcuts, making it
+suitable for keyboard hotkeys and automated capture scenarios.
 """
 import os
 import sys
