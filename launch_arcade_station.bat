@@ -1,4 +1,22 @@
 @echo off
+REM ============================================================================
+REM Arcade Station Launcher
+REM ============================================================================
+REM This script serves as the main entry point for launching Arcade Station.
+REM It performs the following tasks:
+REM 1. Verifies administrator privileges
+REM 2. Unblocks all files to prevent Windows security warnings
+REM 3. Sets up the Python environment
+REM 4. Installs/updates dependencies if needed
+REM 5. Launches the Arcade Station frontend
+REM
+REM The script requires administrator privileges to:
+REM - Modify system settings
+REM - Access virtual environment
+REM - Install Python packages
+REM - Launch system services
+REM ============================================================================
+
 REM Check for admin privileges and elevate if needed
 net session >nul 2>&1
 if %errorLevel% neq 0 (
