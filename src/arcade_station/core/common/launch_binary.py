@@ -147,7 +147,20 @@ def launch_osd():
     return True
 
 def launch_by_type(binary_type):
-    """Launch a preconfigured binary based on type."""
+    """
+    Launch a preconfigured binary based on its type.
+    
+    Currently supports the following binary types:
+    - 'osd': Launches the On-Screen Display (AudioSwitch) application
+    - 'vpn': Reserved for future VPN client implementation
+    
+    Args:
+        binary_type (str): The type of binary to launch. Must be one of the
+                          supported types ('osd', 'vpn').
+    
+    Returns:
+        bool: True if the binary was launched successfully, False otherwise.
+    """
     if binary_type.lower() == 'osd':
         return launch_osd()
     else:
@@ -196,7 +209,25 @@ def set_process_priority(pid, priority_level="high"):
         return False
 
 def main():
-    """Main function to parse arguments and launch the binary."""
+    """
+    Main entry point for the binary launcher script.
+    
+    Handles command-line argument parsing and binary launching with the following
+    capabilities:
+    1. Launch a binary file directly from a provided path
+    2. Launch preconfigured binaries by type (e.g., 'osd', 'vpn')
+    3. Optionally wait for process completion
+    4. Support process identification for tracking
+    
+    Command-line Arguments:
+        binary_path: Path to the binary file to launch
+        --type: Type of preconfigured binary to launch ('osd', 'vpn')
+        --wait: Optional flag to wait for process completion
+        --identifier: Optional identifier for process tracking
+    
+    Returns:
+        None. Exits with status code 1 on error.
+    """
     # Setup argument parser
     parser = argparse.ArgumentParser(description='Launch a binary file.')
     
