@@ -18,4 +18,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 
 from arcade_station.core.common.core_functions import start_pegasus
 
-start_pegasus() 
+if __name__ == "__main__":
+    """
+    Main entry point for the script.
+    
+    When run directly, this script will:
+    1. Import the start_pegasus function from core_functions
+    2. Execute the function to launch the Pegasus frontend
+    3. Handle any platform-specific initialization automatically
+    
+    Returns:
+        None. The Pegasus frontend will be launched as a separate process.
+    """
+    start_pegasus() 
