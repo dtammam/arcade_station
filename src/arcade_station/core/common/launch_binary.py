@@ -81,7 +81,23 @@ def prepare_audioswitch_settings():
         return False
 
 def files_are_identical(file1, file2):
-    """Compare two files to check if they're identical."""
+    """
+    Compare two files to check if they have identical content.
+    
+    Performs a binary comparison of two files to determine if they are exactly
+    the same. This is used to verify file integrity and detect changes.
+    
+    Args:
+        file1 (str): Path to the first file to compare
+        file2 (str): Path to the second file to compare
+        
+    Returns:
+        bool: True if files are identical, False if they differ or if an error occurs
+        
+    Note:
+        This function performs a binary comparison, so it will detect any differences
+        in the files, including line endings and encoding differences.
+    """
     try:
         with open(file1, 'rb') as f1, open(file2, 'rb') as f2:
             return f1.read() == f2.read()

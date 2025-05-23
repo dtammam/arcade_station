@@ -11,8 +11,20 @@ from arcade_station.core.common.core_functions import load_toml_config, log_mess
 
 def connect_vpn():
     """
-    Connect to VPN directly using Python
-    with parameters loaded from utility_config.toml
+    Connect to VPN using configuration from utility_config.toml.
+    
+    This function handles the VPN connection process by:
+    1. Loading VPN configuration from utility_config.toml
+    2. Validating required parameters (app directory, name, process, config profile)
+    3. Constructing the full path to the VPN application
+    4. Initiating the VPN connection with the specified configuration
+    
+    Returns:
+        int: 0 if connection was successful, 1 if any errors occurred
+        
+    Note:
+        The function requires a properly configured utility_config.toml file
+        with a [vpn] section containing the necessary parameters.
     """
     # Load VPN configuration from utility_config.toml
     config = load_toml_config('utility_config.toml')

@@ -54,9 +54,22 @@ except ImportError as e:
     
     # Define minimal implementations for required functions
     def log_message(message, category="ERROR"):
+        """
+        Fallback logging function when core_functions import fails.
+        
+        Args:
+            message (str): The message to log
+            category (str): Category for the log message, defaults to "ERROR"
+        """
         print(f"[{category}] {message}")
     
     def kill_pegasus():
+        """
+        Fallback function to kill Pegasus when core_functions import fails.
+        
+        Attempts to terminate Pegasus processes using taskkill command.
+        Handles both .exe and non-.exe process names.
+        """
         print("Attempting to kill Pegasus manually...")
         for proc_name in ["pegasus-fe_windows", "pegasus-fe_windows.exe"]:
             try:
@@ -66,6 +79,12 @@ except ImportError as e:
                 pass
     
     def kill_all_processes():
+        """
+        Fallback function to kill all Arcade Station processes when core_functions import fails.
+        
+        Attempts to terminate a predefined list of common Arcade Station processes
+        using taskkill command. Includes frontend, emulators, and utility processes.
+        """
         print("Attempting to kill processes manually...")
         process_names = [
             "cmd.exe", "explorer.exe", "gslauncher.exe", "i_view64.exe", 
