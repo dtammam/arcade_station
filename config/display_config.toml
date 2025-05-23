@@ -5,9 +5,9 @@ background_color = "black"
 monitor_index = 1
 
 [dynamic_marquee]
-enabled = true
-itgmania_display_enabled = true
-itgmania_display_file_path = "C:/Users/dean/AppData/Roaming/ITGmania/Themes/Simply Love/Modules/ArcadeStationMarquee.log"
+enabled = false
+itgmania_display_enabled = false
+itgmania_display_file_path = ""
 itgmania_base_path = ""
-itgmania_banner_path = "C:/Users/dean/AppData/Roaming/ITGmania/Themes/Simply Love/Modules/itgmania.png"
+itgmania_banner_path = ""
 
