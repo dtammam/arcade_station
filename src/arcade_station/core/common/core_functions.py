@@ -670,7 +670,7 @@ def run_powershell_script(script_path, params=None):
     """
     Execute a PowerShell script with optional parameters.
     
-    Runs a PowerShell script with hidden window style and bypassed execution policy.
+    Runs a PowerShell script with bypassed execution policy.
     Supports passing named parameters to the script and captures output.
     
     Args:
@@ -681,13 +681,12 @@ def run_powershell_script(script_path, params=None):
     Returns:
         subprocess.Popen: The process object for the PowerShell script execution,
                          or None if an error occurred.
-                         
-    Note:
-        This function is Windows-specific and will fail on other operating systems.
-        The PowerShell window is hidden from view during execution.
     """
+    # Resolve the script path to absolute path
+    script_path = os.path.abspath(script_path)
+    
     # Construct the command
-    command = ['powershell.exe', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', script_path]
+    command = ['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', script_path]
     
     # Add parameters if provided
     if params:
@@ -700,12 +699,11 @@ def run_powershell_script(script_path, params=None):
     log_message(f"Full command: {full_command}", "PS_COMMAND")
     
     try:
-        # Run the command
+        # Run the command without hiding the window
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            creationflags=subprocess.CREATE_NO_WINDOW
+            stderr=subprocess.PIPE
         )
         
         return process

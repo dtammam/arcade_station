@@ -633,9 +633,14 @@ class InstallationManager:
         
         # Generate MAME config if MAME games are configured
         if config.get("mame_path"):
+            mame_path = config["mame_path"]
+            # If mame_path includes the executable name, strip it
+            if mame_path.endswith("mame.exe") or mame_path.endswith("mame"):
+                mame_path = os.path.dirname(mame_path)
+            
             mame_config = {
                 "mame": {
-                    "executable_path": config["mame_path"],
+                    "executable_path": mame_path,
                     "executable": "mame.exe" if self.is_windows else "mame",
                     "ini_path": config.get("mame_inipath", "")
                 }
