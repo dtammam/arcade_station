@@ -30,6 +30,7 @@ THANKS
     - Chris R.
     - Luis M.
     - Dan G.
+    - Stephen P. (the first production user!)
 
 - Last but not least, Marcy and Daisy for putting up with me programming furiously without knowing what it was about but trusting me when I said it was cool and important
 <p align="center">
