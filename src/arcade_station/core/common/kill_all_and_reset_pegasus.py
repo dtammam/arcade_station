@@ -34,6 +34,23 @@ from arcade_station.core.common.light_control import reset_lights, kill_specific
 from arcade_station.core.common.display_image import display_image_from_config
 
 def main():
+    """
+    Main entry point for the Arcade Station reset and restart process.
+    
+    Executes a series of cleanup and restart operations in sequence:
+    1. Terminates all processes listed in processes_to_kill.toml
+    2. Resets lighting effects to default state
+    3. Kills specific processes (LightsTest, marquee image, previous Pegasus)
+    4. Displays default marquee image if dynamic marquee is enabled
+    5. Attempts to restart Pegasus frontend with fallback methods
+    
+    The function includes error handling and logging for each step,
+    with multiple fallback methods for restarting Pegasus if the primary
+    method fails.
+    
+    Returns:
+        None. All operations are logged for debugging purposes.
+    """
     # Kill all processes that might interfere with a clean restart
     log_message("Killing processes that might interfere with a clean restart", "RESET")
     kill_processes_from_toml('processes_to_kill.toml')
