@@ -1,3 +1,11 @@
+"""
+Image Display Script for Arcade Station.
+
+This script provides a command-line interface for displaying images on specific monitors
+in the Arcade Station system. It handles argument parsing, file validation, and error
+logging for the image display functionality.
+"""
+
 import sys
 import os
 import argparse
@@ -9,6 +17,21 @@ from arcade_station.core.common.display_image import run_image_display
 from arcade_station.core.common.core_functions import log_message
 
 def main():
+    """
+    Main entry point for the image display script.
+    
+    Parses command-line arguments, validates the image file, and initiates
+    the image display process on the specified monitor.
+    
+    Command-line Arguments:
+        image_path: Path to the image file to display
+        background_color: Background color (e.g., "black", "#000000")
+        monitor_index: Index of the monitor to display on
+        --identifier: Optional process identifier (default: 'marquee_image')
+    
+    Returns:
+        None. Exits with status code 1 on error.
+    """
     try:
         # Parse command line arguments
         parser = argparse.ArgumentParser(description='Display an image on a monitor')
