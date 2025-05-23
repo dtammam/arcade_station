@@ -19,12 +19,6 @@ import keyboard
 import sys
 import time
 
-# function Invoke-SetMarqueeFromFile
-# function Open-FullscreenImage
-# function Send-Keystrokes
-# function Set-ForegroundWindow
-# function Start-Sound
-
 def open_header(script_name):
     """
     Prepare the environment for script execution and initialize logging.
