@@ -15,7 +15,20 @@ import sys
 import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
-from arcade_station.core.common.core_functions import kill_pegasus
+from arcade_station.core.common.core_functions import kill_pegasus, log_message
 
-# Function to kill Pegasus process
-kill_pegasus() 
+def main():
+    """
+    Main entry point for the Pegasus termination script.
+    
+    Calls the kill_pegasus function to terminate any running instances
+    of the Pegasus frontend application.
+    
+    Returns:
+        None
+    """
+    log_message("Terminating Pegasus frontend", "KILL")
+    kill_pegasus()
+
+if __name__ == "__main__":
+    main() 
