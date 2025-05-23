@@ -363,6 +363,12 @@ class InstallationManager:
                 if item.is_dir():
                     # Create custom copy function for counting items
                     def copy_dir_recursive(src, dst):
+                        """Recursively copy a directory and its contents, updating counters.
+
+                        Args:
+                            src: Source directory path.
+                            dst: Destination directory path.
+                        """
                         nonlocal total_dirs_copied, total_files_copied
                         if os.path.isdir(src):
                             total_dirs_copied += 1
@@ -400,6 +406,12 @@ class InstallationManager:
                         if item.is_dir():
                             # Custom function to copy installer directories
                             def copy_installer_dir(src, dst):
+                                """Recursively copy installer directory and its contents, updating counters.
+
+                                Args:
+                                    src: Source directory path.
+                                    dst: Destination directory path.
+                                """
                                 nonlocal total_dirs_copied, total_files_copied
                                 os.makedirs(dst, exist_ok=True)
                                 total_dirs_copied += 1
