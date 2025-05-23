@@ -635,9 +635,9 @@ class InstallationManager:
         if config.get("mame_path"):
             mame_config = {
                 "mame": {
-                    "path": config["mame_path"],
-                    "exe": "mame.exe" if self.is_windows else "mame",
-                    "inipath": config.get("mame_inipath", "")
+                    "executable_path": config["mame_path"],
+                    "executable": "mame.exe" if self.is_windows else "mame",
+                    "ini_path": config.get("mame_inipath", "")
                 }
             }
             self._write_toml(os.path.join(config_dir, "mame_config.toml"), mame_config)

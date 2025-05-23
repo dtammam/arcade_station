@@ -160,7 +160,7 @@ try {
         )
 
         Write-Information "Starting MAME with arguments: [$IniPath $ROM -state $State]"
-        $process = Start-Process -FilePath "$ExecutablePath\$Executable" -ArgumentList "$IniPath $ROM -state $State" -PassThru
+        $process = Start-Process -FilePath "$ExecutablePath\$Executable" -ArgumentList "-inipath $IniPath $ROM -state $State" -PassThru
         return $process
     }
 
