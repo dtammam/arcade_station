@@ -88,7 +88,8 @@ For a detailed walkthrough with examples showing the complete installation and u
 
 ## 🐛 Known Issues
 
-- When reconfiguring an existing installation, there may be a blank game field. You must delete this field before adding a new game.
+- When reconfiguring an existing installation, there may be a blank game field when selecting binary games. You must delete this field before adding a new game.
+- When selecting utilities, the default ..\..\ lights programs will not resolve correctly. They will be removed and the browse button will be made visible shortly.
 
 These issues are being actively investigated and will be fixed in an upcoming update.
 
