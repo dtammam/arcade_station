@@ -1,3 +1,17 @@
+"""
+Windows iCloud Process Management Module.
+
+This module provides functionality for managing iCloud processes on Windows systems,
+specifically for the Arcade Station application. It handles:
+- Termination of iCloud-related processes (iCloudServices, iCloudPhotos, iCloudDrive)
+- Cleanup of Python iCloud manager processes
+- Restart of iCloud services with proper sequencing
+- Configuration-based process management
+
+The module reads process lists and paths from screenshot_config.toml and provides
+both automated and interactive modes of operation.
+"""
+
 import os
 import sys
 import subprocess
@@ -112,6 +126,15 @@ def restart_icloud_services():
     return True
 
 if __name__ == "__main__":
+    """
+    Main entry point for the iCloud process management script.
+    
+    When run directly, this script will:
+    1. Kill all iCloud-related processes
+    2. Prompt the user to restart services
+    3. Restart services if requested
+    4. Wait for user input before exiting
+    """
     # Kill the processes
     kill_icloud_processes()
     
