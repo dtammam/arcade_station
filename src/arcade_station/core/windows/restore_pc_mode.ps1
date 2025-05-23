@@ -1,3 +1,19 @@
+<#
+.SYNOPSIS
+    Restores Windows to normal PC mode from Arcade Station kiosk mode.
+.DESCRIPTION
+    This script reverts Windows configuration changes made by setup_kiosk_mode.ps1,
+    restoring the system to standard PC operation. It:
+    - Sets the default Windows shell back to explorer.exe
+    - Restores default window focus behavior
+    - Requires administrative privileges to modify system settings
+.PARAMETER None
+    This script takes no parameters.
+.NOTES
+    This script must be run as Administrator to modify system settings.
+    It will automatically restart the computer after making changes.
+#>
+
 #Requires -RunAsAdministrator
 
 # Script to restore Windows to normal PC mode
