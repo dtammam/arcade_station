@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# Arcade Station Linux Startup Script
+#
+# This script handles the initialization and startup of Arcade Station on Linux systems.
+# It performs the following tasks:
+# 1. Environment setup and path resolution
+# 2. Python version verification (requires 3.12.9)
+# 3. Virtual environment management
+# 4. Dependencies installation
+# 5. Application startup with optional shell mode
+#
+# Usage:
+#   ./arcade_station_start.sh        # Normal startup
+#   ./arcade_station_start.sh --shell # Shell replacement mode
+
 # Determine the script location and project root
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/../../../.." && pwd )"
