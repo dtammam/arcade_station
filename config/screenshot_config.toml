@@ -6,7 +6,7 @@ quality = "High"
 sound_file = "../../../../assets/sounds/megatouch_yahoo.wav" 
 
 [icloud_upload]
-enabled = true
+enabled = false
 interval_seconds = 360
 delete_after_upload = true
 upload_directory = ""
