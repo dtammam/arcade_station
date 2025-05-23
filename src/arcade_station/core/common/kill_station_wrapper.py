@@ -24,7 +24,24 @@ def launch_explorer():
             print(f"Error starting Explorer: {e}")
 
 def main():
-    """Main function to execute the kill process."""
+    """
+    Main entry point for the Arcade Station termination wrapper.
+    
+    This function orchestrates the termination process with the following steps:
+    1. Configures Python path to ensure proper module imports
+    2. Checks and requests administrator privileges on Windows if needed
+    3. Attempts to execute the main kill script (kill_arcade_station.py)
+    4. Falls back to direct process termination if the main script fails
+    5. Launches Explorer as the final step on Windows
+    
+    The function includes multiple fallback mechanisms:
+    - Direct script execution if import fails
+    - Manual process termination as a last resort
+    - PowerShell script for Python process cleanup
+    
+    Returns:
+        None. All operations are logged to console for debugging.
+    """
     print("Kill Arcade Station Wrapper")
     print("-------------------------")
     
