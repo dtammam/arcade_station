@@ -11,6 +11,10 @@ import sys
 import subprocess
 
 def main():
+    """Launch the Arcade Station installer as a subprocess without a console window.
+
+    Finds the main.py script in the same directory and runs it using the current Python interpreter.
+    """
     # Get the directory of this script
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
