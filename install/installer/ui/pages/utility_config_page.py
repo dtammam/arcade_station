@@ -18,11 +18,30 @@ class UtilityConfigPage(BasePage):
         # because the base class will call create_widgets()
         self.monitor_count = self.get_monitor_count_safe(app)
         
+        # Initialize default lights executable paths
+        self.default_lights_reset_path = ""
+        self.default_lights_mame_path = ""
+        
         super().__init__(container, app)
         self.set_title(
             "Utilities Setup",
             "Configure utilities for your Arcade Station"
         )
+        
+        # Update default paths if installation path is available
+        if "install_path" in self.app.user_config:
+            self.update_default_lights_paths()
+    
+    def update_default_lights_paths(self):
+        """Update the default lights executable paths based on installation directory."""
+        if "install_path" in self.app.user_config:
+            install_path = self.app.user_config["install_path"]
+            self.default_lights_reset_path = os.path.join(
+                install_path, "bin", "windows", "LightsTest.exe"
+            ).replace("\\", "/")
+            self.default_lights_mame_path = os.path.join(
+                install_path, "bin", "windows", "mame2lit.exe"
+            ).replace("\\", "/")
     
     def get_monitor_count_safe(self, app):
         """Get the number of monitors connected to the system safely.
@@ -83,7 +102,7 @@ class UtilityConfigPage(BasePage):
         scrollbar.pack(side="right", fill="y")
         
         main_frame = ttk.Frame(self.scrollable_frame)
-        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        main_frame.pack(fill="x", expand=False, padx=20, pady=20)
         
         # Introduction
         intro_text = ttk.Label(
@@ -132,7 +151,7 @@ class UtilityConfigPage(BasePage):
         self.enable_lights_var = tk.BooleanVar(value=False)
         enable_lights = ttk.Checkbutton(
             lights_frame,
-            text="Do you want Arcade Station to manage your lights? This is useful for things like litboards, as you'll need to reset them when closing your games.",
+            text="Do you want Arcade Station to manage your lights?",
             variable=self.enable_lights_var,
             command=self.toggle_lights_options
         )
@@ -152,7 +171,7 @@ class UtilityConfigPage(BasePage):
         )
         reset_label.pack(side="left", padx=(0, 5))
         
-        self.lights_reset_var = tk.StringVar(value="../bin/windows/LightsTest.exe")
+        self.lights_reset_var = tk.StringVar(value=self.default_lights_reset_path)
         reset_entry = ttk.Entry(
             reset_frame,
             textvariable=self.lights_reset_var,
@@ -178,7 +197,7 @@ class UtilityConfigPage(BasePage):
         )
         mame_label.pack(side="left", padx=(0, 5))
         
-        self.lights_mame_var = tk.StringVar(value="../bin/windows/mame2lit.exe")
+        self.lights_mame_var = tk.StringVar(value=self.default_lights_mame_path)
         mame_entry = ttk.Entry(
             mame_frame,
             textvariable=self.lights_mame_var,
@@ -445,7 +464,7 @@ class UtilityConfigPage(BasePage):
         
         # Enable OSD
         self.enable_osd_var = tk.BooleanVar(value=True)
-        osd_text = "Kiosk mode on a Windows machine makes the native on-screen display for volume not usable. Would you like to enable a replacement OSD?"
+        osd_text = "Kiosk mode disables volume OSD. Enable replacement?"
         enable_osd = ttk.Checkbutton(
             osd_frame,
             text=osd_text,
@@ -456,7 +475,7 @@ class UtilityConfigPage(BasePage):
         # OSD information
         osd_info = ttk.Label(
             osd_frame,
-            text="AudioSwitch will be installed to handle volume display. Settings will be configured automatically.",
+            text="AudioSwitch will be installed to handle volume display.",
             wraplength=500,
             foreground="gray"
         )
@@ -471,36 +490,18 @@ class UtilityConfigPage(BasePage):
         )
         screenshot_frame.pack(fill="x", pady=10)
         
-        # Create a canvas with horizontal scrollbar
-        canvas = tk.Canvas(screenshot_frame)
-        scrollbar = ttk.Scrollbar(screenshot_frame, orient="horizontal", command=canvas.xview)
-        scrollable_frame = ttk.Frame(canvas)
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
-            )
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(xscrollcommand=scrollbar.set)
-        
-        canvas.pack(side="top", fill="both", expand=True)
-        scrollbar.pack(side="bottom", fill="x")
-        
         # Enable screenshot management
         self.enable_screenshot_var = tk.BooleanVar(value=False)
         enable_screenshot = ttk.Checkbutton(
-            scrollable_frame,
-            text="Do you want Arcade Station to save screenshots to a specific folder?",
+            screenshot_frame,
+            text="What folder should screenshots be saved to?",
             variable=self.enable_screenshot_var,
             command=self.toggle_screenshot_options
         )
         enable_screenshot.pack(anchor="w", pady=5)
         
         # Screenshot options frame
-        self.screenshot_options_frame = ttk.Frame(scrollable_frame)
+        self.screenshot_options_frame = ttk.Frame(screenshot_frame)
         
         # Monitor selection
         monitor_frame = ttk.Frame(self.screenshot_options_frame)
@@ -875,6 +876,15 @@ class UtilityConfigPage(BasePage):
                 return False
         
         return True
+    
+    def on_enter(self):
+        """Called when the page is shown."""
+        # Update the default lights paths based on the current installation path
+        if "install_path" in self.app.user_config:
+            self.update_default_lights_paths()
+            # Update the UI variables with the new paths
+            self.lights_reset_var.set(self.default_lights_reset_path)
+            self.lights_mame_var.set(self.default_lights_mame_path)
     
     def save_data(self):
         """Save utility configuration to the user config."""
