@@ -175,7 +175,7 @@ def start_listening_to_keybinds_from_toml(toml_file_path):
         
         if action == "kill_processes":
             script_path = os.path.join(os.path.dirname(__file__), 'kill_all_and_reset_pegasus.py')
-            keyboard.add_hotkey(hotkey, lambda: subprocess.Popen(['python', script_path]))
+            keyboard.add_hotkey(hotkey, lambda: launch_script(script_path))
         else:
             keyboard.add_hotkey(hotkey, lambda action_path=action_path: start_app(action_path))
 
@@ -427,6 +427,10 @@ def start_app(executable_path):
                 subprocess.Popen(['wscript.exe', executable_path], creationflags=subprocess.CREATE_NO_WINDOW)
             else:
                 log_message("VBScript is not supported on non-Windows systems.", "MENU")
+        # Check if the file is a Python script
+        elif executable_path.endswith('.py'):
+            # Use launch_script for Python files to ensure hidden console
+            launch_script(executable_path)
         else:
             # Logic to handle different operating systems for other executables
             if os_type == "Windows":
