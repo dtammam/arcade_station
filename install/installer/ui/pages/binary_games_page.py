@@ -335,8 +335,8 @@ class BinaryGamesPage(BasePage):
             main_frame,
             text="Add games that are launched directly from executable files. "
                  "These can include OpenITG, NotITG, DDR Grand Prix, or any other "
-                 "standalone game."
-                 "Select Delete on the blank entry and Next to skip this page.",
+                 "standalone game. "
+                 "Click 'Add Another Game' below to add games, or select Next to skip this page.",
             wraplength=500,
             justify="left"
         )
@@ -400,9 +400,6 @@ class BinaryGamesPage(BasePage):
             style="Accent.TButton"
         )
         add_button.pack(expand=True, pady=5)
-        
-        # Add a default empty game entry
-        self.add_game()
     
     def add_game(self):
         """Add a new game entry."""
