@@ -26,7 +26,7 @@ It is a Windows-based PC, currently running Windows 11.
 
 1. I've disabled UAC.
 
-   <img src="../assets/images/example/laptop/0.png" width="60%">
+   <img src="../assets/images/example/generic/uac.png" width="60%">
 
 2. I'll launch the installer and select `Next`.
 
