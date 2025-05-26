@@ -194,6 +194,12 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/180.png" width="40%">
 
+
+- Per the instructions, at this point, I will reboot to go into `Kiosk Mode`.
+
+---
+
+
 #### 🧪 Testing ITGmania and Integrations
 
 32. I'll use the arrow keys to select it and press `Enter` to launch it - and would you look at that, the dynamic marquee changed to ITGmania!
