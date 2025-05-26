@@ -17,4 +17,11 @@ This guide will cover setting up Arcade Station on a dedicated DDR cabinet. This
 
 ## 🔧 DDR Cabinet Installation Walkthrough
 
-*Coming soon! This guide will provide a comprehensive walkthrough for setting up Arcade Station on a DDR cabinet, including specialized hardware configuration and rhythm game-specific settings.*
+I'm standing in front of my DDR cabinet, logged in as the local Administrator, and have downloaded the latest version of Arcade Station.
+It is a Windows-based PC, currently running Windows 11. It has two monitors connected to it and I'm using an external keyboard and mouse.
+
+1. I've disabled UAC.
+
+   <img src="assets/images/example/0.png" width="60%">
+
+2. 
