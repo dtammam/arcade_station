@@ -1,7 +1,7 @@
 [lights]
-enabled = true
-light_reset_executable_path = "C:/Repositories/arcade_station/bin/windows/LightsTest.exe"
-light_mame_executable_path = "C:/Repositories/arcade_station/bin/windows/mame2lit.exe"
+enabled = false
+light_reset_executable_path = "../../../../arcade_station/bin/windows/LightsTest.exe"
+light_mame_executable_path = "../../../../arcade_station/bin/windows/mame2lit.exe"
 
 [streaming]
 webcam_management_enabled = false
@@ -10,13 +10,13 @@ obs_executable = "C:/Program Files/obs-studio/bin/64bit/obs64.exe"
 obs_arguments = "--startstreaming --disable-shutdown-check"
 
 [vpn]
-enabled = true
+enabled = false
 vpn_application_directory = "C:/Program Files/OpenVPN/bin" 
 vpn_application = "openvpn-gui.exe" 
 vpn_process = "openvpn" 
-vpn_config_profile = "gradius-DRDOOFUS-phaseii-config.ovpn" 
+vpn_config_profile = "" 
 seconds_to_wait = 10 
 
 [osd]
-enabled = true
-sound_osd_executable = "C:/Program Files (x86)/AudioSwitch/AudioSwitch.exe"
+enabled = false
+sound_osd_executable = "../../../../bin/windows/AudioSwitch/AudioSwitch.exe"

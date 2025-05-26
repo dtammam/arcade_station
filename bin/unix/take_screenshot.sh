@@ -8,8 +8,8 @@ REPO_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # Run the script using pythonw if available (macOS) or nohup (Linux)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS - use pythonw which doesn't show a console
-  "$REPO_PATH/.venv/bin/pythonw" "$REPO_PATH/src/arcade_station/screenshot.py" &
+  "$REPO_PATH/.venv/bin/pythonw" "$REPO_PATH/src/arcade_station/core/common/monitor_screenshot.py" &
 else
   # Linux - use nohup to prevent terminal output
-  nohup "$REPO_PATH/.venv/bin/python" "$REPO_PATH/src/arcade_station/screenshot.py" > /dev/null 2>&1 &
+  nohup "$REPO_PATH/.venv/bin/python" "$REPO_PATH/src/arcade_station/core/common/monitor_screenshot.py" > /dev/null 2>&1 &
 fi 

@@ -1,12 +1,13 @@
 [display]
-image_path = "C:/Repositories/arcade_station/assets/images/banners/arcade_station.png"
-default_image_path = "C:/Repositories/arcade_station/assets/images/banners/arcade_station.png"
+image_path = ""
+default_image_path = ""
 background_color = "black"
 monitor_index = 1
 
 [dynamic_marquee]
 enabled = true
 itgmania_display_enabled = true
-itgmania_display_file_path = "C:/Games/ITGmania/Themes/Simply Love/Modules/ArcadeStationMarquee.log"
-itgmania_base_path = "C:/Games/ITGmania"
-itgmania_banner_path = "C:/Games/ITGmania/Themes/Simply Love/Modules/simply-love.png"
+itgmania_display_file_path = "C:/Users/dean/AppData/Roaming/ITGmania/Themes/Simply Love/Modules/ArcadeStationMarquee.log"
+itgmania_base_path = ""
+itgmania_banner_path = "C:/Users/dean/AppData/Roaming/ITGmania/Themes/Simply Love/Modules/itgmania.png"
+

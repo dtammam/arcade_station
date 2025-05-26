@@ -1,5 +1,6 @@
-# Virtual environment
+# Virtual environment, let it get rebuilt
 .venv/
+venv/
 
 # Byte-compiled files
 __pycache__/

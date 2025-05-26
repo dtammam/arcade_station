@@ -8,7 +8,7 @@ launch:
     "C:/Repositories/arcade_station/.venv/Scripts/pythonw.exe" 
     "C:/Repositories/arcade_station/src/arcade_station/launchers/launch_game.py" 
     "itgmania"
-assets.box_front: ../../../../assets/images/banners/simply-love.png
+assets.box_front: ../../../../assets/images/banners/itgmania.png
 
 game: Not ITG
 file: not\using\files\to\launch\games\Not ITG

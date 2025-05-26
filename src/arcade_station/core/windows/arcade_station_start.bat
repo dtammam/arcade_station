@@ -1,4 +1,24 @@
 @echo off
+:: Arcade Station Windows Startup Script
+::
+:: This script handles the initialization and startup of Arcade Station on Windows systems.
+:: It performs the following tasks:
+:: 1. Environment setup and path resolution
+:: 2. Python version detection and verification (prefers 3.12.9)
+:: 3. Virtual environment management
+:: 4. Dependencies installation
+:: 5. Application startup with optional shell mode
+::
+:: Usage:
+::   arcade_station_start.bat        # Normal startup
+::   arcade_station_start.bat --shell # Shell replacement mode
+::
+:: Note: This script is designed for Windows and will:
+:: - Use Python Launcher (py) if available
+:: - Fall back to python3.12 or python commands
+:: - Create/use a virtual environment in .venv
+:: - Handle Windows-specific path separators and environment variables
+
 setlocal enabledelayedexpansion
 
 :: Determine the project root directory

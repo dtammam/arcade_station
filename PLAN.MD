@@ -37,6 +37,7 @@ The motivation behind this project is a desire to recreate the [ddr-picker](http
 - (To be validated) Local administrative privileges
 - Ability to auto-logon
 - User interface in exclusive mode
+- PowerShell execution policy set to Bypass (handled automatically during installation)
 
 ### Plan the Transition Strategy
 ### Phase 1: Core logic and scaffolding in Python

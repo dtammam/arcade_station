@@ -116,6 +116,16 @@ def start_streaming():
 
 
 if __name__ == "__main__":
+    """
+    Main entry point for the streaming script.
+    
+    When run directly, this script will:
+    1. Execute the start_streaming() function
+    2. Exit with status code 0 on success, 1 on failure
+    
+    Returns:
+        None. Exits the process with appropriate status code.
+    """
     # When run directly, execute the streaming function
     success = start_streaming()
     sys.exit(0 if success else 1)

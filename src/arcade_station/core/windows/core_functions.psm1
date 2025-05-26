@@ -1,3 +1,20 @@
+<#
+.SYNOPSIS
+    Windows-specific core functions for Arcade Station.
+
+.DESCRIPTION
+    This PowerShell module provides essential Windows-specific functionality for the
+    Arcade Station system, including:
+    - Registry manipulation for system configuration
+    - Silent process management with controlled window visibility
+    - Safe system restart capabilities
+
+.NOTES
+    This module is designed for Windows systems only and should not be imported
+    on other platforms. Functions use Write-Information for logging to maintain
+    compatibility with the main application's logging system.
+#>
+
 function Update-RegistryKey {
     <#
     .SYNOPSIS

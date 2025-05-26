@@ -1,8 +1,27 @@
 <#
 .SYNOPSIS
-    Launch MAME.exe in an unobtrusive way.
+    Launches MAME.exe with specific ROM and state for Arcade Station.
+.DESCRIPTION
+    This script provides a controlled way to launch MAME.exe, particularly for
+    573 rhythm games. It handles:
+    - Proper working directory setup
+    - ROM and save state loading
+    - Window focus management
+    - Multiple focus attempts with increasing delays
+.PARAMETER ROM
+    The name of the ROM to load (required).
+.PARAMETER State
+    The save state to load (optional).
+.PARAMETER ExecutablePath
+    The path to the MAME executable directory.
+.PARAMETER Executable
+    The name of the MAME executable file.
+.PARAMETER IniPath
+    The path to the MAME configuration file.
 .NOTES
-    MAME.exe is required for launching 573 rhythm games and it must be opened, using the ROM and save state as arguments.
+    This script is specifically designed for Arcade Station's MAME integration.
+    It includes sophisticated window focus management to ensure the MAME window
+    becomes the foreground window after launch.
 #>
 
 # Parameters to launch the .ps1 script from a command line
@@ -160,7 +179,7 @@ try {
         )
 
         Write-Information "Starting MAME with arguments: [$IniPath $ROM -state $State]"
-        $process = Start-Process -FilePath "$ExecutablePath\$Executable" -ArgumentList "$IniPath $ROM -state $State" -PassThru
+        $process = Start-Process -FilePath "$ExecutablePath\$Executable" -ArgumentList "-inipath $IniPath $ROM -state $State" -PassThru
         return $process
     }
 

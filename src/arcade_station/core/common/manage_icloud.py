@@ -35,14 +35,25 @@ else:
 
 def restart_process(process_name, process_path):
     """
-    Stop and restart a Windows process.
+    Stop and restart a Windows process with minimal UI disruption.
+    
+    This function handles the graceful termination and restart of Windows processes,
+    specifically designed for iCloud services. It ensures minimal UI disruption
+    by using hidden windows and lower process priority.
+    
+    The function:
+    1. Terminates the existing process using taskkill
+    2. Waits for the process to fully terminate
+    3. Starts a new instance with minimal UI visibility
+    4. Uses lower process priority to reduce focus disruption
     
     Args:
         process_name (str): Name of the process to restart (without .exe)
         process_path (str): Path to the directory containing the process executable
     
     Returns:
-        bool: True if successful, False otherwise
+        bool: True if the process was successfully restarted, False otherwise.
+              All operations are logged for debugging purposes.
     """
     try:
         log_message(f"Attempting to stop process: {process_name}", "ICLOUD")
@@ -89,14 +100,26 @@ def restart_process(process_name, process_path):
 
 def clean_directory(directory, delete_files=True):
     """
-    Clean a directory by deleting all files.
+    Clean a directory by deleting all files within it.
+    
+    This function recursively traverses the specified directory and removes
+    all files found within it. It's designed to clean up iCloud upload
+    directories after photos have been uploaded.
+    
+    The function:
+    1. Verifies the directory exists
+    2. Recursively walks through all subdirectories
+    3. Deletes each file encountered
+    4. Logs all operations and any failures
     
     Args:
         directory (str): Path to the directory to clean
-        delete_files (bool): Whether to delete files or just count them
+        delete_files (bool): Whether to actually delete files (True) or just
+                            count them (False). Useful for dry runs.
     
     Returns:
-        int: Number of files deleted or would have been deleted
+        int: Number of files deleted (or would have been deleted if delete_files
+             is False). Returns 0 if the directory doesn't exist or an error occurs.
     """
     if not delete_files:
         log_message(f"File deletion disabled, skipping cleanup of {directory}", "ICLOUD")

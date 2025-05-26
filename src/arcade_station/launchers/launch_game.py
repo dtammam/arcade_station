@@ -163,10 +163,10 @@ def launch_game(game_name):
             rom = game_config['rom']
             state = game_config.get('state', '')
             log_message(f"Launching MAME game - ROM: {rom}, State: {state}", "GAME_LAUNCH")
-            mame_script = os.path.join(os.path.dirname(__file__), '..', 'core', 'windows', 'start_mame.ps1')
+            mame_script = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'core', 'windows', 'start_mame.ps1'))
             
             # Log the full script path for troubleshooting
-            log_message(f"MAME script path: {os.path.abspath(mame_script)}", "GAME_LAUNCH")
+            log_message(f"MAME script path: {mame_script}", "GAME_LAUNCH")
             
             # Load MAME configuration
             mame_config = load_mame_config()
@@ -174,6 +174,10 @@ def launch_game(game_name):
             executable_path = mame_config['mame']['executable_path']
             executable = mame_config['mame']['executable']
             ini_path = mame_config['mame']['ini_path']
+            
+            # If executable_path includes the executable name, strip it
+            if executable_path.endswith(executable):
+                executable_path = os.path.dirname(executable_path)
             
             # Launch MAME lights if configured
             launch_mame_lights()

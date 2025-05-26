@@ -1,86 +1,114 @@
-# arcade_station
-arcade_station is a front-end interface for managing and interacting with the games you love.
-![Demo Collage](assets/images/readme/demo-collage.jpg)
+# Arcade Station
 
-## Project Status: Phases 1 & 2 Complete! 🎉
+[![Python Version](https://img.shields.io/badge/python-3.12.9-blue.svg)](https://www.python.org/downloads/release/python-3129/)
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
 
-**✅ Phase 1: Core logic and scaffolding in Python**
-- Successfully migrated and refactored core functionality to Python
-- Recreated all base scripts for critical functions (managing Pegasus, launching games, etc.)
-- Implemented keyboard listeners and key bindings for system control
+<div align="center">
+   <img src="assets/images/readme/logo.png" width="300" alt="Arcade Station logo featuring retro arcade-style text design"/>
+</div>
 
-**✅ Phase 2: Cross-platform compatibility**
-- Created platform-agnostic solutions for all system dependencies
-- Validated functionality across Windows, Linux, and macOS
-- Implemented marquee display system that works across all supported platforms
+<h2 align="center">Arcade Station is a front-end interface for managing and interacting with the games you love.</h2>
 
-**Coming Next:**
-- Phase 3: User-friendly installer creation
-- Phase 4: Extended options and customization features
+<div align="center">
+   <img src="assets/images/readme/collage.png" width="900" alt="Collage showing Arcade Station interface with game selection menu, dynamic marquee displays, and various rhythm games including ITGmania and DDR"/>
+</div>
 
-## Motivation
-The motivation behind this project is a desire to recreate the [ddr-picker](https://github.com/dtammam/ddr-picker) project from scratch so that the larger rhythm-game community can easily use it for any of their needs. This has been a passion project since I first saw [evan clue's version](https://github.com/evanclue/ddr-picker) - it inspired me to make it my own by refactoring it in PowerShell and by adding tons of new features. Now, I'm off to do it again - by the end, it'll provide the best of the ddr-picker experience while having a seamless install experience for those not technically savvy.
+## Table of Contents
+- [✨ Features](#features)
+- [🎯 Goals](#goals)
+- [📋 Requirements](#requirements)
+- [💾 Installation](#installation)
+- [🎮 Walkthroughs](#walkthroughs)
+- [🐛 Known Issues](#known-issues)
+- [⚖️ License](#license)
+- [🙏 Acknowledgments](#acknowledgments)
 
-## Installation
+## ✨ Features
 
-**Super user-friendly installer coming soon in Phase 3!**
+- Cross-platform core functionality (Windows, Linux, and macOS)
+- Easy-to-use installation wizard (Windows installer in this release)
+- Game configuration for ITGMania, binary games, and MAME
 
-Stay tuned for our one-click installation solution that will handle all the setup for you.
+## 🎯 Goals
 
-> **Note:** This application requires Python 3.12.9. If you have multiple Python versions installed, the launcher will attempt to find and use the correct version.
+This project was born from several personal and professional development goals:
 
-## Features
+- **Gain experience as a software developer** - Building a complete application from concept to deployment
+- **Learn AI-assisted programming** - Exploring how to effectively collaborate with AI as a development partner
+- **Practice DevOps principles** - Implementing modern software development practices and workflows
+- **Create something modern and modular** - Building a user-friendly solution that non-technical people can easily use
+- **Have fun** - Enjoying the process of creating something meaningful for myself and the arcade gaming community
 
-- Seamless startup experience with automatic dependency management
-- Cross-platform support for Windows, Linux, and macOS
-- Dynamic marquee display for game banners and artwork
-- Configurable key binding system for navigation and control
-- Deep integration with Pegasus-FE frontend
-- Support for ITGMania dynamic marquee display
-- Optional VPN connectivity for networked cabinets
-- Windows shell replacement capability
-- Process management for optimal game performance
-- Platform-specific optimizations and compatibility solutions
+## 📋 Requirements
 
-## Supported Applications
+### 💻 Technical
+- [Python 3.12.9](https://www.python.org/downloads/release/python-3129/)
+- Windows 10/11 (current release)
+- Administrator privileges for installation
+- 500MB free disk space
 
-| Application                                   | Windows | Linux | Mac |
-|-----------------------------------------------|---------|-------|-----|
-| Pegasus-FE (Frontend interface)               | ✅      | ✅    | ✅  |
-| MAME (Arcade emulator)                        | ✅      | ✅    | ✅  |
-| ITGMania (Dance game simulator)               | ✅      | ✅    | ✅  |
-| Lighting control (Litboard support)           | ✅      | ✅    | ❌  |
-| OBS Studio (Streaming/recording)              | ✅      | ✅    | ✅  |
-| Screenshot and media management               | ✅      | ✅    | ✅  |
+### 🔒 UAC
+Arcade Station is designed primarily for private, arcade-style machines running in a kiosk-like environment.
 
-## Integration with ITGMania
+While scripts may function with User Access Control (UAC) enabled, the full experience (including shell replacement and seamless startup) only works reliably with UAC disabled. In standard desktop setups, functionality may be partial or inconsistent. We recommend:
 
-Arcade Station can display song banners from ITGMania on your marquee display in real-time as you select them. To set up this integration:
+- UAC disabled (Never notify)
+- Autologin with the local user
+- Trusted software only
+- No general-purpose use
+- Physical access limited to trusted users
 
-1. Make sure Arcade Station is installed and configured
-2. Run the setup script from the arcade_station root directory:
-   ```
-   python installer/itgmania_dynamic_marquee/setup.py
-   ```
-3. Follow the prompts to specify your ITGMania installation path
-4. The setup script will automatically:
-   - Copy the necessary files to your ITGMania installation
-   - Configure Arcade Station to use the dynamic marquee feature
-   - Create the required log file in the correct location
+This configuration ensures the system behaves as intended and delivers a smooth, arcade-style experience.
+This recommendation is based on practical needs for stability and predictability in arcade-style deployments. Use at your discretion.
 
-Once set up, your marquee display will automatically show the banner for songs you select while playing ITGMania!
+## 💾 Installation
 
-## Technical Details
+### ℹ️ Platform Support
+**Note:** While the core codebase is cross-platform, this initial release focuses on Windows installation. Mac and Linux installers are in development and will be available soon.
 
-Arcade Station is built with Python 3.12 and follows Google's Python style guidelines. The codebase is designed to be:
+### 🪟 (Windows - Current Release)
 
-- Modular and well-documented
-- Cross-platform compatible
-- Configuration-driven via TOML files
-- Easy to extend and customize
+1. Download and install [Python 3.12.9](https://www.python.org/downloads/release/python-3129/). *You must select install as Admin and add to PATH options!*
 
-The project uses a virtual environment (`venv`) with explicit dependencies listed in `requirements.txt`.
+   <img src="assets/images/readme/python.png" alt="Python 3.12.9 installer showing 'Add Python to PATH' and 'Install for all users' options checked" />
 
-## Contributing
+2. If intending on using this with kiosk mode, disable UAC. 
+3. Download Arcade Station by cloning the repo or by clicking `Code/Download ZIP`
 
-Contribution guidelines will be published after Phase 4 is complete. If you're interested in contributing before then, please reach out directly.
+   <img src="assets/images/readme/download.png" alt="GitHub repository page showing Code dropdown menu with Download ZIP option highlighted" />
+
+4. Right-click and run `install_arcade_station.bat` from the cloned repo/extracted .zip as Administrator. If warned about Windows protecting your PC, select more options and `Run anyway`.
+
+   <img src="assets/images/readme/warning.png" alt="Windows Defender SmartScreen warning dialog with 'More info' and 'Run anyway' options" />
+
+5. Go through the setup, starting by choosing where you'd want the program installed. For detailed walkthroughs, see the [Laptop Setup Guide](examples/LAPTOP.md) or [DDR Cabinet Setup Guide](examples/DDR.md).
+
+6. Once installation is complete, the location you installed arcade station in will open in Windows Explorer.
+
+7. Run `launch_arcade_station.bat`. The launcher will automatically unblock all files to prevent security warnings.
+
+Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to your install directory to reconfigure it.
+
+## 🎮 Walkthroughs
+
+For detailed walkthroughs with examples showing complete installation and usage flows:
+
+- **[🎮 Laptop Setup Guide](examples/LAPTOP.md)** - Portable multi-monitor setup using a Surface Laptop Studio with external displays, configuring ITGmania and Megatouch Maxx, and demonstrating dynamic marquee functionality
+- **[🕺 DDR Cabinet Setup Guide](examples/DDR.md)** - Dedicated DDR cabinet configuration with rhythm games including ITGmania, ITG2, OpenITG, and MAME-based 573 games, plus advanced features like kiosk mode and reconfiguration
+
+## 🐛 Known Issues
+
+- When reconfiguring an existing installation, your config may not save properly if you navigate back and forth between pages. This will be fixed in an upcoming release.
+
+These issues are being actively investigated and will be fixed in an upcoming update.
+
+## ⚖️ License
+
+**Arcade Station** is Free and Open Source Software (FOSS).
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+This project incorporates several third-party components. See [NOTICE](NOTICE) for detailed attribution and licensing information.
+
+## 🙏 Acknowledgments
+
+Please reference the [THANKS](THANKS.md) file.

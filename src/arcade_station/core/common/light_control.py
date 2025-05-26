@@ -1,3 +1,11 @@
+"""
+Light Control Module for Arcade Station.
+
+This module provides functionality for managing arcade cabinet lighting systems,
+including process management for LightsTest and mame2lit applications, and
+lighting control operations.
+"""
+
 import subprocess
 import platform
 import psutil
@@ -7,7 +15,14 @@ from arcade_station.core.common.core_functions import load_toml_config, launch_s
 
 def kill_lights_processes():
     """
-    Kill all running LightsTest and mame2lit processes to ensure COM port is released.
+    Kill all running LightsTest and mame2lit processes.
+    
+    Terminates any running instances of LightsTest and mame2lit to ensure
+    the COM port is released for other applications. This is particularly
+    important when switching between different lighting control applications.
+    
+    Returns:
+        None. All operations are logged for debugging purposes.
     """
     light_processes = ["LightsTest", "mame2lit"]
     
@@ -24,6 +39,16 @@ def kill_lights_processes():
 def kill_specific_lights_process(process_name):
     """
     Kill a specific lights-related process by name.
+    
+    Terminates a single lights-related process identified by its name.
+    This is used when only a specific lighting control application needs
+    to be stopped, rather than all lighting processes.
+    
+    Args:
+        process_name (str): The name of the process to terminate (e.g., "LightsTest").
+    
+    Returns:
+        None. All operations are logged for debugging purposes.
     """
     for proc in psutil.process_iter(['name']):
         try:
@@ -37,7 +62,20 @@ def kill_specific_lights_process(process_name):
 
 def reset_lights():
     """
-    Resets the lights using the LightsTest.exe if configured.
+    Reset the arcade cabinet lights to their default state.
+    
+    Uses LightsTest.exe to reset the lighting system if enabled in the
+    configuration. The process is run briefly and then terminated to
+    ensure the lights are reset without leaving the process running.
+    
+    The function:
+    1. Terminates any existing LightsTest processes
+    2. Checks if lights are enabled in the configuration
+    3. Runs LightsTest.exe briefly if enabled
+    4. Ensures the process is properly terminated
+    
+    Returns:
+        None. All operations are logged for debugging purposes.
     """
     # Only kill LightsTest, not mame2lit
     kill_specific_lights_process("LightsTest")
@@ -70,7 +108,20 @@ def reset_lights():
 
 def launch_mame_lights():
     """
-    Launches mame2lit.exe if lights are enabled and the game is MAME-based.
+    Launch the MAME-specific lighting control application.
+    
+    Starts mame2lit.exe if lights are enabled in the configuration and
+    the system is running Windows. This function is specifically for
+    MAME-based games that support lighting control.
+    
+    The function:
+    1. Checks if lights are enabled in the configuration
+    2. Terminates any existing mame2lit processes
+    3. Launches a new instance of mame2lit.exe
+    4. Logs the process ID for tracking
+    
+    Returns:
+        None. All operations are logged for debugging purposes.
     """
     config = load_toml_config('utility_config.toml')
     lights_config = config.get('lights', {})

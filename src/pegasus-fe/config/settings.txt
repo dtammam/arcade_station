@@ -1,4 +1,4 @@
-general.theme: c:/Repositories/arcade_station/src/pegasus-fe/themes/micro/
+general.theme: ../themes/micro
 general.verify-files: false
 general.input-mouse-support: false
 general.fullscreen: true
