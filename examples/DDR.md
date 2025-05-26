@@ -98,7 +98,7 @@ Let's go over where I am as I start this process:
 12. For the banner image, I'll select `Browse...` which opens the bundled image assets that came with Arcade Station! Inside of it includes a bunch of dance games for convenience. I'll find and select the banner for ITG2 and select `Open`.
 
     <img src="../assets/images/example/ddr/102.png">
-    <img src="../assets/images/example/generic/itg2 banner.png" width="40%">
+    <img src="../assets/images/example/generic/itg2 banner.png">
     <img src="../assets/images/example/ddr/104.png">
 
 13. ITG2 is all set. I'll now select `Add Another Game` again, and go through the same process for NotITG. Once done, I'll select `Next`.
@@ -136,7 +136,6 @@ Let's go over where I am as I start this process:
     <img src="../assets/images/example/ddr/115.png">
 
 21.  For the banner image, I'll select `Browse...`, will find and select the banner for DDRMAX2 and will select `Open`.
-
     <img src="../assets/images/example/generic/ddrmax2 banner.png">
     <img src="../assets/images/example/ddr/117.png">
      
