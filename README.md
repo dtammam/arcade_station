@@ -49,8 +49,11 @@ This project was born from several personal and professional development goals:
 - 500MB free disk space
 
 ### 🔒 UAC
-Arcade Station is designed for use in dedicated, arcade-style environments where a seamless, kiosk-like experience is expected. For this reason, we recommend disabling User Account Control (UAC) when installing in kiosk mode. Disabling UAC ensures that system-level operations—such as replacing the Windows shell (explorer.exe), running PowerShell scripts with ExecutionPolicy Bypass, programmatically launching and terminating background processes, and suppressing Windows security prompts—function reliably without interruption. These operations are critical to achieving a clean boot-to-arcade flow and preventing unexpected UAC elevation dialogs that could disrupt the experience.
-That said, disabling UAC is not required for users running Arcade Station in standard desktop setups or non-kiosk mode. All core functionality should remain intact, though shell replacement and automatic launch behavior may be inconsistent due to permission constraints.
+Arcade Station is designed for use in dedicated, arcade-style environments where a seamless, kiosk-like experience is expected. For this reason, we recommend disabling User Account Control (UAC) when installing in kiosk mode. 
+- Disabling UAC ensures that system-level operations—such as replacing the Windows shell (explorer.exe), running PowerShell scripts with ExecutionPolicy Bypass, programmatically launching and terminating background processes, and suppressing Windows security prompts—function reliably without interruption. 
+- These operations are critical to achieving a clean boot-to-arcade flow and preventing unexpected UAC elevation dialogs that could disrupt the experience.
+- That said, disabling UAC is not required for users running Arcade Station in standard desktop setups or non-kiosk mode. All core functionality should remain intact, though shell replacement and automatic launch behavior may be inconsistent due to permission constraints.
+
 I recognize that requiring UAC to be disabled introduces tradeoffs, especially for advanced users or mixed-use systems. This requirement is being actively investigated and prioritized for resolution in future releases, with the goal of offering full functionality without needing to disable UAC wherever possible as the future standard.
 
 ## 💾 Installation
