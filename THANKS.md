@@ -3,7 +3,7 @@
 ## Table of Contents
 - [👨‍💻 Creator](#creator)
 - [🤖 AI & Technology](#ai--technology)
-- [🎮 Game Development Community](#game-development-community)
+- [🎮 Rhythm Game Community](#rhythm-game-community)
 - [👥 Friends & Testers](#friends--testers)
 - [👨‍👩‍👧 Family](#family)
 
