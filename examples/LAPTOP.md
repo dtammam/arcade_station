@@ -37,31 +37,23 @@ Let's go over where I am as I start this process:
 - It has one external monitor connected to it and I'm using an external keyboard and mouse.
 
 #### 🚀 Launching the Installer
-1. I've disabled UAC by doing the following:
-   1. Press `Windows Key` + `R`, type `UserAccountControlSettings`, and press `Enter`
-   2. In the User Account Control Settings window, drag the slider to the bottom for the `Never notify` / `Never notify me when` option
-   3. Select `OK`, then `Yes` to confirm
-   4. Reboot your computer to fully apply the change
-
-      <img src="../assets/images/example/generic/uac.png" alt="Windows UAC settings showing 'Never notify' option selected">
-
-2. I'll launch the installer and select `Next`.
+1. I'll launch the installer and select `Next`.
 
    <img src="../assets/images/example/laptop/10.png" alt="Arcade Station installer welcome screen with Next button">
 
 #### 📁 Choosing Install Directory
-3. I'll choose an install location. By default, it wants to install in the logged in users' profile. I'm okay with this and will select `Next`, and then see the files copying to the location.
+2. I'll choose an install location. By default, it wants to install in the logged in users' profile. I'm okay with this and will select `Next`, and then see the files copying to the location.
 
    <img src="../assets/images/example/laptop/20.png" alt="Arcade Station installer directory selection screen showing default user profile path">
 
    <img src="../assets/images/example/laptop/30.png" alt="Arcade Station installer file copying progress screen">
 
-4. I'm notified about the different types of games to configure. I'll leave the checkbox checked as I do want to configure my game, Megatouch Maxx, and select `Next`.
+3. I'm notified about the different types of games to configure. I'll leave the checkbox checked as I do want to configure my game, Megatouch Maxx, and select `Next`.
 
    <img src="../assets/images/example/laptop/40.png" alt="Arcade Station game configuration introduction screen with checkbox to configure games">
 
 #### 🎵 Configuring ITGmania
-5. I'm asked if I want to use ITGmania. I do, so I'll leave it and select `Next`.
+4. I'm asked if I want to use ITGmania. I do, so I'll leave it and select `Next`.
 - The installer detected that I have it installed in the default location and is referencing it automatically
 - It is set to use a default bundled picture for ITGmania's banner
 - It has an option to use the dynamic marquee module which will show songs that I pick on my 2nd display when I pick them, which I'll leave checked
@@ -69,7 +61,7 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/50.png" alt="ITGmania configuration screen showing auto-detected installation path and dynamic marquee options">
 
 #### 💿 Configuring Binary-Based Games
-6. I'm asked if I have any binary-based games to configure, which I do (Megatouch Maxx).
+5. I'm asked if I have any binary-based games to configure, which I do (Megatouch Maxx).
 - I'll type Megatouch for the name
 - I'll select browse and pick the .exe used to open my game
 - I'll pick my banner image (the art for the game) that'll show up on the 2nd display. When I click Browse, I see a set of bundled art (which includes Megatouch - otherwise, I'd pick from my PC.)
@@ -81,13 +73,13 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/63.png" alt="Binary games configuration screen with Megatouch fully configured including banner image">
 
 #### 🕹️ Configuring MAME
-7. I'm asked if I want to setup any MAME games. I don't right now, so I'll select `Next`.
+6. I'm asked if I want to setup any MAME games. I don't right now, so I'll select `Next`.
 - But if I did, I'd check the box, input my `mame.exe` path and `mame.ini` path, then `Add Another MAME-Based Game`, filling it out similarly to how I did the binaries (with the addition of ROMs and save states). 
 
    <img src="../assets/images/example/laptop/70.png" alt="MAME games configuration screen with option to enable MAME games unchecked">
 
 #### ⌨️ Configuring Key Bindings and Processes
-8. I'm asked to setup key bindings and processes to kill - very important.
+7. I'm asked to setup key bindings and processes to kill - very important.
 - In the `Key Bindings` tab, there are a set of default key bindings to do things like reset back to the menu, close Arcade Station, and even start streaming.
 - If I have any custom scripts or apps I want to run with a button press, I can add them here.
 - The main one for me is `Reset back to menu` (which closes the games and brings me back) which will get triggered if I click `Ctrl + Space`. 
@@ -95,7 +87,7 @@ Let's go over where I am as I start this process:
 
    <img src="../assets/images/example/laptop/80.png" alt="Key Bindings setup screen showing default keyboard shortcuts for Arcade Station functions">
 
-9. Near the top, there's a `Process Management` tab. This is the list of processes to close when resetting back to the menu or exiting Arcade Station. 
+8. Near the top, there's a `Process Management` tab. This is the list of processes to close when resetting back to the menu or exiting Arcade Station. 
 - Since I'm adding Megatouch, I need to add the processes it launches to make sure they get closed.
 - I added the list to the top and selected `Next`, leaving everything else.
 
@@ -103,7 +95,7 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/82.png" alt="Process Management tab with Megatouch processes added to the termination list">
 
 #### 🖼️ Configuring Dynamic Marquee
-10. I'm asked about setting up my display. This is for a dynamic marquee, or a "billboard" of sorts that shows the art for the game I pick.
+9. I'm asked about setting up my display. This is for a dynamic marquee, or a "billboard" of sorts that shows the art for the game I pick.
 - I click `Show Monitor Numbers` which shows a little number on each of my display, so I know which is identified as what for the system.
 - I want it on my right screen (or `Monitor 1` for Arcade Station's sake), so I'll select it.
 - I can choose the background color, since the dynamic marquee supports transparent .png files. I'm happy with `Black` so I'll leave it.
@@ -113,12 +105,12 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/91.png" alt="Monitor identification overlay showing numbered displays for dynamic marquee setup">
 
 #### 🔒 Configuring Kiosk Mode
-11. I'm asked about setting up Kiosk Mode, which would turn my computer into a purpose built station (when I turn it on, it'll auto-login and start arcade station - nothing else). Since this is just my portable machine, I won't. But if I were to, I'd check the box to `Enable Kiosk Mode` and input the credentials to automatically logon with. I'll select `Next`.
+10. I'm asked about setting up Kiosk Mode, which would turn my computer into a purpose built station (when I turn it on, it'll auto-login and start arcade station - nothing else). Since this is just my portable machine, I won't. But if I were to, I'd check the box to `Enable Kiosk Mode` and input the credentials to automatically logon with. I'll select `Next`.
 
     <img src="../assets/images/example/laptop/100.png" alt="Kiosk Mode configuration screen with Enable Kiosk Mode checkbox unchecked for portable setup">
 
 #### 🛠️ Configuring Utilities
-12. I'm asked about utilities to setup:
+11. I'm asked about utilities to setup:
 - There's a light reset program option, which lets me pick my light controller if I want to reset them between game selections
 - There's a VPN client setting, which lets me pick my VPN client and configuration file for autoconnecting when the system turns on
 - There's a streaming setting, so that I can pick my streaming program like OBS to have it auto-started on a button press from the key bindings earlier
@@ -129,13 +121,13 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/110.png" alt="Utilities setup screen showing default configuration options for audio, screenshots, and other features">
 
 #### 📋 Installation Summary
-13. I'll be shown my summary, which will include all of the settings I picked. When ready, I'll select `Finish` and will receive a confirmation dialog, prompting me to launch it for the first time if I setup kiosk mode for any security prompts.
+12. I'll be shown my summary, which will include all of the settings I picked. When ready, I'll select `Finish` and will receive a confirmation dialog, prompting me to launch it for the first time if I setup kiosk mode for any security prompts.
 
     <img src="../assets/images/example/laptop/120.png" alt="Installation Summary screen showing recap of all configured options for laptop setup">
 
     <img src="../assets/images/example/laptop/121.png" alt="Installation completion confirmation dialog">
 
-14. My install directory will open and I'll get a final confirmation box. Arcade Station is installed!
+13. My install directory will open and I'll get a final confirmation box. Arcade Station is installed!
 
     <img src="../assets/images/example/laptop/130.png" alt="Windows Explorer showing Arcade Station installation folder after successful installation">
 
