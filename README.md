@@ -49,7 +49,7 @@ This project was born from several personal and professional development goals:
 - 500MB free disk space
 
 ### 🔒 Kiosk Mode and UAC
-Arcade Station is primarily intended for use in dedicated, modern arcade cabinets, where a seamless kiosk-like experience is expected. In such cases, system-level operations — such as replacing the Windows shell, executing PowerShell scripts, and managing background processes — may be disrupted by User Account Control (UAC):
+Arcade Station is primarily intended for use in dedicated, modern arcade cabinets, where a seamless kiosk-like experience is expected. In such cases, system-level operations - such as replacing the Windows shell, executing PowerShell scripts, and managing background processes - may be disrupted by User Account Control (UAC):
 
 - For this reason, disabling UAC may be considered in tightly controlled kiosk environments. 
 - However, this should only be done with compensating security measures in place (e.g., restricted physical and network access).
@@ -107,3 +107,5 @@ This project incorporates several third-party components. See [NOTICE](NOTICE) f
 ## 🙏 Acknowledgments
 
 Please reference the [THANKS](THANKS.md) file.
+
+This is a free and open-source project - no payment is expected. But if you've found it helpful and want to show support, you're welcome to do so here: [Ko-Fi](https://ko-fi.com/dtammam) ☕
