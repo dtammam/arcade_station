@@ -107,5 +107,3 @@ This project incorporates several third-party components. See [NOTICE](NOTICE) f
 ## 🙏 Acknowledgments
 
 Please reference the [THANKS](THANKS.md) file.
-
-This is a free and open-source project - no payment is expected. But if you've found it helpful and want to show support, you're welcome to do so here: [Ko-Fi](https://ko-fi.com/dtammam) ☕
