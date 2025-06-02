@@ -134,7 +134,7 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/114.png" alt="MAME game configuration form with 'ddrmax2' entered as the ROM name">
 
-20. For the save state... all games have been bundled with a save state that immediately kicks off in Event Mode at the start screen, bypassing the boot options. You can confirm the name of the save state in the `ddr5734-mame\sta\ddrmax2` folder (all are named similarly as `o`.)
+20. For the save state... all games have been bundled with a save state that immediately kicks off in Event Mode at the start screen, bypassing the boot options. You can confirm the name of the save state in the `ddr573-mame\sta\ddrmax2` folder (all are named similarly as `o`.)
 
     <img src="../assets/images/example/ddr/115.png" alt="Windows Explorer showing save state file 'o' in the ddrmax2 folder">
 
