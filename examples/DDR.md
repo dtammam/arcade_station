@@ -1,33 +1,33 @@
-# 🕺 DDR Cabinet Setup Guide
+# DDR Cabinet Setup Guide
 
 ## Table of Contents
-- [🎮 DDR Cabinet Scenario](#ddr-cabinet-scenario)
-- [🎯 MAME Configuration (Optional)](#mame-configuration-optional)
-- [🔧 DDR Cabinet Installation Walkthrough](#ddr-cabinet-installation-walkthrough)
-  - [🚀 Launching the Installer](#launching-the-installer)
-  - [📁 Choosing Install Directory](#choosing-install-directory)
-  - [🎵 Configuring ITGmania](#configuring-itgmania)
-  - [💿 Configuring Binary-Based Games](#configuring-binary-based-games)
-  - [🕹️ Configuring MAME](#configuring-mame)
-  - [⌨️ Configuring Key Bindings and Processes](#configuring-key-bindings-and-processes)
-  - [🖼️ Configuring Dynamic Marquee](#configuring-dynamic-marquee)
-  - [🔒 Configuring Kiosk Mode](#configuring-kiosk-mode)
-  - [🛠️ Configuring Utilities](#configuring-utilities)
-  - [📋 Installation Summary](#installation-summary)
-  - [🎮 Arcade Station First Launch](#arcade-station-first-launch)
-  - [🧪 Testing ITGmania and Integrations](#testing-itgmania-and-integrations)
-  - [✨ Dynamic Marquee Examples](#dynamic-marquee-examples)
-  - [📸 Screenshot Example](#screenshot-example)
-  - [💻 Going Back to PC Mode](#going-back-to-pc-mode)
-- [🔄 Updating an Existing Arcade Station Setup](#updating-an-existing-arcade-station-setup)
+- [DDR Cabinet Scenario](#ddr-cabinet-scenario)
+- [MAME Configuration (Optional)](#mame-configuration-optional)
+- [DDR Cabinet Installation Walkthrough](#ddr-cabinet-installation-walkthrough)
+  - [Launching the Installer](#launching-the-installer)
+  - [Choosing Install Directory](#choosing-install-directory)
+  - [Configuring ITGmania](#configuring-itgmania)
+  - [Configuring Binary-Based Games](#configuring-binary-based-games)
+  - [Configuring MAME](#configuring-mame)
+  - [Configuring Key Bindings and Processes](#configuring-key-bindings-and-processes)
+  - [Configuring Dynamic Marquee](#configuring-dynamic-marquee)
+  - [Configuring Kiosk Mode](#configuring-kiosk-mode)
+  - [Configuring Utilities](#configuring-utilities)
+  - [Installation Summary](#installation-summary)
+  - [Arcade Station First Launch](#arcade-station-first-launch)
+  - [Testing ITGmania and Integrations](#testing-itgmania-and-integrations)
+  - [Dynamic Marquee Examples](#dynamic-marquee-examples)
+  - [Screenshot Example](#screenshot-example)
+  - [Going Back to PC Mode](#going-back-to-pc-mode)
+- [Updating an Existing Arcade Station Setup](#updating-an-existing-arcade-station-setup)
 
-### 🎮 DDR Cabinet Scenario
+### DDR Cabinet Scenario
 This guide will cover setting up Arcade Station on a dedicated DDR cabinet. This configuration will include:
 - Installing Arcade Station and configuring rhythm games, including ITGmania, ITG2, OpenITG and some 573-based versions via MAME
 - Reconfiguring an existing Arcade Station install to replace configured games and imagery
 - Leveraging the dynamic marquee and ITGmania dynamic marquee integration to see song banner art when selected
 
-### 🎯 MAME Configuration (Optional)
+### MAME Configuration (Optional)
 On MAME specifically,
 - You can download it [here](https://drive.google.com/file/d/1MeW7KpsYcS2fmws7ZQG0OomuIFVHAcid/view?usp=sharing), [here](https://mega.nz/file/ICVRFJwI#ksriX9qHzXEdDwwjsqYv84MN1V43CSedjK8lEosV_7Y), or [here](https://archive.org/download/ddr573-mame/ddr573-mame.zip). 
 - It includes:
@@ -38,7 +38,7 @@ On MAME specifically,
         - Once you have the MAME pack downloaded, you should extract it as-is (for this example, it'll be in `C:\Games\ddr-573`)
 
 
-### 🔧 DDR Cabinet Installation Walkthrough
+### DDR Cabinet Installation Walkthrough
 
 Let's go over where I am as I start this process:
 - I'm standing in front of my DDR cabinet, logged in as the local Administrator, and have downloaded the latest version of Arcade Station.
@@ -46,7 +46,7 @@ Let's go over where I am as I start this process:
 - It is a Windows-based PC, currently running Windows 11.
 - It has two monitors connected to it and I'm using an external keyboard and mouse.
 
-#### 🚀 Launching the Installer
+#### Launching the Installer
 1. I've disabled UAC by doing the following:
     1. Press `Windows Key` + `R`, type `UserAccountControlSettings`, and press `Enter`
     2. In the User Account Control Settings window, drag the slider to the bottom for the `Never notify` / `Never notify me when` option
@@ -70,7 +70,7 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/40.png" alt="Arcade Station installer welcome screen with Next button">
 
-#### 📁 Choosing Install Directory
+#### Choosing Install Directory
 6. I'm prompted to select an install directory, with the default being within the logged in user profile. I'll accept this default and select `Next`, and will then see the files copy.
 
     <img src="../assets/images/example/ddr/50.png" alt="Arcade Station installer directory selection screen showing default user profile path">
@@ -80,12 +80,12 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/70.png" alt="Arcade Station game configuration introduction screen with checkbox to configure games">
 
-#### 🎵 Configuring ITGmania
+#### Configuring ITGmania
 8. I have ITGmania installed in the default location, and the installer detected it for me! It's also going to use the default image in the menu and enables the dynamic marquee integration for displaying the song asset on my 2nd monitor. Since I plan to use that later, I'll leave all of it set to default and select `Next`.
 
     <img src="../assets/images/example/ddr/80.png" alt="ITGmania configuration screen showing auto-detected installation path and dynamic marquee options">
 
-#### 💿 Configuring Binary-Based Games
+#### Configuring Binary-Based Games
 9. I now see the binary game setup page, where .exe style games are added. I want to setup ITG2 and OpenITG. I'll select `Add Another Game` in the bottom to show a new game entry field.
 
     <img src="../assets/images/example/ddr/90.png" alt="Binary games configuration screen with Add Another Game button">
@@ -108,7 +108,7 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/105.png" alt="Binary games configuration screen showing both ITG2 and NotITG configured with their respective banners">
 
-#### 🕹️ Configuring MAME
+#### Configuring MAME
 
 14. I now see the MAME games setup page. We're leveraging the ddr-573 MAME setup mentioned earlier, so I'll use that context for configuring it here. 
 
@@ -147,7 +147,7 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/118.png" alt="MAME configuration screen showing all three configured games: DDRMAX2, DDRMAX, and 5thMIX with their banners">
 
-#### ⌨️ Configuring Key Bindings and Processes
+#### Configuring Key Bindings and Processes
 
 23. I now see the Key Bindings Setup page. These show bundled scripts provided with Arcade Station that do things like reset back to the menu, take screenshots, or restart the computer. I'm actually okay with all of these defaults, but if I wanted to change them, I'd point to different scripts or reference [available keys for keybindings here](https://github.com/boppreh/keyboard/blob/master/README.md#api). 
      - The most important one will be `Reset back to menu`, which kills any open game or console and goes back to the main menu, which is triggered when pressing `ctrl` + `space` by default.
@@ -159,24 +159,24 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/121.png" alt="Process Management tab showing list of processes to be terminated when resetting to menu">
 
-#### 🖼️ Configuring Dynamic Marquee
+#### Configuring Dynamic Marquee
 
 25. I now see the Display Configuration page, where I'll be able to configure the `Dynamic Marquee`, which is a digital replacement of the arcade cabinet art based on the selected game. I have two screens and want to do this, so I'll leave `Enable Dynamic Marquee` checked, and will select `Show Monitor Numbers` which will show which monitor is which. My second moniutor is showing up as `1`, so I'll select `1` in the dropdown and will select `Next`.
 
-#### 🔒 Configuring Kiosk Mode
+#### Configuring Kiosk Mode
 
 26. I now see the Kiosk Mode Configuration page, which will allow me to turn my machine into a `kiosk-mode` - it'll make it so that the machine immediately launches Arcade Station when the machine is powered on. I'll select `Enable Kiosk Mode` and will input my local username and password for autologin. I'll also make sure that `Replace Windows Explorer with Arcade Station` is checked.
 
     <img src="../assets/images/example/ddr/140.png" alt="Kiosk Mode configuration screen with Enable Kiosk Mode checkbox and autologin credentials fields">
 
-#### 🛠️ Configuring Utilities
+#### Configuring Utilities
 
 27. I now see the Utilities Setup page, which will allow me to configure things like lights management (for litboards or stacboards), setup a streaming button to launch OBS, setup a VPN client to autostart, add a volume OSD (since kiosk mode doesn't natively have one), or configure a location for screenshots. I'll go ahead and configure a combination of settings I need, which include a streaming button, a VPN to autostart, and screenshots being saved into a specific folder. After configuring the desired options, I'll select `Next`.
 
     <img src="../assets/images/example/ddr/150.png" alt="Utilities setup screen showing various configuration options for lights, streaming, VPN, and screenshots">    
     <img src="../assets/images/example/ddr/151.png" alt="Utilities configuration screen with specific settings for streaming, VPN, and screenshot folder paths">
 
-#### 📋 Installation Summary
+#### Installation Summary
 
 28. I now see the Installation Summary page, which shows a recap of all selected options for final review. I'm ready for it to complete and will select `Finish`!
 
@@ -187,7 +187,7 @@ Let's go over where I am as I start this process:
     <img src="../assets/images/example/ddr/161.png" alt="Installation success dialog advising to launch Arcade Station before rebooting for kiosk mode setup">
     <img src="../assets/images/example/ddr/162.png" alt="Windows Explorer showing Arcade Station installation folder with final success confirmation">
 
-#### 🎮 Arcade Station First Launch
+#### Arcade Station First Launch
 
 30. I'll right-click `launch_arcade_station.bat` in the window that just opened (my install of Arcade Station) and will run it as Administrator.
 
@@ -203,7 +203,7 @@ Let's go over where I am as I start this process:
 ---
 
 
-#### 🧪 Testing ITGmania and Integrations
+#### Testing ITGmania and Integrations
 
 32. I'll use the arrow keys to select it and press `Enter` to launch it - and would you look at that, the dynamic marquee changed to ITGmania!
 
@@ -216,7 +216,7 @@ Let's go over where I am as I start this process:
     <img src="../assets/images/example/ddr/184.png" width="40%" alt="Dynamic marquee displaying specific song banner art when song is selected in ITGmania">
     <img src="../assets/images/example/ddr/185.png" width="40%" alt="ITGmania gameplay screen with song playing and dynamic marquee showing song artwork">
 
-#### ✨ Dynamic Marquee Examples
+#### Dynamic Marquee Examples
 
 34. I'm going back to the menu by presing `Ctrl` + `Space` and then open each game, so I can see what they look like, pressing `Ctrl` + `Space` to go back to the menu after each launch. They look cool!
 
@@ -226,20 +226,20 @@ Let's go over where I am as I start this process:
     <img src="../assets/images/example/ddr/190.png" width="40%" alt="Dynamic marquee displaying DDR 5thMIX banner when MAME game is selected">
     
 
-#### 📸 Screenshot Example
+#### Screenshot Example
 35. For 5thMIX, I'll quickly test my screenshot function by pressing `/` - it saves to a folder which automatically uploads to my iCloud, and the screenshot looks crisp!
 
     <img src="../assets/images/example/ddr/191.png" width="40%" alt="DDR 5thMIX gameplay screen showing the game running in MAME">
     <img src="../assets/images/example/generic/ddr5th screenshot.jpg" width="40%" alt="Screenshot of DDR 5thMIX saved to iCloud folder showing crisp image quality">
 
-#### 💻 Going Back to PC Mode
+#### Going Back to PC Mode
 
 36. This is great, but I'm thinking about reconfiguring my setup - I want to swap out some games. I'll go back to PC mode by pressing `ctrl` + `f2`.
 
 <img src="../assets/images/example/ddr/192.png" width="40%" alt="Arcade Station showing exit confirmation dialog when pressing Ctrl+F2">
 <img src="../assets/images/example/ddr/193.png" width="40%" alt="Windows desktop showing return to PC mode from kiosk mode">
 
-### 🔄 Updating an Existing Arcade Station Setup
+### Updating an Existing Arcade Station Setup
 
 37. I'd like to update a few games and change my default banner image, now that I think about it. Now that I'm back in PC mode, I'll go back to the Arcade Station installer, launch it as Administrator... except this time, I'll choose to install on top of my existing install and will select `Yes` when prompted to reconfigure.
 

@@ -15,22 +15,22 @@
 </div>
 
 ## Table of Contents
-- [✨ Features](#features)
-- [🎯 Goals](#goals)
-- [📋 Requirements](#requirements)
-- [💾 Installation](#installation)
-- [🎮 Walkthroughs](#walkthroughs)
-- [🐛 Known Issues](#known-issues)
-- [⚖️ License](#license)
-- [🙏 Acknowledgments](#acknowledgments)
+- [Features](#features)
+- [Goals](#goals)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Walkthroughs](#walkthroughs)
+- [Known Issues](#known-issues)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
 
-## ✨ Features
+## Features
 
 - Cross-platform core functionality (Windows, Linux, and macOS)
 - Easy-to-use installation wizard (Windows installer in this release)
 - Game configuration for ITGMania, binary games, and MAME
 
-## 🎯 Goals
+## Goals
 
 This project was born from several personal and professional development goals:
 
@@ -40,15 +40,15 @@ This project was born from several personal and professional development goals:
 - **Create something modern and modular** - Building a user-friendly solution that non-technical people can easily use
 - **Have fun** - Enjoying the process of creating something meaningful for myself and the arcade gaming community
 
-## 📋 Requirements
+## Requirements
 
-### 💻 Technical
+### Technical
 - [Python 3.12.9](https://www.python.org/downloads/release/python-3129/)
 - Windows 10/11 (current release)
 - Administrator privileges for installation
 - 500MB free disk space
 
-### 🔒 Kiosk Mode and UAC
+### Kiosk Mode and UAC
 Arcade Station is primarily intended for use in dedicated, modern arcade cabinets, where a seamless kiosk-like experience is expected. In such cases, system-level operations - such as replacing the Windows shell, executing PowerShell scripts, and managing background processes - may be disrupted by User Account Control (UAC):
 
 - For this reason, disabling UAC may be considered in tightly controlled kiosk environments. 
@@ -57,12 +57,12 @@ Arcade Station is primarily intended for use in dedicated, modern arcade cabinet
 
 This recommendation is not made lightly, and future releases aim to improve compatibility and reduce reliance on this configuration.
 
-## 💾 Installation
+## Installation
 
-### ℹ️ Platform Support
+### Platform Support
 **Note:** While the core codebase is cross-platform, this initial release focuses on Windows installation. Mac and Linux installers are in development and will be available soon.
 
-### 🪟 (Windows - Current Release)
+### (Windows - Current Release)
 
 1. Download and install [Python 3.12.9](https://www.python.org/downloads/release/python-3129/). *You must select install as Admin and add to PATH options!*
 
@@ -85,25 +85,25 @@ This recommendation is not made lightly, and future releases aim to improve comp
 
 Congrats, you're setup! Whenever you want to start Arcade Station. Re-run `install_arcade_station.bat` and point to your install directory to reconfigure it.
 
-## 🎮 Walkthroughs
+## Walkthroughs
 
 For detailed walkthroughs with examples showing complete installation and usage flows:
 
-- **[🎮 Laptop Setup Guide](examples/LAPTOP.md)** - Portable multi-monitor setup using a Surface Laptop Studio with external displays, configuring ITGmania and Megatouch Maxx, and demonstrating dynamic marquee functionality
-- **[🕺 DDR Cabinet Setup Guide](examples/DDR.md)** - Dedicated DDR cabinet configuration with rhythm games including ITGmania, ITG2, OpenITG, and MAME-based 573 games, plus advanced features like kiosk mode and reconfiguration
+- **[Laptop Setup Guide](examples/LAPTOP.md)** - Portable multi-monitor setup using a Surface Laptop Studio with external displays, configuring ITGmania and Megatouch Maxx, and demonstrating dynamic marquee functionality
+- **[DDR Cabinet Setup Guide](examples/DDR.md)** - Dedicated DDR cabinet configuration with rhythm games including ITGmania, ITG2, OpenITG, and MAME-based 573 games, plus advanced features like kiosk mode and reconfiguration
 
-## 🐛 Known Issues
+## Known Issues
 
 - When reconfiguring an existing installation, your config may not save properly if you navigate back and forth between pages. This will be fixed in an upcoming release.
 
 These issues are being actively investigated and will be fixed in an upcoming update.
 
-## ⚖️ License
+## License
 
 **Arcade Station** is Free and Open Source Software (FOSS).
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 This project incorporates several third-party components. See [NOTICE](NOTICE) for detailed attribution and licensing information.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Please reference the [THANKS](THANKS.md) file.

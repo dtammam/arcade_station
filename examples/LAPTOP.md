@@ -1,21 +1,21 @@
-# 🎮 Laptop Setup Guide
+# Laptop Setup Guide
 
 ## Table of Contents
-- [💻 Multi-Monitor Laptop Scenario](#multi-monitor-laptop-scenario)
-- [🔧 Multi-Monitor Laptop Installation Walkthrough](#multi-monitor-laptop-installation-walkthrough)
-  - [🚀 Launching the Installer](#launching-the-installer)
-  - [📁 Choosing Install Directory](#choosing-install-directory)
-  - [🎵 Configuring ITGmania](#configuring-itgmania)
-  - [💿 Configuring Binary-Based Games](#configuring-binary-based-games)
-  - [🕹️ Configuring MAME](#configuring-mame)
-  - [⌨️ Configuring Key Bindings and Processes](#configuring-key-bindings-and-processes)
-  - [🖼️ Configuring Dynamic Marquee](#configuring-dynamic-marquee)
-  - [🔒 Configuring Kiosk Mode](#configuring-kiosk-mode)
-  - [🛠️ Configuring Utilities](#configuring-utilities)
-  - [📋 Installation Summary](#installation-summary)
-- [🎲 A Basic Example Workflow with Arcade Station](#a-basic-example-workflow-with-arcade-station)
+- [Multi-Monitor Laptop Scenario](#multi-monitor-laptop-scenario)
+- [Multi-Monitor Laptop Installation Walkthrough](#multi-monitor-laptop-installation-walkthrough)
+  - [Launching the Installer](#launching-the-installer)
+  - [Choosing Install Directory](#choosing-install-directory)
+  - [Configuring ITGmania](#configuring-itgmania)
+  - [Configuring Binary-Based Games](#configuring-binary-based-games)
+  - [Configuring MAME](#configuring-mame)
+  - [Configuring Key Bindings and Processes](#configuring-key-bindings-and-processes)
+  - [Configuring Dynamic Marquee](#configuring-dynamic-marquee)
+  - [Configuring Kiosk Mode](#configuring-kiosk-mode)
+  - [Configuring Utilities](#configuring-utilities)
+  - [Installation Summary](#installation-summary)
+- [A Basic Example Workflow with Arcade Station](#a-basic-example-workflow-with-arcade-station)
 
-### 💻 Multi-Monitor Laptop Scenario
+### Multi-Monitor Laptop Scenario
 
 In this example, I'm demonstrating a **portable multi-monitor setup** using a Surface Laptop Studio connected to two external displays. This configuration allows me to:
 - Run Arcade Station as the front-end interface
@@ -29,19 +29,19 @@ In this example, I'm demonstrating a **portable multi-monitor setup** using a Su
 
 **Important:** Arcade Station works with virtually any hardware configuration - from laptops to dedicated cabinets to home PCs. This example shows just one approach, but it can be adapted to specific needs, games, and hardware. Whether building a full-size MAME cabinet, a rhythm game station, or just organizing PC games, the same core functionality applies.
 
-### 🔧 Multi-Monitor Laptop Installation Walkthrough
+### Multi-Monitor Laptop Installation Walkthrough
 
 Let's go over where I am as I start this process:
 - I'm standing in front of my laptop, logged in as the local Administrator, and have downloaded the latest version of Arcade Station.
 - It is a Windows-based PC, currently running Windows 11.
 - It has one external monitor connected to it and I'm using an external keyboard and mouse.
 
-#### 🚀 Launching the Installer
+#### Launching the Installer
 1. I'll launch the installer and select `Next`.
 
    <img src="../assets/images/example/laptop/10.png" alt="Arcade Station installer welcome screen with Next button">
 
-#### 📁 Choosing Install Directory
+#### Choosing Install Directory
 2. I'll choose an install location. By default, it wants to install in the logged in users' profile. I'm okay with this and will select `Next`, and then see the files copying to the location.
 
    <img src="../assets/images/example/laptop/20.png" alt="Arcade Station installer directory selection screen showing default user profile path">
@@ -52,7 +52,7 @@ Let's go over where I am as I start this process:
 
    <img src="../assets/images/example/laptop/40.png" alt="Arcade Station game configuration introduction screen with checkbox to configure games">
 
-#### 🎵 Configuring ITGmania
+#### Configuring ITGmania
 4. I'm asked if I want to use ITGmania. I do, so I'll leave it and select `Next`.
 - The installer detected that I have it installed in the default location and is referencing it automatically
 - It is set to use a default bundled picture for ITGmania's banner
@@ -60,7 +60,7 @@ Let's go over where I am as I start this process:
 
    <img src="../assets/images/example/laptop/50.png" alt="ITGmania configuration screen showing auto-detected installation path and dynamic marquee options">
 
-#### 💿 Configuring Binary-Based Games
+#### Configuring Binary-Based Games
 5. I'm asked if I have any binary-based games to configure, which I do (Megatouch Maxx).
 - I'll type Megatouch for the name
 - I'll select browse and pick the .exe used to open my game
@@ -72,13 +72,13 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/62.png" alt="File browser showing bundled banner images folder with Megatouch banner available">
    <img src="../assets/images/example/laptop/63.png" alt="Binary games configuration screen with Megatouch fully configured including banner image">
 
-#### 🕹️ Configuring MAME
+#### Configuring MAME
 6. I'm asked if I want to setup any MAME games. I don't right now, so I'll select `Next`.
 - But if I did, I'd check the box, input my `mame.exe` path and `mame.ini` path, then `Add Another MAME-Based Game`, filling it out similarly to how I did the binaries (with the addition of ROMs and save states). 
 
    <img src="../assets/images/example/laptop/70.png" alt="MAME games configuration screen with option to enable MAME games unchecked">
 
-#### ⌨️ Configuring Key Bindings and Processes
+#### Configuring Key Bindings and Processes
 7. I'm asked to setup key bindings and processes to kill - very important.
 - In the `Key Bindings` tab, there are a set of default key bindings to do things like reset back to the menu, close Arcade Station, and even start streaming.
 - If I have any custom scripts or apps I want to run with a button press, I can add them here.
@@ -94,7 +94,7 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/81.png" alt="Process Management tab showing list of processes to be terminated when resetting to menu">
    <img src="../assets/images/example/laptop/82.png" alt="Process Management tab with Megatouch processes added to the termination list">
 
-#### 🖼️ Configuring Dynamic Marquee
+#### Configuring Dynamic Marquee
 9. I'm asked about setting up my display. This is for a dynamic marquee, or a "billboard" of sorts that shows the art for the game I pick.
 - I click `Show Monitor Numbers` which shows a little number on each of my display, so I know which is identified as what for the system.
 - I want it on my right screen (or `Monitor 1` for Arcade Station's sake), so I'll select it.
@@ -104,12 +104,12 @@ Let's go over where I am as I start this process:
    <img src="../assets/images/example/laptop/90.png" alt="Dynamic marquee configuration screen showing monitor selection and background color options">
    <img src="../assets/images/example/laptop/91.png" alt="Monitor identification overlay showing numbered displays for dynamic marquee setup">
 
-#### 🔒 Configuring Kiosk Mode
+#### Configuring Kiosk Mode
 10. I'm asked about setting up Kiosk Mode, which would turn my computer into a purpose built station (when I turn it on, it'll auto-login and start arcade station - nothing else). Since this is just my portable machine, I won't. But if I were to, I'd check the box to `Enable Kiosk Mode` and input the credentials to automatically logon with. I'll select `Next`.
 
     <img src="../assets/images/example/laptop/100.png" alt="Kiosk Mode configuration screen with Enable Kiosk Mode checkbox unchecked for portable setup">
 
-#### 🛠️ Configuring Utilities
+#### Configuring Utilities
 11. I'm asked about utilities to setup:
 - There's a light reset program option, which lets me pick my light controller if I want to reset them between game selections
 - There's a VPN client setting, which lets me pick my VPN client and configuration file for autoconnecting when the system turns on
@@ -120,7 +120,7 @@ Let's go over where I am as I start this process:
 
    <img src="../assets/images/example/laptop/110.png" alt="Utilities setup screen showing default configuration options for audio, screenshots, and other features">
 
-#### 📋 Installation Summary
+#### Installation Summary
 12. I'll be shown my summary, which will include all of the settings I picked. When ready, I'll select `Finish` and will receive a confirmation dialog, prompting me to launch it for the first time if I setup kiosk mode for any security prompts.
 
     <img src="../assets/images/example/laptop/120.png" alt="Installation Summary screen showing recap of all configured options for laptop setup">
@@ -133,7 +133,7 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/laptop/131.png" alt="Final installation success confirmation dialog">
 
-### 🎲 A Basic Example Workflow with Arcade Station
+### A Basic Example Workflow with Arcade Station
 
 1. I'll right-click `launch_arcade_station.bat` and run it as administrator to start Arcade Station. If I set kiosk mode up, after this, I'd reboot.
 
