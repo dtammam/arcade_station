@@ -254,6 +254,29 @@ def main():
     reset_process = launch_script(reset_script, identifier="kill_all_and_reset_pegasus")
     log_message(f"Launched kill_all_and_reset_pegasus.py with PID: {reset_process.pid}", "RESET")
     
+    # Check for default game launch on system startup
+    try:
+        default_config = load_toml_config('default_config.toml')
+        default_game_config = default_config.get('default_game', {})
+        default_game_start = default_game_config.get('default_game_start', False)
+        default_game = default_game_config.get('default_game', '')
+        
+        if default_game_start and default_game:
+            log_message(f"Default game launch enabled, will launch: {default_game}", "STARTUP")
+            # Wait for Pegasus to fully load before launching game
+            log_message("Waiting for Pegasus to initialize...", "STARTUP")
+            time.sleep(5)
+            
+            # Launch the default game
+            from arcade_station.launchers.launch_game import launch_game
+            log_message(f"Launching default game: {default_game}", "STARTUP")
+            launch_game(default_game)
+        elif default_game_start and not default_game:
+            log_message("default_game_start is enabled but default_game is not set", "STARTUP")
+    except Exception as e:
+        log_message(f"Error checking default game config: {e}", "STARTUP")
+        log_message(traceback.format_exc(), "STARTUP")
+    
     # If running in shell replacement mode, we need to keep this process running
     if args.shell_mode:
         log_message("Running in shell replacement mode, keeping process alive", "STARTUP")

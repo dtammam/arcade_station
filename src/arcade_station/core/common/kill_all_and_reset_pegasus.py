@@ -152,6 +152,7 @@ def main():
             log_message(f"Error in alternative Pegasus launch: {e}", "RESET")
             import traceback
             log_message(traceback.format_exc(), "RESET")
+    
 
 if __name__ == "__main__":
     main() 
