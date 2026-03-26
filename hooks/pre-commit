@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Load user tool paths (hooks run with a stripped environment)
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+echo "=== pre-commit ==="
+
+# Python format check
+if command -v black &>/dev/null; then
+  black --check src/ install/
+else
+  echo "SKIP: black not found (install via pip install black)"
+fi
+
+# Python lint
+if command -v flake8 &>/dev/null; then
+  flake8 src/ install/
+else
+  echo "SKIP: flake8 not found (install via pip install flake8)"
+fi
+
+# Markdown lint
+if command -v npx &>/dev/null; then
+  npx markdownlint-cli2 '**/*.md'
+else
+  echo "SKIP: npx not found (install Node.js for markdownlint)"
+fi
+
+echo "pre-commit checks passed"

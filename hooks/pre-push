@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Load user tool paths (hooks run with a stripped environment)
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+echo "=== pre-push ==="
+
+# Run test suite
+if command -v python &>/dev/null && python -c "import pytest" 2>/dev/null; then
+  python -m pytest
+else
+  echo "SKIP: pytest not found (install via pip install pytest)"
+fi
+
+echo "pre-push checks passed"
