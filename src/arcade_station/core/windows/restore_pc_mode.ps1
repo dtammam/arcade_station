@@ -19,6 +19,12 @@
 # Script to restore Windows to normal PC mode
 # Must be run as Administrator
 
+# Write-Host is intentional: this is an interactive administrator script where
+# colored console output provides clear feedback during system reconfiguration.
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '',
+    Justification = 'Intentional colored console output in interactive administrator script')]
+param()
+
 $ErrorActionPreference = "Stop"
 
 # Get the current directory where the script is located

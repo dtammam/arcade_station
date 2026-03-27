@@ -16,6 +16,9 @@
 #>
 
 function Update-RegistryKey {
+    # ShouldProcess omitted: internal helper called programmatically in automated kiosk workflow.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Internal helper called programmatically; ShouldProcess would break automated kiosk workflow')]
     <#
     .SYNOPSIS
         Updates a registry key with a specified value.
@@ -41,6 +44,9 @@ function Update-RegistryKey {
 }
 
 function Start-ProcessSilently {
+    # ShouldProcess omitted: internal helper called programmatically in automated kiosk workflow.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Internal helper called programmatically; ShouldProcess would break automated kiosk workflow')]
     <#
     .SYNOPSIS
         Starts a process silently with minimal UI flashing.
@@ -58,13 +64,13 @@ function Start-ProcessSilently {
     param (
         [Parameter(Mandatory=$true)]
         [string]$FilePath,
-        
+
         [Parameter(Mandatory=$false)]
         [string]$WorkingDirectory = "",
-        
+
         [Parameter(Mandatory=$false)]
         [string]$Arguments = "",
-        
+
         [Parameter(Mandatory=$false)]
         [ValidateSet("Hidden", "Normal", "Minimized", "Maximized")]
         [string]$WindowStyle = "Hidden"
@@ -83,21 +89,21 @@ function Start-ProcessSilently {
         # Use ProcessStartInfo for more control
         $startInfo = New-Object System.Diagnostics.ProcessStartInfo
         $startInfo.FileName = $FilePath
-        
+
         if ($Arguments) {
             $startInfo.Arguments = $Arguments
         }
-        
+
         if ($WorkingDirectory) {
             $startInfo.WorkingDirectory = $WorkingDirectory
         }
-        
+
         $startInfo.WindowStyle = $windowStyleValue
         $startInfo.CreateNoWindow = ($WindowStyle -eq "Hidden")
-        
+
         # Start the process
         $process = [System.Diagnostics.Process]::Start($startInfo)
-        
+
         Write-Information "Started process [$FilePath] with PID [$($process.Id)]"
         return $process
     }
@@ -112,6 +118,10 @@ function Restart-ComputerSafely {
     .SYNOPSIS
         Restarts the computer safely.
     #>
+    # ShouldProcess omitted: internal helper called programmatically in automated kiosk workflow.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Internal helper called programmatically; ShouldProcess would break automated kiosk workflow')]
+    param()
     try {
         Write-Information "Restarting computer now..."
         Restart-Computer -Force

@@ -41,33 +41,36 @@ Import-Module -Name $coreFunctionsModule -Force
 
 # Add this function to set window focus
 function Set-WindowFocus {
+    # ShouldProcess omitted: internal helper called programmatically in automated kiosk workflow.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Internal helper called programmatically; ShouldProcess would break automated kiosk workflow')]
     param (
         [int]$ProcessId,
         [string]$WindowTitle
     )
-    
+
     Add-Type @"
         using System;
         using System.Runtime.InteropServices;
-        
+
         public class WindowFocus {
             [DllImport("user32.dll")]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool SetForegroundWindow(IntPtr hWnd);
-            
+
             [DllImport("user32.dll")]
             public static extern IntPtr GetForegroundWindow();
-            
+
             [DllImport("user32.dll")]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-            
+
             [DllImport("user32.dll")]
             public static extern bool AllowSetForegroundWindow(int processId);
-            
+
             [DllImport("user32.dll")]
             public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
-            
+
             [DllImport("user32.dll")]
             public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         }
@@ -80,50 +83,50 @@ function Set-WindowFocus {
             if ($process) {
                 # Force allowing foreground window changes
                 [void][WindowFocus]::AllowSetForegroundWindow($ProcessId)
-                
+
                 # Try to set focus multiple times
                 for ($i = 0; $i -lt 3; $i++) {
                     # Show and maximize the window
                     [void][WindowFocus]::ShowWindow($process.MainWindowHandle, 3) # 3 = Maximize
                     [void][WindowFocus]::SetForegroundWindow($process.MainWindowHandle)
-                    
+
                     # Simulate Alt key press to force focus refresh
                     [WindowFocus]::keybd_event(0x12, 0, 0, 0) # Alt press
                     Start-Sleep -Milliseconds 100
                     [WindowFocus]::keybd_event(0x12, 0, 2, 0) # Alt release (2 = KEYEVENTF_KEYUP)
-                    
+
                     Start-Sleep -Milliseconds 500
                 }
                 Write-Information "Set window focus for process $ProcessId"
                 return $true
             }
         }
-        
+
         # Method 2: Try to find window by title substring
         if (-not [string]::IsNullOrEmpty($WindowTitle)) {
             Write-Information "Looking for window with title containing: $WindowTitle"
             $processes = Get-Process | Where-Object {$_.MainWindowTitle -like "*$WindowTitle*" -and $_.MainWindowHandle -ne 0}
-            
+
             if ($processes.Count -gt 0) {
                 $process = $processes[0]  # Take the first matching process
                 Write-Information "Found window: $($process.MainWindowTitle) (PID: $($process.Id))"
-                
+
                 # Show and maximize the window
                 [void][WindowFocus]::ShowWindow($process.MainWindowHandle, 3) # 3 = Maximize
                 [void][WindowFocus]::SetForegroundWindow($process.MainWindowHandle)
-                
+
                 # Simulate Alt key press to force focus refresh
                 [WindowFocus]::keybd_event(0x12, 0, 0, 0) # Alt press
                 Start-Sleep -Milliseconds 100
                 [WindowFocus]::keybd_event(0x12, 0, 2, 0) # Alt release (2 = KEYEVENTF_KEYUP)
-                
+
                 Write-Information "Set window focus for window with title '$WindowTitle'"
                 return $true
             } else {
                 Write-Information "No window found with title containing: $WindowTitle"
             }
         }
-        
+
         # Method 3: Fallback - Try to find any MAME window by well-known titles
         $knownMameTitles = @("MAME", $ROM)
         foreach ($title in $knownMameTitles) {
@@ -131,25 +134,25 @@ function Set-WindowFocus {
             if ($processes.Count -gt 0) {
                 $process = $processes[0]
                 Write-Information "Found MAME window with title: $($process.MainWindowTitle)"
-                
+
                 # Show and maximize the window
                 [void][WindowFocus]::ShowWindow($process.MainWindowHandle, 3) # 3 = Maximize
                 [void][WindowFocus]::SetForegroundWindow($process.MainWindowHandle)
-                
+
                 # Simulate Alt key press to force focus refresh
                 [WindowFocus]::keybd_event(0x12, 0, 0, 0) # Alt press
                 Start-Sleep -Milliseconds 100
                 [WindowFocus]::keybd_event(0x12, 0, 2, 0) # Alt release (2 = KEYEVENTF_KEYUP)
-                
+
                 Write-Information "Set window focus for MAME window"
                 return $true
             }
         }
-        
+
         # Method 4: Force foreground permission to any process
         [void][WindowFocus]::AllowSetForegroundWindow(-1)  # -1 = ASFW_ANY
         Write-Information "Allowed any process to take foreground focus"
-        
+
         Write-Information "All focus setting methods exhausted"
         return $false
     }
@@ -162,11 +165,14 @@ function Set-WindowFocus {
 # Main execution block
 try {
     Write-Information "Received ROM: [$ROM], State: [$State]"
-    # Change the working directory to the directory with MAME in it, does not parse well without it    
+    # Change the working directory to the directory with MAME in it, does not parse well without it
     Set-Location -Path $ExecutablePath
-    
+
     # Create our function for launching MAME with the appropriate ROM and state
     function Start-MAME {
+        # ShouldProcess omitted: internal helper called programmatically in automated kiosk workflow.
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+            Justification = 'Internal helper called programmatically; ShouldProcess would break automated kiosk workflow')]
         [CmdletBinding()]
         param(
             [Parameter(Mandatory)]
@@ -187,28 +193,28 @@ try {
     Write-Information "Launching MAME.exe with ROM: [$ROM], State: [$State]..."
     $mameProcess = Start-MAME -ROM $ROM -State $State -ExecutablePath $ExecutablePath -Executable $Executable -IniPath $IniPath
     Write-Information "Launched MAME.exe with PID: $($mameProcess.Id)"
-    
+
     # Give MAME time to initialize
     Write-Information "Waiting for MAME window to appear..."
     Start-Sleep -Seconds 3
-    
+
     # Try multiple focus attempts with increasing delay to ensure MAME window gets focus
     for ($attempt = 1; $attempt -le 5; $attempt++) {
         Write-Information "Focus attempt $attempt..."
-        
+
         # Try to find and focus the MAME window
         $focusResult = Set-WindowFocus -ProcessId $mameProcess.Id -WindowTitle $ROM
-        
+
         # If successful, exit the retry loop
         if ($focusResult) {
             Write-Information "Successfully focused MAME window on attempt $attempt"
             break
         }
-        
+
         # Wait a bit longer with each attempt
         Start-Sleep -Seconds ($attempt * 1)
     }
-    
+
     $Script:exitCode = 0
 } catch {
     Write-Information "Script failed with the following exception: [$($_.Message)]"
