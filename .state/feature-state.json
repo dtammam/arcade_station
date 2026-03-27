@@ -1,9 +1,9 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "implementation",
+  "stage": "review",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:16",
+  "updated_at": "2026-03-27T00:19",
   "tasks": [
     {
       "id": "P1-T1",
@@ -66,7 +66,7 @@
       "description": "If pwsh is available, run PSScriptAnalyzer against all .ps1 and .psm1 files: install_logic.ps1 (repo root), src/arcade_station/core/windows/*.ps1, src/arcade_station/core/windows/core_functions.psm1. Fix all warnings/errors. If pwsh is not available, document the skip and the commands needed to run manually.",
       "files_to_touch": ["install_logic.ps1", "src/arcade_station/core/windows/*.ps1", "src/arcade_station/core/windows/core_functions.psm1"],
       "definition_of_done": "PSScriptAnalyzer reports zero warnings/errors on all PowerShell files, or a documented note explains pwsh unavailability with manual run instructions.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P1-T8",
@@ -114,7 +114,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -137,6 +137,9 @@
     { "timestamp": "2026-03-27 00:13", "stage": "implementation", "note": "Completed P1-T4: Fixed 83 mypy errors across 17 files — Windows-only attrs (subprocess/os/ctypes/winreg), undefined globals, Callable attr access, type mismatches, Path/str conversion" },
     { "timestamp": "2026-03-27 00:14", "stage": "review", "note": "Running code review for P1-T4 (mypy fixes) — routing to quality-assurance agent" },
     { "timestamp": "2026-03-27 00:15", "stage": "implementation", "note": "Starting implementation — task P1-T5: Add TOML validation with taplo and fix any issues" },
-    { "timestamp": "2026-03-27 00:16", "stage": "implementation", "note": "Starting implementation — task P1-T6: Add shellcheck validation and fix shell script issues" }
+    { "timestamp": "2026-03-27 00:16", "stage": "implementation", "note": "Starting implementation — task P1-T6: Add shellcheck validation and fix shell script issues" },
+    { "timestamp": "2026-03-27 00:17", "stage": "implementation", "note": "Starting implementation — task P1-T7: Add PSScriptAnalyzer validation and fix PowerShell script issues" },
+    { "timestamp": "2026-03-27 00:18", "stage": "implementation", "note": "Completed P1-T7: Installed pwsh 7.6.0 and PSScriptAnalyzer; fixed 3 warning types across 5 files — renamed Write-Log→Write-InstallLog (PSAvoidOverwritingBuiltInCmdlets), added SuppressMessageAttribute for PSAvoidUsingWriteHost and PSUseShouldProcessForStateChangingFunctions, removed trailing whitespace from install_logic.ps1/start_mame.ps1/core_functions.psm1; zero warnings on all 6 target files" },
+    { "timestamp": "2026-03-27 00:19", "stage": "review", "note": "Running code review for P1-T7 (PSScriptAnalyzer fixes for PowerShell scripts) — routing to quality-assurance agent" }
   ]
 }
