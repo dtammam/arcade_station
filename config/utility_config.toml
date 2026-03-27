@@ -11,11 +11,11 @@ obs_arguments = "--startstreaming --disable-shutdown-check"
 
 [vpn]
 enabled = false
-vpn_application_directory = "C:/Program Files/OpenVPN/bin" 
-vpn_application = "openvpn-gui.exe" 
-vpn_process = "openvpn" 
-vpn_config_profile = "" 
-seconds_to_wait = 10 
+vpn_application_directory = "C:/Program Files/OpenVPN/bin"
+vpn_application = "openvpn-gui.exe"
+vpn_process = "openvpn"
+vpn_config_profile = ""
+seconds_to_wait = 10
 
 [osd]
 enabled = false
