@@ -1,0 +1,1 @@
+- [Batch to PowerShell migration](project_batch_to_powershell.md) — future tech debt: migrate .bat to .ps1 for linting

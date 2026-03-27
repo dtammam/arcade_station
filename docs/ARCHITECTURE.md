@@ -43,7 +43,13 @@ arcade_station/
 ├── docs/                     # Project documentation and exec plans
 ├── .claude/                  # Agent definitions, commands, hooks
 ├── .state/                   # Feature lifecycle state
-└── hooks/                    # Git hooks (pre-commit, pre-push)
+├── hooks/                    # Git hooks (pre-commit, pre-push)
+├── tests/                    # Test suite (pytest)
+│   ├── conftest.py           # Shared test fixtures
+│   └── unit/                 # Unit tests for semantic/pure functions
+├── pyproject.toml            # Python tool config (black, mypy, pytest, coverage)
+├── .flake8                   # flake8 linter config
+└── requirements-dev.txt      # Development-only Python dependencies
 ```
 
 ## Component relationships
