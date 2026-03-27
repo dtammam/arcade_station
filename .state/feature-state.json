@@ -3,7 +3,7 @@
   "feature_name": "Multi-phase code hygiene initiative",
   "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:15",
+  "updated_at": "2026-03-27T00:16",
   "tasks": [
     {
       "id": "P1-T1",
@@ -57,7 +57,7 @@
       "description": "Run shellcheck against all .sh files: bin/unix/take_screenshot.sh, setup.sh, src/arcade_station/core/linux/arcade_station_start.sh, src/arcade_station/core/macos/arcade_station_start.sh. Fix all warnings. Use targeted '# shellcheck disable=SCXXXX' directives with comments where intentional patterns are flagged. Exclude .claude/hooks/session-start.sh (agent infrastructure).",
       "files_to_touch": ["bin/unix/take_screenshot.sh", "setup.sh", "src/arcade_station/core/linux/arcade_station_start.sh", "src/arcade_station/core/macos/arcade_station_start.sh"],
       "definition_of_done": "'shellcheck bin/unix/*.sh setup.sh src/arcade_station/core/linux/*.sh src/arcade_station/core/macos/*.sh' exits 0.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P1-T7",
@@ -114,7 +114,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -136,6 +136,7 @@
     { "timestamp": "2026-03-27 00:12", "stage": "implementation", "note": "Starting implementation — task P1-T4: Fix all mypy errors in src/ and install/" },
     { "timestamp": "2026-03-27 00:13", "stage": "implementation", "note": "Completed P1-T4: Fixed 83 mypy errors across 17 files — Windows-only attrs (subprocess/os/ctypes/winreg), undefined globals, Callable attr access, type mismatches, Path/str conversion" },
     { "timestamp": "2026-03-27 00:14", "stage": "review", "note": "Running code review for P1-T4 (mypy fixes) — routing to quality-assurance agent" },
-    { "timestamp": "2026-03-27 00:15", "stage": "implementation", "note": "Starting implementation — task P1-T5: Add TOML validation with taplo and fix any issues" }
+    { "timestamp": "2026-03-27 00:15", "stage": "implementation", "note": "Starting implementation — task P1-T5: Add TOML validation with taplo and fix any issues" },
+    { "timestamp": "2026-03-27 00:16", "stage": "implementation", "note": "Starting implementation — task P1-T6: Add shellcheck validation and fix shell script issues" }
   ]
 }
