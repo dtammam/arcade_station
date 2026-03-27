@@ -25,18 +25,20 @@ import time
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
 )
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     kill_processes_from_toml,
     kill_process_by_identifier,
     load_toml_config,
     log_message,
     start_pegasus,
 )
-from arcade_station.core.common.light_control import (
+from arcade_station.core.common.light_control import (  # noqa: E402
     reset_lights,
     kill_specific_lights_process,
 )
-from arcade_station.core.common.display_image import display_image_from_config
+from arcade_station.core.common.display_image import (  # noqa: E402
+    display_image_from_config,
+)
 
 
 def main():
@@ -175,7 +177,7 @@ def main():
                     )
                 else:
                     log_message(
-                        f"Pegasus process exited immediately with code: {process.returncode}",
+                        f"Pegasus process exited immediately with code: {process.returncode}",  # noqa: E501
                         "RESET",
                     )
             else:

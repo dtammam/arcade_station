@@ -68,7 +68,7 @@ def main():
                 )
                 return
 
-        # Now execute the actual kill script - import directly since we're in the same directory
+        # Now execute the actual kill script - import directly since we're in the same directory  # noqa: E501
         from arcade_station.core.common.kill_arcade_station import main as kill_main
 
         print("Terminating Arcade Station...")
@@ -115,15 +115,18 @@ def main():
                     except Exception:
                         pass
 
-                # Create a PowerShell script that kills Python processes and then launches explorer
+                # Create a PowerShell script that kills Python processes and then launches explorer  # noqa: E501
                 ps_script = """
-                Get-Process python*, py* | Where-Object { $_.ProcessName -match 'python|py' } | ForEach-Object {
-                    Write-Host "Killing Python process: $($_.ProcessName) (PID: $($_.Id))"
+                Get-Process python*, py* |
+                    Where-Object { $_.ProcessName -match 'python|py' } |
+                    ForEach-Object {
+                    $msg = "Killing Python process: $($_.ProcessName) (PID: $($_.Id))"
+                    Write-Host $msg
                     Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
                 }
 
                 Write-Host "All Python processes terminated."
-                
+
                 # Start Explorer
                 Start-Sleep -Seconds 1
                 Write-Host "Starting Explorer..."
@@ -134,7 +137,7 @@ def main():
                     ["powershell", "-Command", ps_script],
                     creationflags=subprocess.CREATE_NEW_CONSOLE,
                 )
-                # Note: Don't launch explorer here since the PowerShell script will do it
+                # Note: Don't launch explorer here since the PowerShell script will do it  # noqa: E501
 
 
 if __name__ == "__main__":

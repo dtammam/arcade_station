@@ -86,7 +86,7 @@ class GameSetupPage(BasePage):
 
         itg_text = ttk.Label(
             itg_frame,
-            text="Built on StepMania 5.1, ITGMania powers high-performance rhythm gaming with the iconic Simply Love interface.",
+            text="Built on StepMania 5.1, ITGMania powers high-performance rhythm gaming with the iconic Simply Love interface.",  # noqa: E501
             wraplength=750,
             justify="left",
         )
@@ -103,7 +103,7 @@ class GameSetupPage(BasePage):
 
         binary_text = ttk.Label(
             binary_frame,
-            text="Whether it's Call of Duty, Grand Theft Auto, or any other binary game, binary games boot via .exe, .bat, or .ps1 files.",
+            text="Whether it's Call of Duty, Grand Theft Auto, or any other binary game, binary games boot via .exe, .bat, or .ps1 files.",  # noqa: E501
             wraplength=750,
             justify="left",
         )
@@ -120,7 +120,7 @@ class GameSetupPage(BasePage):
 
         mame_text = ttk.Label(
             mame_frame,
-            text="From Pac Man to Dig Dug, all the way to DDR EXTREME - MAME emulates classic arcade games on PC.",
+            text="From Pac Man to Dig Dug, all the way to DDR EXTREME - MAME emulates classic arcade games on PC.",  # noqa: E501
             wraplength=750,
             justify="left",
         )
@@ -135,9 +135,9 @@ class GameSetupPage(BasePage):
         process_text = ttk.Label(
             process_frame,
             text="In the next few screens, you'll configure each type of game:\n\n"
-            "- For each game, you can specify the executable path and an optional image for the menu and marquee.\n\n"
-            "- Your input will be saved to configuration files and can be updated later.\n\n"
-            "- Everything is optional. You can uncheck the box below to skip game configuration and preserve existing settings.",
+            "- For each game, you can specify the executable path and an optional image for the menu and marquee.\n\n"  # noqa: E501
+            "- Your input will be saved to configuration files and can be updated later.\n\n"  # noqa: E501
+            "- Everything is optional. You can uncheck the box below to skip game configuration and preserve existing settings.",  # noqa: E501
             wraplength=750,
             justify="left",
         )
@@ -155,7 +155,7 @@ class GameSetupPage(BasePage):
         # Help text
         help_text = ttk.Label(
             main_frame,
-            text="Note: You can skip game setup. You can always add more games later by running the installer again.",
+            text="Note: You can skip game setup. You can always add more games later by running the installer again.",  # noqa: E501
             font=("Arial", 9, "italic"),
             foreground="#555555",
             wraplength=750,

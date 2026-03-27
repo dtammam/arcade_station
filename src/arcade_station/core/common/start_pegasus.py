@@ -19,7 +19,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
 )
 
-from arcade_station.core.common.core_functions import start_pegasus
+from arcade_station.core.common.core_functions import start_pegasus  # noqa: E402
 
 if __name__ == "__main__":
     """

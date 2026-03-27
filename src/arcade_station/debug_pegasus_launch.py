@@ -17,11 +17,10 @@ import argparse
 # Add the root directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     log_message,
     load_toml_config,
     kill_processes_from_toml,
-    kill_process_by_identifier,
     determine_operating_system,
 )
 
@@ -163,7 +162,7 @@ def try_launch_pegasus(binary_path):
 
 
 def repair_pegasus_configuration():
-    """Attempt to repair Pegasus configuration by updating config files with correct paths."""
+    """Attempt to repair Pegasus configuration by updating config files with correct paths."""  # noqa: E501
     log_message("Attempting to repair Pegasus configuration...", "DEBUG")
 
     try:
@@ -231,7 +230,7 @@ def repair_pegasus_configuration():
                     "Configuration update required. Please update manually:", "DEBUG"
                 )
                 log_message(
-                    f"Edit pegasus_binaries.toml and ensure the binary name matches: {binary_name}",
+                    f"Edit pegasus_binaries.toml and ensure the binary name matches: {binary_name}",  # noqa: E501
                     "DEBUG",
                 )
                 log_message(
@@ -258,7 +257,7 @@ def repair_pegasus_configuration():
 
 
 def generate_pegasus_launch_script(binary_path):
-    """Generate a direct launch script for Pegasus that bypasses the normal startup flow."""
+    """Generate a direct launch script for Pegasus that bypasses the normal startup flow."""  # noqa: E501
     log_message(f"Generating direct launch script for: {binary_path}", "DEBUG")
 
     # Determine script extension based on OS
@@ -333,7 +332,7 @@ def main():
     if not binaries:
         log_message("No Pegasus binaries found!", "DEBUG")
         log_message(
-            "Please check your installation. The pegasus-fe directory may be missing or in an unexpected location.",
+            "Please check your installation. The pegasus-fe directory may be missing or in an unexpected location.",  # noqa: E501
             "DEBUG",
         )
         return
@@ -353,7 +352,7 @@ def main():
         launcher_path = generate_pegasus_launch_script(binaries[0])
         if launcher_path:
             log_message(f"Created launcher at: {launcher_path}", "DEBUG")
-            log_message(f"You can use this script to launch Pegasus directly.", "DEBUG")
+            log_message("You can use this script to launch Pegasus directly.", "DEBUG")
 
     # Skip launch attempt if scan-only
     if args.scan_only:
@@ -380,7 +379,7 @@ def main():
             "Failed to launch Pegasus from any of the detected binaries.", "DEBUG"
         )
         log_message(
-            "Please check the logs for error details and consider repairing your installation.",
+            "Please check the logs for error details and consider repairing your installation.",  # noqa: E501
             "DEBUG",
         )
 

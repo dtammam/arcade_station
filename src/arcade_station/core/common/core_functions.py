@@ -1,9 +1,9 @@
 """
 Core Functions Module for Arcade Station.
 
-This module contains essential utilities and functions used throughout the Arcade Station
-application. It handles configuration loading, process management, platform detection,
-and common operations that need to be accessible across the codebase.
+This module contains essential utilities and functions used throughout the
+Arcade Station application. It handles configuration loading, process management,
+platform detection, and common operations accessible across the codebase.
 
 The functions in this module are designed to be platform-agnostic where possible,
 with platform-specific implementations when necessary.
@@ -34,9 +34,6 @@ def open_header(script_name):
     Returns:
         None. Sets global variables for use throughout the script.
     """
-    # Determine the directory of the current script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-
     # Load configuration from default_config.toml
     config = load_toml_config("default_config.toml")
     log_folder_path = config["logging"]["logdirectory"]
@@ -269,8 +266,6 @@ def get_pegasus_binary(installed_games):
     Returns:
         str: Absolute path to the appropriate Pegasus binary for the current OS.
     """
-    config = load_toml_config("default_config.toml")
-
     # First try to find pegasus-fe in a relative path (installed environment)
     # Try different possible locations
     potential_paths = [
@@ -817,7 +812,7 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
 
     try:
         # Execute the PowerShell command
-        process = subprocess.Popen(
+        subprocess.Popen(
             [
                 "powershell.exe",
                 "-WindowStyle",

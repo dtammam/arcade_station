@@ -17,12 +17,12 @@ import subprocess
 # Add the parent directory of 'arcade_station' to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     load_toml_config,
     log_message,
     kill_process_by_identifier,
 )
-from arcade_station.core.common.display_image import display_image
+from arcade_station.core.common.display_image import display_image  # noqa: E402
 
 
 def ensure_required_packages():
@@ -33,10 +33,8 @@ def ensure_required_packages():
         return
 
     try:
-        import win32gui
-        import win32process
-        import win32con
-        import psutil
+        import win32gui  # noqa: F401
+        import win32con  # noqa: F401
 
         log_message("All required Windows modules available", "BANNER")
     except ImportError:
@@ -58,9 +56,7 @@ def ensure_required_packages():
 if platform.system() == "Windows":
     try:
         import win32gui
-        import win32process
         import win32con
-        import psutil
 
         has_win32_modules = True
     except ImportError:
@@ -77,8 +73,6 @@ def find_itgmania_window():
     """
     if not has_win32_modules:
         return None
-
-    result = None
 
     def enum_windows_callback(hwnd, results):
         if win32gui.IsWindowVisible(hwnd):
@@ -130,7 +124,6 @@ def monitor_itgmania_log(config_path="display_config.toml"):
     try:
         config = load_toml_config(config_path)
         dynamic_marquee_config = config.get("dynamic_marquee", {})
-        display_config = config.get("display", {})
 
         # Check if ITGMania display is enabled
         if not dynamic_marquee_config.get("itgmania_display_enabled", False):
@@ -198,7 +191,7 @@ def monitor_itgmania_log(config_path="display_config.toml"):
                         with open(log_file, "r", encoding="utf-8") as f:
                             content = f.read()
 
-                        # Only process if content has changed and not too soon after last update
+                        # Only process if content has changed and not too soon after last update  # noqa: E501
                         current_time = time.time()
                         if (
                             content != last_content

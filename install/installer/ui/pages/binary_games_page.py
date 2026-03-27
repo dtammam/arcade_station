@@ -10,7 +10,7 @@ import tomllib
 import logging
 
 from .base_page import BasePage
-from ...utils.game_id import generate_game_id, validate_game_id, get_display_name
+from ...utils.game_id import generate_game_id, validate_game_id
 
 
 class GameEntry:
@@ -215,7 +215,7 @@ class GameEntry:
         if not validate_game_id(game_id):
             messagebox.showerror(
                 "Invalid ID",
-                f"The game ID '{game_id}' is invalid. Only lowercase letters, numbers, and underscores are allowed.",
+                f"The game ID '{game_id}' is invalid. Only lowercase letters, numbers, and underscores are allowed.",  # noqa: E501
             )
             return False
 
@@ -307,7 +307,7 @@ class BinaryGamesPage(BasePage):
             text="Add games that are launched directly from executable files. "
             "These can include OpenITG, NotITG, DDR Grand Prix, or any other "
             "standalone game. "
-            "Click 'Add Another Game' below to add games, or select Next to skip this page.",
+            "Click 'Add Another Game' below to add games, or select Next to skip this page.",  # noqa: E501
             wraplength=500,
             justify="left",
         )

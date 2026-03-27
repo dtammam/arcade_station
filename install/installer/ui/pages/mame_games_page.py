@@ -10,7 +10,7 @@ import tomllib
 import logging
 
 from .base_page import BasePage
-from ...utils.game_id import generate_game_id, validate_game_id, get_display_name
+from ...utils.game_id import generate_game_id, validate_game_id
 
 
 class MameGameEntry:
@@ -191,7 +191,7 @@ class MameGameEntry:
         if not validate_game_id(game_id):
             messagebox.showerror(
                 "Invalid ID",
-                f"The game ID '{game_id}' is invalid. Only lowercase letters, numbers, and underscores are allowed.",
+                f"The game ID '{game_id}' is invalid. Only lowercase letters, numbers, and underscores are allowed.",  # noqa: E501
             )
             return False
 
@@ -542,7 +542,7 @@ class MAMEGamesPage(BasePage):
         return True
 
     def on_next(self):
-        """Override the base class method to prevent config updates when MAME is disabled."""
+        """Override the base class method to prevent config updates when MAME is disabled."""  # noqa: E501
         if self.validate():
             self.save_data()
             self.on_leave()

@@ -28,7 +28,7 @@ for root in possible_roots:
     sys.path.insert(0, root)
     try:
         # Try to import a module to verify path is correct
-        import arcade_station
+        import arcade_station  # noqa: F401
 
         arcade_station_found = True
         break
@@ -84,7 +84,8 @@ except ImportError as e:
 
     def kill_all_processes():
         """
-        Fallback function to kill all Arcade Station processes when core_functions import fails.
+        Fallback function to kill all Arcade Station processes when
+        core_functions import fails.
 
         Attempts to terminate a predefined list of common Arcade Station processes
         using taskkill command. Includes frontend, emulators, and utility processes.
@@ -126,7 +127,9 @@ def create_kill_python_script():
 $currentPID = $PID
 
 # Kill all Python processes except this PowerShell process
-Get-Process python*, py* | Where-Object { $_.ProcessName -match 'python|py' } | ForEach-Object {
+Get-Process python*, py* |
+    Where-Object { $_.ProcessName -match 'python|py' } |
+    ForEach-Object {
     Write-Host "Killing Python process: $($_.ProcessName) (PID: $($_.Id))"
     Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
 }

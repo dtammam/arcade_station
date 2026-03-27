@@ -13,7 +13,6 @@ import sys
 import os
 from datetime import datetime
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QScreen
 import tomllib
 import subprocess
 
@@ -22,7 +21,7 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 )
 
-from arcade_station.core.common.core_functions import log_message
+from arcade_station.core.common.core_functions import log_message  # noqa: E402
 
 
 def load_config(config_path="config/screenshot_config.toml"):
@@ -97,7 +96,7 @@ def take_screenshot(
 
     if monitor_index >= len(screens):
         log_message(
-            f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.",
+            f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.",  # noqa: E501
             "SCREENSHOT",
         )
         monitor_index = 0

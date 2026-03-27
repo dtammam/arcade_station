@@ -3,6 +3,7 @@ Installation location page for the Arcade Station Installer
 """
 
 import os
+import shutil
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
@@ -92,8 +93,8 @@ class InstallLocationPage(BasePage):
 
             warning_label = ttk.Label(
                 warning_frame,
-                text="Warning: A new installation will not remove the existing installation. "
-                "To avoid conflicts, consider using the same location as the existing installation "
+                text="Warning: A new installation will not remove the existing installation. "  # noqa: E501
+                "To avoid conflicts, consider using the same location as the existing installation "  # noqa: E501
                 "or completely removing the old installation first.",
                 wraplength=500,
                 foreground="red",
@@ -183,7 +184,7 @@ class InstallLocationPage(BasePage):
                             except Exception as e:
                                 messagebox.showerror(
                                     "Delete Error",
-                                    f"Could not delete {item}. Please close any programs using files in this directory and try again.\n\nError: {e}",
+                                    f"Could not delete {item}. Please close any programs using files in this directory and try again.\n\nError: {e}",  # noqa: E501
                                 )
                                 return False
 
@@ -195,7 +196,7 @@ class InstallLocationPage(BasePage):
                         except Exception:
                             # If we can't delete .git, just log it and continue
                             print(
-                                "Warning: Could not delete .git directory, continuing with installation"
+                                "Warning: Could not delete .git directory, continuing with installation"  # noqa: E501
                             )
 
                     # Recreate the directory
@@ -205,7 +206,7 @@ class InstallLocationPage(BasePage):
                 except Exception as e:
                     messagebox.showerror(
                         "Reset Error",
-                        f"An unexpected error occurred while resetting the installation: {e}",
+                        f"An unexpected error occurred while resetting the installation: {e}",  # noqa: E501
                     )
                     return False
 
@@ -320,7 +321,7 @@ class InstallLocationPage(BasePage):
 
                     # Copy each item (except the installer while it's running)
                     for item in all_items:
-                        # Skip the installer for now to avoid copying it while it's running
+                        # Skip the installer for now to avoid copying it while it's running  # noqa: E501
                         if item.name == "installer":
                             continue
 
@@ -371,12 +372,12 @@ class InstallLocationPage(BasePage):
                         # Create the destination directory
                         os.makedirs(installer_dst, exist_ok=True)
 
-                        # Copy all files and subdirectories in the installer except for any running processes
+                        # Copy all files and subdirectories in the installer except for any running processes  # noqa: E501
                         for item in installer_src.iterdir():
                             dst_item = installer_dst / item.name
                             try:
                                 if item.is_dir():
-                                    # Use our custom recursive copy function for complete copy
+                                    # Use our custom recursive copy function for complete copy  # noqa: E501
                                     def copy_installer_dir(src, dst):
                                         nonlocal total_dirs_copied, total_files_copied
                                         os.makedirs(dst, exist_ok=True)
@@ -392,9 +393,9 @@ class InstallLocationPage(BasePage):
                                                 try:
                                                     shutil.copy2(s, d)
                                                     total_files_copied += 1
-                                                except (PermissionError, OSError) as e:
+                                                except (PermissionError, OSError):
                                                     update_status(
-                                                        f"Skipping locked file: {os.path.basename(s)}"
+                                                        f"Skipping locked file: {os.path.basename(s)}"  # noqa: E501
                                                     )
 
                                     copy_installer_dir(str(item), str(dst_item))
@@ -427,7 +428,7 @@ class InstallLocationPage(BasePage):
                     # Mark files as copied
                     self.app.install_manager.files_copied = True
                     update_status(
-                        f"Copy completed: {total_dirs_copied} directories and {total_files_copied} files copied successfully!"
+                        f"Copy completed: {total_dirs_copied} directories and {total_files_copied} files copied successfully!"  # noqa: E501
                     )
 
                 except Exception as e:
@@ -464,7 +465,7 @@ class InstallLocationPage(BasePage):
             # Show error and return to previous page
             messagebox.showerror(
                 "Copy Error",
-                f"An error occurred while copying files: {str(e)}\n\nPlease ensure you have sufficient permissions and try again.",
+                f"An error occurred while copying files: {str(e)}\n\nPlease ensure you have sufficient permissions and try again.",  # noqa: E501
             )
 
             # Go back to the previous page

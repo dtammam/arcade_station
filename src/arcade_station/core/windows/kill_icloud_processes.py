@@ -23,7 +23,10 @@ base_dir = os.path.abspath(os.path.join(script_dir, "..", ".."))
 project_root = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, project_root)
 
-from arcade_station.core.common.core_functions import log_message, load_toml_config
+from arcade_station.core.common.core_functions import (  # noqa: E402
+    log_message,
+    load_toml_config,
+)
 
 
 def kill_icloud_processes():

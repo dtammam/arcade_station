@@ -3,22 +3,11 @@ Installation manager for handling the Arcade Station installation process
 """
 
 import os
-import shutil
-import platform
 import logging
-from pathlib import Path
 import tomllib
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime
+from typing import Dict, Any
 
-# Try to import tomli_w for writing TOML files
-try:
-    import tomli_w
-except ImportError:
-    # If tomli_w is not available, we'll handle it when writing TOML files
-    pass
-
-from .. import IS_WINDOWS, IS_LINUX, IS_MAC, INSTALLER_DIR, RESOURCES_DIR
+from .. import IS_WINDOWS, IS_LINUX, IS_MAC, RESOURCES_DIR
 from ..utils.game_id import get_display_name
 
 
@@ -37,7 +26,7 @@ class InstallationManager:
         self.logger = logging.getLogger("InstallationManager")
         self.logger.info("=== Starting Arcade Station Installation ===")
         self.logger.info(
-            f"Platform: {'Windows' if self.is_windows else 'Linux' if self.is_linux else 'Mac'}"
+            f"Platform: {'Windows' if self.is_windows else 'Linux' if self.is_linux else 'Mac'}"  # noqa: E501
         )
         self.logger.info(f"Resources directory: {self.resources_dir}")
 
@@ -351,7 +340,7 @@ class InstallationManager:
 
             # Log the process
             self.logger.info(
-                f"Starting to copy all project files from {current_dir} to {install_path}"
+                f"Starting to copy all project files from {current_dir} to {install_path}"  # noqa: E501
             )
 
             # Get all items in the current directory
@@ -382,7 +371,9 @@ class InstallationManager:
                 if item.is_dir():
                     # Create custom copy function for counting items
                     def copy_dir_recursive(src, dst):
-                        """Recursively copy a directory and its contents, updating counters.
+                        """Recursively copy a directory and its contents.
+
+                        Updates total_dirs_copied and total_files_copied counters.
 
                         Args:
                             src: Source directory path.
@@ -427,7 +418,9 @@ class InstallationManager:
                         if item.is_dir():
                             # Custom function to copy installer directories
                             def copy_installer_dir(src, dst):
-                                """Recursively copy installer directory and its contents, updating counters.
+                                """Recursively copy the installer directory.
+
+                                Copies all contents and updates counter variables.
 
                                 Args:
                                     src: Source directory path.
@@ -447,9 +440,9 @@ class InstallationManager:
                                         try:
                                             shutil.copy2(s, d)
                                             total_files_copied += 1
-                                        except (PermissionError, OSError) as e:
+                                        except (PermissionError, OSError):
                                             self.logger.warning(
-                                                f"Skipping locked file: {os.path.basename(s)}"
+                                                f"Skipping locked file: {os.path.basename(s)}"  # noqa: E501
                                             )
 
                             copy_installer_dir(str(item), str(dst_item))
@@ -480,7 +473,7 @@ class InstallationManager:
                     os.makedirs(dir_full_path, exist_ok=True)
 
             self.logger.info(
-                f"Project files copied successfully: {total_dirs_copied} directories and {total_files_copied} files"
+                f"Project files copied successfully: {total_dirs_copied} directories and {total_files_copied} files"  # noqa: E501
             )
             self.files_copied = True  # Mark files as copied
         except Exception as e:
@@ -661,7 +654,7 @@ class InstallationManager:
         # If no key bindings were provided in the configuration, set default ones
         if not key_listener["key_mappings"]:
             key_listener["key_mappings"] = {
-                "ctrl+space": "../arcade_station/core/common/kill_all_and_reset_pegasus.py"
+                "ctrl+space": "../arcade_station/core/common/kill_all_and_reset_pegasus.py"  # noqa: E501
             }
 
         self._write_toml(os.path.join(config_dir, "key_listener.toml"), key_listener)
@@ -746,7 +739,7 @@ class InstallationManager:
                 "enabled": config.get("use_icloud", False),
                 "interval_seconds": 360,
                 "delete_after_upload": True,
-                "apple_services_path": "C:/Program Files (x86)/Common Files/Apple/Internet Services/",
+                "apple_services_path": "C:/Program Files (x86)/Common Files/Apple/Internet Services/",  # noqa: E501
                 "processes_to_restart": ["iCloudServices", "iCloudPhotos"],
             },
         }
@@ -866,9 +859,9 @@ shortname: arcade_station
                 metadata_content += """game: ITGMania
 file: not\\using\\files\\to\\launch\\games\\ITGMania
 sortBy: a
-launch: 
-    "{}" 
-    "{}" 
+launch:
+    "{}"
+    "{}"
     "itgmania"
 assets.box_front: {}
 
@@ -906,9 +899,9 @@ assets.box_front: {}
             metadata_content += """game: {}
 file: not\\using\\files\\to\\launch\\games\\{}
 sortBy: {}
-launch: 
-    "{}" 
-    "{}" 
+launch:
+    "{}"
+    "{}"
     "{}"
 assets.box_front: {}
 
@@ -958,9 +951,9 @@ assets.box_front: {}
                 metadata_content += """game: {}
 file: not\\using\\files\\to\\launch\\games\\{}
 sortBy: {}
-launch: 
-    "{}" 
-    "{}" 
+launch:
+    "{}"
+    "{}"
     "{}"
 {}
 
@@ -1000,7 +993,7 @@ launch:
                 )
                 asset_path = game_info.get("banner", "")
                 if asset_path:
-                    # Convert absolute paths to relative if they're in the install directory
+                    # Convert absolute paths to relative if they're in the install directory  # noqa: E501
                     if asset_path.startswith(config["install_path"]):
                         asset_path = asset_path.replace(
                             config["install_path"], "../.."
@@ -1015,9 +1008,9 @@ launch:
                 metadata_content += """game: {}
 file: not\\using\\files\\to\\launch\\games\\{}
 sortBy: {}
-launch: 
-    "{}" 
-    "{}" 
+launch:
+    "{}"
+    "{}"
     "{}"
 assets.box_front: {}
 
@@ -1104,7 +1097,7 @@ assets.box_front: {}
                 winreg.SetValueEx(key, "DefaultUserName", 0, winreg.REG_SZ, username)
                 winreg.SetValueEx(key, "DefaultPassword", 0, winreg.REG_SZ, password)
                 winreg.SetValueEx(key, "AutoAdminLogon", 0, winreg.REG_SZ, "1")
-                # Add ForceAutoLogon to prevent password changes from breaking auto-logon
+                # Add ForceAutoLogon to prevent password changes from breaking auto-logon  # noqa: E501
                 winreg.SetValueEx(key, "ForceAutoLogon", 0, winreg.REG_SZ, "1")
 
             self.logger.info(f"Configured Windows auto-logon for user '{username}'")
@@ -1125,7 +1118,7 @@ assets.box_front: {}
 
             # Create a startup script
             startup_path = os.path.join(install_path, "launch_arcade_station.bat")
-            startup_content = f"""@echo off
+            startup_content = """@echo off
 REM Check for admin privileges and elevate if needed
 net session >nul 2>&1
 if %errorLevel% neq 0 (
@@ -1197,7 +1190,9 @@ exit /b
             self.logger.error(f"Error setting up shell replacement: {str(e)}")
 
     def _setup_audioswitch_settings(self, install_path: str) -> None:
-        """Set up AudioSwitch settings by copying the Settings.xml file to %LOCALAPPDATA%\AudioSwitch.
+        """Set up AudioSwitch settings.
+
+        Copies the Settings.xml file to %LOCALAPPDATA%\\AudioSwitch.
 
         Args:
             install_path: Installation directory
@@ -1242,7 +1237,7 @@ exit /b
                 import shutil
 
                 self.logger.info(
-                    f"Copying Settings.xml from {settings_xml_source} to {settings_xml_dest}"
+                    f"Copying Settings.xml from {settings_xml_source} to {settings_xml_dest}"  # noqa: E501
                 )
                 shutil.copy2(settings_xml_source, settings_xml_dest)
                 self.logger.info("AudioSwitch settings configured successfully")
@@ -1264,11 +1259,12 @@ exit /b
         os.makedirs(autostart_dir, exist_ok=True)
 
         desktop_entry = os.path.join(autostart_dir, "arcade_station.desktop")
+        start_script = ".venv/bin/python src/arcade_station/core/common/start_pegasus.py"  # noqa: E501
         entry_content = f"""[Desktop Entry]
 Type=Application
 Name=Arcade Station
 Comment=Arcade Station Frontend
-Exec=bash -c "cd {install_path} && .venv/bin/python src/arcade_station/core/common/start_pegasus.py"
+Exec=bash -c "cd {install_path} && {start_script}"
 Terminal=false
 Categories=Game;
 """
@@ -1293,8 +1289,14 @@ Categories=Game;
         os.makedirs(launch_agents_dir, exist_ok=True)
 
         plist_file = os.path.join(launch_agents_dir, "com.arcadestation.startup.plist")
+        dtd_url = "http://www.apple.com/DTDs/PropertyList-1.0.dtd"
+        plist_doctype = f'<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "{dtd_url}">'  # noqa: E501
+        plist_cmd = (
+            f"cd {install_path} && "
+            ".venv/bin/python src/arcade_station/core/common/start_pegasus.py"
+        )
         plist_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+{plist_doctype}
 <plist version="1.0">
 <dict>
     <key>Label</key>
@@ -1303,7 +1305,7 @@ Categories=Game;
     <array>
         <string>bash</string>
         <string>-c</string>
-        <string>cd {install_path} && .venv/bin/python src/arcade_station/core/common/start_pegasus.py</string>
+        <string>{plist_cmd}</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -1417,7 +1419,7 @@ Categories=Game;
                 if os.path.basename(itgmania_base_path).lower() == "program":
                     itgmania_base_path = os.path.dirname(itgmania_base_path)
                     self.logger.info(
-                        f"Adjusted to go up from Program directory: {itgmania_base_path}"
+                        f"Adjusted to go up from Program directory: {itgmania_base_path}"  # noqa: E501
                     )
             else:
                 itgmania_base_path = itgmania_path
@@ -1509,7 +1511,7 @@ Categories=Game;
                     itgmania_base_path.replace("\\", "/")
                 )
 
-                # Write the updated config - use manual writing since tomllib can't write
+                # Write the updated config - use manual writing since tomllib can't write  # noqa: E501
                 self._write_toml(display_config_path, display_config)
 
                 self.logger.info("Updated display_config.toml with ITGMania settings")

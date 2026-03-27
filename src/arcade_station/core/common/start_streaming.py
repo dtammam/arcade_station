@@ -16,7 +16,10 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 )
 
-from arcade_station.core.common.core_functions import load_toml_config, log_message
+from arcade_station.core.common.core_functions import (  # noqa: E402
+    load_toml_config,
+    log_message,
+)
 
 
 def start_streaming():

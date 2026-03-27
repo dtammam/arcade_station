@@ -138,7 +138,7 @@ class SummaryPage(BasePage):
         self.summary_text.insert("end", "Display Configuration:\n", "section")
         self.summary_text.insert(
             "end",
-            f"Dynamic Marquee: {'Enabled' if self.app.user_config.get('use_dynamic_marquee', False) else 'Disabled'}\n",
+            f"Dynamic Marquee: {'Enabled' if self.app.user_config.get('use_dynamic_marquee', False) else 'Disabled'}\n",  # noqa: E501
         )
 
         if self.app.user_config.get("use_dynamic_marquee", False):
@@ -148,7 +148,7 @@ class SummaryPage(BasePage):
             )
             self.summary_text.insert(
                 "end",
-                f"Background Color: {self.app.user_config.get('marquee_background_color', 'black')}\n",
+                f"Background Color: {self.app.user_config.get('marquee_background_color', 'black')}\n",  # noqa: E501
             )
 
             default_image = self.app.user_config.get("default_marquee_image", "")
@@ -157,7 +157,7 @@ class SummaryPage(BasePage):
 
             self.summary_text.insert(
                 "end",
-                f"ITGMania Integration: {'Enabled' if self.app.user_config.get('enable_itgmania_display', False) else 'Disabled'}\n",
+                f"ITGMania Integration: {'Enabled' if self.app.user_config.get('enable_itgmania_display', False) else 'Disabled'}\n",  # noqa: E501
             )
 
         self.summary_text.insert("end", "\n")
@@ -177,7 +177,7 @@ class SummaryPage(BasePage):
             for game_id, game_info in binary_games.items():
                 self.summary_text.insert(
                     "end",
-                    f"- {game_info.get('display_name', game_id)}: {game_info.get('path', 'No path')}\n",
+                    f"- {game_info.get('display_name', game_id)}: {game_info.get('path', 'No path')}\n",  # noqa: E501
                 )
 
         # MAME games
@@ -187,7 +187,7 @@ class SummaryPage(BasePage):
             for game_id, game_info in mame_games.items():
                 self.summary_text.insert(
                     "end",
-                    f"- {game_info.get('display_name', game_id)}: {game_info.get('rom', 'No ROM')}\n",
+                    f"- {game_info.get('display_name', game_id)}: {game_info.get('rom', 'No ROM')}\n",  # noqa: E501
                 )
 
         self.summary_text.insert("end", "\n")
@@ -204,7 +204,7 @@ class SummaryPage(BasePage):
         if kiosk_mode:
             self.summary_text.insert(
                 "end",
-                f"Replace Shell: {'Yes' if self.app.user_config.get('kiosk_replace_shell', False) else 'No'}\n",
+                f"Replace Shell: {'Yes' if self.app.user_config.get('kiosk_replace_shell', False) else 'No'}\n",  # noqa: E501
             )
 
         # Key Bindings
@@ -219,7 +219,7 @@ class SummaryPage(BasePage):
                 ):
                     self.summary_text.insert(
                         "end",
-                        f"- {binding['function']}: {binding['key']} -> {binding['script_path']}\n",
+                        f"- {binding['function']}: {binding['key']} -> {binding['script_path']}\n",  # noqa: E501
                     )
 
         # Process Management
@@ -242,11 +242,11 @@ class SummaryPage(BasePage):
             self.summary_text.insert("end", "\nLights Configuration:\n")
             self.summary_text.insert(
                 "end",
-                f"Lights Reset Program: {lights_config.get('light_reset_executable_path', 'Not specified')}\n",
+                f"Lights Reset Program: {lights_config.get('light_reset_executable_path', 'Not specified')}\n",  # noqa: E501
             )
             self.summary_text.insert(
                 "end",
-                f"Lights MAME Executable: {lights_config.get('light_mame_executable_path', 'Not specified')}\n",
+                f"Lights MAME Executable: {lights_config.get('light_mame_executable_path', 'Not specified')}\n",  # noqa: E501
             )
 
         # Streaming Configuration
@@ -255,17 +255,17 @@ class SummaryPage(BasePage):
             self.summary_text.insert("end", "\nStreaming Configuration:\n")
             self.summary_text.insert(
                 "end",
-                f"OBS Executable: {streaming_config.get('obs_executable', 'Not specified')}\n",
+                f"OBS Executable: {streaming_config.get('obs_executable', 'Not specified')}\n",  # noqa: E501
             )
             if streaming_config.get("obs_arguments"):
                 self.summary_text.insert(
                     "end",
-                    f"OBS Arguments: {streaming_config.get('obs_arguments', 'Not specified')}\n",
+                    f"OBS Arguments: {streaming_config.get('obs_arguments', 'Not specified')}\n",  # noqa: E501
                 )
             if streaming_config.get("webcam_management_enabled", False):
                 self.summary_text.insert(
                     "end",
-                    f"Webcam Executable: {streaming_config.get('webcam_management_executable', 'Not specified')}\n",
+                    f"Webcam Executable: {streaming_config.get('webcam_management_executable', 'Not specified')}\n",  # noqa: E501
                 )
 
         # VPN Configuration
@@ -274,11 +274,11 @@ class SummaryPage(BasePage):
             self.summary_text.insert("end", "\nVPN Configuration:\n")
             self.summary_text.insert(
                 "end",
-                f"VPN Directory: {vpn_config.get('vpn_application_directory', 'Not specified')}\n",
+                f"VPN Directory: {vpn_config.get('vpn_application_directory', 'Not specified')}\n",  # noqa: E501
             )
             self.summary_text.insert(
                 "end",
-                f"VPN Application: {vpn_config.get('vpn_application', 'Not specified')}\n",
+                f"VPN Application: {vpn_config.get('vpn_application', 'Not specified')}\n",  # noqa: E501
             )
             self.summary_text.insert(
                 "end",
@@ -286,11 +286,11 @@ class SummaryPage(BasePage):
             )
             self.summary_text.insert(
                 "end",
-                f"VPN Config: {vpn_config.get('vpn_config_profile', 'Not specified')}\n",
+                f"VPN Config: {vpn_config.get('vpn_config_profile', 'Not specified')}\n",  # noqa: E501
             )
             self.summary_text.insert(
                 "end",
-                f"Wait Time: {vpn_config.get('seconds_to_wait', 'Not specified')} seconds\n",
+                f"Wait Time: {vpn_config.get('seconds_to_wait', 'Not specified')} seconds\n",  # noqa: E501
             )
 
         # OSD Configuration
@@ -299,7 +299,7 @@ class SummaryPage(BasePage):
             self.summary_text.insert("end", "\nOSD Configuration:\n")
             self.summary_text.insert(
                 "end",
-                f"OSD Executable: {osd_config.get('sound_osd_executable', 'Not specified')}\n",
+                f"OSD Executable: {osd_config.get('sound_osd_executable', 'Not specified')}\n",  # noqa: E501
             )
 
         # Screenshot Configuration
@@ -308,11 +308,11 @@ class SummaryPage(BasePage):
             self.summary_text.insert("end", "\nScreenshot Configuration:\n")
             self.summary_text.insert(
                 "end",
-                f"Screenshot Location: {screenshot_config.get('file_location', 'Not specified')}\n",
+                f"Screenshot Location: {screenshot_config.get('file_location', 'Not specified')}\n",  # noqa: E501
             )
             self.summary_text.insert(
                 "end",
-                f"Monitor Index: {screenshot_config.get('monitor_index', 'Not specified')}\n",
+                f"Monitor Index: {screenshot_config.get('monitor_index', 'Not specified')}\n",  # noqa: E501
             )
             self.summary_text.insert(
                 "end",
@@ -333,9 +333,9 @@ class SummaryPage(BasePage):
             self.install()
         else:
             # Files already copied, just finish
-            message = "Arcade Station has been successfully installed and configured!\n\nYou can now start using it."
+            message = "Arcade Station has been successfully installed and configured!\n\nYou can now start using it."  # noqa: E501
             if platform.system().lower() == "windows":
-                message += "\nPlease launch `launch_arcade_station.bat` to accept the security prompt before switching to kiosk mode."
+                message += "\nPlease launch `launch_arcade_station.bat` to accept the security prompt before switching to kiosk mode."  # noqa: E501
 
             messagebox.showinfo("Installation Complete", message)
 
@@ -436,7 +436,7 @@ class SummaryPage(BasePage):
         else:
             messagebox.showerror(
                 "Installation Failed",
-                "The installation could not be completed. Please check the logs for details.",
+                "The installation could not be completed. Please check the logs for details.",  # noqa: E501
             )
 
     def export_config(self):

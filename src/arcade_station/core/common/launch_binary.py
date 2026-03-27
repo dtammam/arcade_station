@@ -3,7 +3,7 @@ Launch Binary Script
 
 This script can:
 1. Launch a binary file passed as a command-line argument
-2. Launch specific configured binaries conditionally based on utility_config.toml settings
+2. Launch specific configured binaries conditionally based on utility_config.toml
 
 Usage:
     python launch_binary.py /path/to/binary [--wait]
@@ -19,14 +19,13 @@ import sys
 import argparse
 import psutil
 import shutil
-import subprocess
 
 # Add the parent directory to the Python path
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 )
 
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     start_app,
     log_message,
     open_header,
@@ -182,7 +181,7 @@ def launch_osd():
     # Prepare AudioSwitch settings before launching
     if not prepare_audioswitch_settings():
         log_message(
-            "Warning: Failed to prepare AudioSwitch settings, but continuing with launch",
+            "Warning: Failed to prepare AudioSwitch settings, but continuing with launch",  # noqa: E501
             "OSD",
         )
 
@@ -220,7 +219,8 @@ def set_process_priority(pid, priority_level="high"):
 
     Args:
         pid (int): Process ID
-        priority_level (str): Priority level (low, below_normal, normal, above_normal, high, realtime)
+        priority_level (str): Priority level (low, below_normal, normal,
+            above_normal, high, realtime)
 
     Returns:
         bool: True if successful, False otherwise
@@ -321,8 +321,8 @@ def main():
             start_app(binary_path)
             log_message(f"Binary launched successfully: {binary_path}", "BINARY")
 
-            # Remove the line that tried to set process priority since we don't have access to the PID here
-            # The process creation happens inside start_app and we don't get the PID back
+            # Remove the line that tried to set process priority since we don't have access to the PID here  # noqa: E501
+            # The process creation happens inside start_app and we don't get the PID back  # noqa: E501
         except Exception as e:
             log_message(f"Failed to launch binary: {e}", "ERROR")
             sys.exit(1)

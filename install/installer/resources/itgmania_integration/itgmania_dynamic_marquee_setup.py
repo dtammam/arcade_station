@@ -100,7 +100,8 @@ def copy_shim_files(itgmania_path, custom_banner_path=None):
 
     Returns:
         bool: True if successful, False otherwise.
-        tuple: (dest_file, dest_image, is_portable) - Destination file paths and portable mode status
+        tuple: (dest_file, dest_image, is_portable) - Destination file paths and
+            portable mode status
     """
     try:
         # Source paths for the module files
@@ -122,7 +123,7 @@ def copy_shim_files(itgmania_path, custom_banner_path=None):
         if not has_custom_banner and not source_png.exists():
             log_message(f"Fallback image {source_png} does not exist.", "SETUP")
             log_message(
-                f"Warning: Fallback image {source_png} not found. Will use default theme image.",
+                f"Warning: Fallback image {source_png} not found. Will use default theme image.",  # noqa: E501
                 "WARNING",
             )
 
@@ -143,7 +144,7 @@ def copy_shim_files(itgmania_path, custom_banner_path=None):
         if is_portable:
             log_message("Detected ITGMania running in portable mode", "SETUP")
             log_message(
-                "Detected portable mode (Portable.ini found). Installing to the local installation directory.",
+                "Detected portable mode (Portable.ini found). Installing to the local installation directory.",  # noqa: E501
                 "SETUP",
             )
 
@@ -152,7 +153,7 @@ def copy_shim_files(itgmania_path, custom_banner_path=None):
         else:
             log_message("ITGMania is running in standard mode (using AppData)", "SETUP")
             log_message(
-                "Standard installation detected. Installing to the user AppData directory.",
+                "Standard installation detected. Installing to the user AppData directory.",  # noqa: E501
                 "SETUP",
             )
 
@@ -301,7 +302,7 @@ def determine_log_file_path(itgmania_path, dest_file=None, is_portable=False):
             log_message(f"Using standard mode log path: {log_file_path}", "SETUP")
 
     # Double-check that the log file's parent directory is not an executable
-    # This is a safeguard against paths like "C:/ITGMania/Program/ITGmania.exe/Themes/..."
+    # This is a safeguard against paths like "C:/ITGMania/Program/ITGmania.exe/Themes/..."  # noqa: E501
     log_path_parts = list(log_file_path.parts)
     new_log_path_parts = []
     executable_found = False
@@ -412,12 +413,12 @@ def update_config(config_path: str, log_file_path: str, banner_path: str) -> boo
                         )
                         if actual_path != log_file_path:
                             log_message(
-                                f"Log path mismatch! Expected: {log_file_path}, Got: {actual_path}",
+                                f"Log path mismatch! Expected: {log_file_path}, Got: {actual_path}",  # noqa: E501
                                 "SETUP",
                             )
                     else:
                         log_message(
-                            "Could not find itgmania_display_file_path in updated config",
+                            "Could not find itgmania_display_file_path in updated config",  # noqa: E501
                             "SETUP",
                         )
                 except Exception as e:
@@ -451,7 +452,7 @@ def find_correct_itgmania_path(input_path):
 
     # If it's a file (executable), start with its parent directory
     if input_path.is_file():
-        log_message(f"Input is a file, starting with parent directory", "SETUP")
+        log_message("Input is a file, starting with parent directory", "SETUP")
         current_dir = input_path.parent
     else:
         current_dir = input_path
@@ -518,7 +519,7 @@ def get_correct_log_file_path(itgmania_base_path, is_portable=False):
     """
     log_message(f"Determining log file path from base: {itgmania_base_path}", "SETUP")
 
-    # The correct log path should always be in the Modules directory under Themes/Simply Love
+    # The correct log path should always be in the Modules directory under Themes/Simply Love  # noqa: E501
     if is_portable:
         # For portable mode, use the installation directory
         log_path = (
@@ -559,7 +560,9 @@ def get_correct_log_file_path(itgmania_base_path, is_portable=False):
 
 def setup_itgmania_integration(itgmania_path, banner_image_path=None):
     """
-    Main function to set up ITGMania integration, designed to be called directly from other modules.
+    Main function to set up ITGMania integration.
+
+    Designed to be called directly from other modules.
 
     Args:
         itgmania_path (str): Path to the ITGMania installation.
@@ -660,7 +663,7 @@ def main():
             default_path = "ITGmania"
 
         itgmania_path = input(
-            f"\nEnter the path to your ITGMania installation [default: {default_path}]: "
+            f"\nEnter the path to your ITGMania installation [default: {default_path}]: "  # noqa: E501
         )
 
         if not itgmania_path:

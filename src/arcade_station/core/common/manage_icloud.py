@@ -18,7 +18,10 @@ base_dir = os.path.abspath(os.path.join(script_dir, "..", ".."))
 project_root = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, project_root)
 
-from arcade_station.core.common.core_functions import log_message, load_toml_config
+from arcade_station.core.common.core_functions import (  # noqa: E402
+    log_message,
+    load_toml_config,
+)
 
 # Import Windows-specific modules for focus management
 if sys.platform == "win32":
@@ -226,7 +229,7 @@ def icloud_manager():
                 time.sleep(min(10, interval_seconds - time_since_last))
                 continue
 
-            # Check if any game processes are currently active (avoid interrupting gameplay)
+            # Check if any game processes are currently active (avoid interrupting gameplay)  # noqa: E501
             game_active = False
             try:
                 if sys.platform == "win32":
@@ -238,7 +241,7 @@ def icloud_manager():
                         proc_name = proc.info["name"].lower()
                         if any(game in proc_name for game in game_processes):
                             log_message(
-                                f"Game process detected ({proc_name}), deferring iCloud cycle",
+                                f"Game process detected ({proc_name}), deferring iCloud cycle",  # noqa: E501
                                 "ICLOUD",
                             )
                             game_active = True

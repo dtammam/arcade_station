@@ -15,8 +15,8 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
 )
 
-from arcade_station.core.common.display_image import run_image_display
-from arcade_station.core.common.core_functions import log_message
+from arcade_station.core.common.display_image import run_image_display  # noqa: E402
+from arcade_station.core.common.core_functions import log_message  # noqa: E402
 
 
 def main():
@@ -57,7 +57,7 @@ def main():
             sys.exit(1)
 
         log_message(
-            f"Starting image display - Image: {args.image_path}, Color: {args.background_color}, Monitor: {args.monitor_index}",
+            f"Starting image display - Image: {args.image_path}, Color: {args.background_color}, Monitor: {args.monitor_index}",  # noqa: E501
             "BANNER",
         )
 

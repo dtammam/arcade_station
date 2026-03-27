@@ -13,7 +13,7 @@ import argparse
 # Add the parent directory of 'arcade_station' to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from arcade_station.core.common.core_functions import launch_script
+from arcade_station.core.common.core_functions import launch_script  # noqa: E402
 
 
 def main():
@@ -44,7 +44,7 @@ def main():
     parser.add_argument(
         "--identifier",
         default=None,
-        help="Optional identifier to pass to the script (e.g., '--identifier=open_image').",
+        help="Optional identifier to pass to the script (e.g., '--identifier=open_image').",  # noqa: E501
     )
     args = parser.parse_args()
     script_path = os.path.abspath(args.script)

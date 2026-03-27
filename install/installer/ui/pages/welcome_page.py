@@ -52,7 +52,7 @@ class WelcomePage(BasePage):
         # Welcome text
         welcome_text = ttk.Label(
             welcome_frame,
-            text="Welcome to the arcade_station installer! This wizard will guide you through the process of setting up arcade_station on your system.\n\n"
+            text="Welcome to the arcade_station installer! This wizard will guide you through the process of setting up arcade_station on your system.\n\n"  # noqa: E501
             "Please select Next to continue.",
             wraplength=500,
             justify="center",
@@ -114,7 +114,7 @@ class WelcomePage(BasePage):
 
     def on_enter(self):
         """Called when the page is shown."""
-        # Since installation status will be checked after the user selects an installation location,
+        # Since installation status will be checked after the user selects an installation location,  # noqa: E501
         # we'll display a generic welcome message and hide installation options
         self.status_label.config(text="")
 

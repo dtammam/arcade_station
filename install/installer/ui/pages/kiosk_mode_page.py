@@ -55,14 +55,14 @@ class KioskModePage(BasePage):
 
         uac_warning = ttk.Label(
             uac_warning_frame,
-            text="While scripts may function with UAC enabled, the full experience - including "
-            "shell replacement and seamless startup - only works reliably with UAC disabled.\n\n"
+            text="While scripts may function with UAC enabled, the full experience - including "  # noqa: E501
+            "shell replacement and seamless startup - only works reliably with UAC disabled.\n\n"  # noqa: E501
             "Recommended Setup:\n"
             "• UAC disabled\n"
             "• Trusted software only\n"
             "• No general-purpose use\n"
             "• Physical access limited to trusted users\n\n"
-            "This configuration ensures the system behaves as intended and delivers a smooth, "
+            "This configuration ensures the system behaves as intended and delivers a smooth, "  # noqa: E501
             "arcade-style experience.",
             wraplength=500,
             justify="left",
@@ -124,8 +124,8 @@ class KioskModePage(BasePage):
 
         shell_info = ttk.Label(
             shell_frame,
-            text="This will replace the Windows shell (explorer.exe) with Arcade Station, "
-            "providing a dedicated arcade experience without the standard Windows desktop.",
+            text="This will replace the Windows shell (explorer.exe) with Arcade Station, "  # noqa: E501
+            "providing a dedicated arcade experience without the standard Windows desktop.",  # noqa: E501
             wraplength=450,
             justify="left",
             font=("Segoe UI", 9),
@@ -139,7 +139,7 @@ class KioskModePage(BasePage):
 
         security_warning = ttk.Label(
             warning_frame,
-            text="Warning: Enabling auto-login will store your password in the Windows registry. "
+            text="Warning: Enabling auto-login will store your password in the Windows registry. "  # noqa: E501
             "For security, consider using a dedicated account for your arcade system.",
             wraplength=500,
             foreground="red",

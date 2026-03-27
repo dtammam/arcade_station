@@ -22,7 +22,7 @@ import platform
 # Add the parent directory of 'arcade_station' to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     load_game_config,
     load_mame_config,
     kill_pegasus,
@@ -32,8 +32,8 @@ from arcade_station.core.common.core_functions import (
     start_process_with_powershell,
     run_powershell_script,
 )
-from arcade_station.core.common.light_control import launch_mame_lights
-from arcade_station.core.common.display_image import display_image
+from arcade_station.core.common.light_control import launch_mame_lights  # noqa: E402
+from arcade_station.core.common.display_image import display_image  # noqa: E402
 
 # Configure logging
 logging.basicConfig(
@@ -242,7 +242,7 @@ def launch_game(game_name):
                     if platform.system() == "Windows":
                         # Log detailed info about game launch
                         log_message(
-                            f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}",
+                            f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}",  # noqa: E501
                             "GAME_LAUNCH",
                         )
 
@@ -258,13 +258,13 @@ def launch_game(game_name):
                             raise Exception("Failed to start game with PowerShell")
                         else:
                             log_message(
-                                f"Successfully launched game via PowerShell: {game_path}",
+                                f"Successfully launched game via PowerShell: {game_path}",  # noqa: E501
                                 "GAME_LAUNCH",
                             )
                     else:
                         # For non-Windows platforms, use the original approach
                         log_message(
-                            f"Launching via subprocess on non-Windows platform",
+                            "Launching via subprocess on non-Windows platform",
                             "GAME_LAUNCH",
                         )
                         os.chdir(game_dir)

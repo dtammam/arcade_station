@@ -50,7 +50,7 @@ class KeyBindingsPage(BasePage):
 
     def __init__(self, container, app):
         """Initialize the key bindings configuration page."""
-        # Initialize key_bindings list before super().__init__ which calls create_widgets
+        # Initialize key_bindings list before super().__init__ which calls create_widgets  # noqa: E501
         self.key_bindings = []
         # Flag to track if we've loaded custom processes
         self.custom_processes_loaded = False
@@ -84,7 +84,7 @@ class KeyBindingsPage(BasePage):
                 processes_data = tomllib.load(f)
 
             print(
-                f"DEBUG: Successfully loaded TOML file from {processes_file}: {processes_data}"
+                f"DEBUG: Successfully loaded TOML file from {processes_file}: {processes_data}"  # noqa: E501
             )
 
             # Update the user_config with the processes from the file
@@ -92,7 +92,7 @@ class KeyBindingsPage(BasePage):
                 self.app.user_config["processes_to_kill"] = processes_data
                 self.custom_processes_loaded = True
                 print(
-                    f"DEBUG: Updated user_config with processes: {processes_data['processes']['names']}"
+                    f"DEBUG: Updated user_config with processes: {processes_data['processes']['names']}"  # noqa: E501
                 )
                 return True
         except Exception as e:
@@ -123,7 +123,7 @@ class KeyBindingsPage(BasePage):
                 key_bindings_data = tomllib.load(f)
 
             print(
-                f"DEBUG: Successfully loaded TOML file from {key_bindings_file}: {key_bindings_data}"
+                f"DEBUG: Successfully loaded TOML file from {key_bindings_file}: {key_bindings_data}"  # noqa: E501
             )
 
             # Update the user_config with the key bindings from the file
@@ -131,7 +131,7 @@ class KeyBindingsPage(BasePage):
                 self.app.user_config["key_listener"] = key_bindings_data
                 self.custom_key_bindings_loaded = True
                 print(
-                    f"DEBUG: Updated user_config with key bindings: {key_bindings_data['key_mappings']}"
+                    f"DEBUG: Updated user_config with key bindings: {key_bindings_data['key_mappings']}"  # noqa: E501
                 )
                 return True
         except Exception as e:
@@ -179,7 +179,7 @@ class KeyBindingsPage(BasePage):
         # First part of text
         ttk.Label(
             intro_frame,
-            text="Configure global hotkeys for Arcade Station which work at all times. Select Process Management to add new processes for games you add. Defaults are provided, select Next to accept all defaults",
+            text="Configure global hotkeys for Arcade Station which work at all times. Select Process Management to add new processes for games you add. Defaults are provided, select Next to accept all defaults",  # noqa: E501
             wraplength=500,
             justify="left",
         ).pack(anchor="w", fill="x")
@@ -457,7 +457,7 @@ class KeyBindingsPage(BasePage):
         # Introduction
         intro_text = ttk.Label(
             self.process_tab,
-            text="Configure which processes should be automatically terminated when returning to "
+            text="Configure which processes should be automatically terminated when returning to "  # noqa: E501
             "the Pegasus frontend.",
             wraplength=500,
             justify="left",
@@ -529,7 +529,7 @@ marquee_image.exe"""
             self.processes_text.insert("1.0", "\n".join(process_names))
         else:
             # Use default processes if no existing config
-            print(f"DEBUG: Using default processes list")
+            print("DEBUG: Using default processes list")
             self.processes_text.insert("1.0", default_processes)
 
         scrollbar.config(command=self.processes_text.yview)
@@ -537,7 +537,7 @@ marquee_image.exe"""
         # Help text
         help_text = ttk.Label(
             process_frame,
-            text="These processes will be terminated when returning to Pegasus or when using the "
+            text="These processes will be terminated when returning to Pegasus or when using the "  # noqa: E501
             "kill hotkey.",
             font=("Segoe UI", 9),
             foreground="#555555",
@@ -546,7 +546,7 @@ marquee_image.exe"""
         help_text.pack(anchor="w", pady=5)
 
     def on_enter(self):
-        """Override base class method for page-specific actions when entering the page."""
+        """Override base class method for page-specific actions on page entry."""
         # Always try to read the existing files
         if self._read_existing_processes_toml():
             print("DEBUG: Successfully read existing processes_to_kill.toml")

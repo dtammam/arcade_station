@@ -32,7 +32,7 @@ class UtilityConfigPage(BasePage):
             self.update_default_lights_paths()
 
     def update_default_lights_paths(self):
-        """Update the default lights executable paths based on installation directory."""
+        """Update the default lights executable paths based on installation directory."""  # noqa: E501
         if "install_path" in self.app.user_config:
             install_path = self.app.user_config["install_path"]
             self.default_lights_reset_path = os.path.join(
@@ -44,7 +44,9 @@ class UtilityConfigPage(BasePage):
 
     def get_monitor_count_safe(self, app):
         """Get the number of monitors connected to the system safely.
-        This method is called before __init__ is completed, so we pass app as a parameter.
+
+        This method is called before __init__ is completed, so we pass app as a
+        parameter.
         """
         try:
             # Try Qt screen detection
@@ -107,7 +109,7 @@ class UtilityConfigPage(BasePage):
         # Introduction
         intro_text = ttk.Label(
             main_frame,
-            text="Configure utilities for your Arcade Station. These tools enhance your gaming experience.",
+            text="Configure utilities for your Arcade Station. These tools enhance your gaming experience.",  # noqa: E501
             wraplength=500,
             justify="left",
         )
@@ -451,7 +453,7 @@ class UtilityConfigPage(BasePage):
 
         monitor_help = ttk.Label(
             monitor_frame,
-            text=f"(Detected {self.monitor_count} monitor{'s' if self.monitor_count != 1 else ''})",
+            text=f"(Detected {self.monitor_count} monitor{'s' if self.monitor_count != 1 else ''})",  # noqa: E501
             font=("Arial", 9),
             foreground="#555555",
         )
@@ -643,7 +645,6 @@ class UtilityConfigPage(BasePage):
         """Show a temporary window on each monitor displaying its number."""
         try:
             from PyQt5.QtWidgets import QApplication
-            from PyQt5.QtCore import Qt
 
             # Create a Qt application to get screen info
             app = QApplication.instance()
@@ -664,7 +665,7 @@ class UtilityConfigPage(BasePage):
 
                 # Position window in the center of the monitor
                 window.geometry(
-                    f"200x100+{geometry.x() + (geometry.width() - 200) // 2}+{geometry.y() + (geometry.height() - 100) // 2}"
+                    f"200x100+{geometry.x() + (geometry.width() - 200) // 2}+{geometry.y() + (geometry.height() - 100) // 2}"  # noqa: E501
                 )
 
                 # Add monitor number label - use 0-based index

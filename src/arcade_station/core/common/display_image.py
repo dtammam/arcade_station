@@ -12,16 +12,14 @@ multiple monitors, background colors, and image updates.
 
 import sys
 import os
-import threading
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-import logging
 
 # Add the parent directory to the Python path to allow relative module imports
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     load_toml_config,
     log_message,
     launch_script,
@@ -60,7 +58,7 @@ class ImageWindow(QMainWindow):
         """
         super().__init__()
         # Add Qt.Tool and Qt.NoFocus flags to prevent stealing focus
-        # Qt.Tool tells Windows this is a tool window (not a main app window), they don't show in taskbar and don't steal focus
+        # Qt.Tool tells Windows this is a tool window (not a main app window), they don't show in taskbar and don't steal focus  # noqa: E501
         # Qt.WindowDoesNotAcceptFocus prevents the window from accepting keyboard focus
         self.setWindowFlags(
             Qt.FramelessWindowHint
@@ -164,7 +162,8 @@ def list_monitors():
         list: A list of dictionaries, each containing information about a monitor:
               - index: The monitor index (0-based)
               - name: The display name
-              - geometry: A tuple (x, y, width, height) representing the monitor's position and size
+              - geometry: A tuple (x, y, width, height) representing the monitor's
+                position and size
     """
     app = QApplication(sys.argv)
     screens = app.screens()
@@ -198,8 +197,10 @@ def display_image_from_config(
 
     Args:
         config_path (str): Path to the TOML configuration file.
-        close_event (threading.Event, optional): Event that will signal when to close the window.
-        use_default (bool): If True, uses the default_image_path from config instead of image_path.
+        close_event (threading.Event, optional): Event that will signal when to
+            close the window.
+        use_default (bool): If True, uses the default_image_path from config
+            instead of image_path.
 
     Returns:
         None
@@ -212,17 +213,16 @@ def display_image_from_config(
     else:
         image_path = config["display"]["image_path"]
     background_color = config["display"]["background_color"]
-    monitor_index = config["display"].get("monitor_index", 0)
 
     log_message(
-        f"Display image from config: {'default image' if use_default else 'normal image'}",
+        f"Display image from config: {'default image' if use_default else 'normal image'}",  # noqa: E501
         "BANNER",
     )
     log_message(
         f"Image path: {image_path}, Background color: {background_color}", "BANNER"
     )
 
-    # Use the display_image function which now uses the standardized approach with marquee_image identifier
+    # Use the display_image function which now uses the standardized approach with marquee_image identifier  # noqa: E501
     return display_image(image_path, background_color)
 
 
@@ -275,7 +275,7 @@ def run_image_display(image_path, background_color, monitor_index):
     # Ensure the monitor index is within range
     if monitor_index >= len(screens):
         log_message(
-            f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.",
+            f"Monitor index {monitor_index} is out of range. Defaulting to primary monitor.",  # noqa: E501
             "BANNER",
         )
         monitor_index = 0
@@ -315,7 +315,7 @@ def display_image(image_path, background_color="black"):
         subprocess.Popen: The process object for the launched image display script.
     """
     log_message(
-        f"Displaying image: {image_path} on monitor with background color: {background_color}",
+        f"Displaying image: {image_path} on monitor with background color: {background_color}",  # noqa: E501
         "BANNER",
     )
 
@@ -337,16 +337,20 @@ import os
 import argparse
 
 # Add the parent directory to the Python path to allow relative module imports
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
+sys.path.insert(0, os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..', '..', '..'))
 
 from arcade_station.core.common.display_image import display_image
 
 def main():
-    parser = argparse.ArgumentParser(description='Display an image on a specific monitor')
+    parser = argparse.ArgumentParser(
+        description='Display an image on a specific monitor')
     parser.add_argument('image_path', help='Path to the image file')
-    parser.add_argument('--background', default='black', help='Background color (default: black)')
+    parser.add_argument(
+        '--background', default='black',
+        help='Background color (default: black)')
     args = parser.parse_args()
-    
+
     display_image(args.image_path, args.background)
 
 if __name__ == "__main__":

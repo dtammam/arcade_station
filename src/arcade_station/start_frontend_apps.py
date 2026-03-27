@@ -37,15 +37,17 @@ if version_info != REQUIRED_VERSION:
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(base_dir, ".."))
 
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     launch_script,
     log_message,
     load_toml_config,
     kill_processes_from_toml,
     determine_operating_system,
 )
-from arcade_station.core.common.display_image import display_image_from_config
-from arcade_station.core.common.launch_binary import launch_osd
+from arcade_station.core.common.display_image import (  # noqa: E402
+    display_image_from_config,
+)
+from arcade_station.core.common.launch_binary import launch_osd  # noqa: E402
 
 
 def setup_virtual_environment():
@@ -211,7 +213,7 @@ def start_conditional_scripts():
 
         if icloud_enabled and determine_operating_system() == "Windows":
             log_message(
-                "iCloud upload enabled and running on Windows - starting upload manager",
+                "iCloud upload enabled and running on Windows - starting upload manager",  # noqa: E501
                 "STARTUP",
             )
 
@@ -281,8 +283,8 @@ def main():
         log_message("Warning: System preparation failed, continuing anyway", "STARTUP")
 
     # Display default image using the standardized approach
-    default_image_process = display_image_from_config(use_default=True)
-    log_message(f"Launched default image display with standardized process", "BANNER")
+    display_image_from_config(use_default=True)
+    log_message("Launched default image display with standardized process", "BANNER")
 
     # Launch the key_listener.py script with the appropriate identifier
     listener_script = os.path.join(base_dir, "listeners", "key_listener.py")
@@ -292,7 +294,7 @@ def main():
     # Start conditional scripts based on configuration
     start_conditional_scripts()
 
-    # Use kill_all_and_reset_pegasus.py to launch Pegasus (replaced the direct Pegasus launch)
+    # Use kill_all_and_reset_pegasus.py to launch Pegasus (replaced the direct Pegasus launch)  # noqa: E501
     reset_script = os.path.join(
         base_dir, "core", "common", "kill_all_and_reset_pegasus.py"
     )

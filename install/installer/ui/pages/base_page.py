@@ -2,7 +2,6 @@
 Base Page class for all installer wizard pages
 """
 
-import tkinter as tk
 from tkinter import ttk
 import os
 import tomllib
@@ -80,7 +79,7 @@ class BasePage:
             label = ttk.Label(parent, image=photo)
             label.image = photo  # Keep a reference
             return label
-        except Exception as e:
+        except Exception:
             # Fallback to text if image loading fails
             return ttk.Label(parent, text="[Image]")
 
@@ -256,7 +255,7 @@ class BasePage:
 
                 with open(config_file, "wb") as f:
                     tomli_w.dump(config_data, f)
-            except (ImportError, Exception) as e:
+            except (ImportError, Exception):
                 # Use the more reliable _write_toml method from install_manager
                 try:
                     self.app.install_manager._write_toml(config_file, config_data)

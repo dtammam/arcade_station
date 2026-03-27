@@ -16,7 +16,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import installer modules
-from installer.ui.app import InstallerApp
+from installer.ui.app import InstallerApp  # noqa: E402
 
 
 def setup_logging():
@@ -180,7 +180,7 @@ def hide_console_window():
 def main():
     """Run the Arcade Station Installer."""
     # Configure logging first
-    log_file = setup_logging()
+    setup_logging()
 
     # Don't try to hide console here since the batch file handles that
     logging.info("Installer launched from batch file")
@@ -198,7 +198,7 @@ def main():
     setup_styles()
 
     # Create the application
-    app = InstallerApp(root)
+    InstallerApp(root)
 
     # Start the main loop
     root.mainloop()

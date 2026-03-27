@@ -2,8 +2,6 @@
 Main application class for the Arcade Station Installer
 """
 
-import os
-import tkinter as tk
 from tkinter import ttk, messagebox
 import logging
 
@@ -319,13 +317,13 @@ class InstallerApp:
                     try:
                         value, _ = winreg.QueryValueEx(key, "DefaultUserName")
                         self.user_config["kiosk_username"] = value
-                    except:
+                    except Exception:
                         pass
 
                     try:
                         value, _ = winreg.QueryValueEx(key, "AutoAdminLogon")
                         self.user_config["enable_kiosk_mode"] = value == "1"
-                    except:
+                    except Exception:
                         pass
 
                     try:
@@ -333,9 +331,9 @@ class InstallerApp:
                         self.user_config["kiosk_replace_shell"] = (
                             value != "explorer.exe"
                         )
-                    except:
+                    except Exception:
                         pass
-            except:
+            except Exception:
                 pass
 
     def next_page(self):
@@ -343,7 +341,7 @@ class InstallerApp:
         if self.current_page < len(self.pages) - 1:
             self.show_page(self.current_page + 1)
         else:
-            # We've reached the end of the wizard - only finish if we're on the summary page
+            # We've reached the end of the wizard - only finish if we're on the summary page  # noqa: E501
             current_page_class = self.pages[self.current_page].__class__.__name__
             if current_page_class == "SummaryPage":
                 self.finish_installation()
@@ -439,7 +437,7 @@ class InstallerApp:
                 install_path
             )
 
-            # If installation is found and we're in reconfigure mode, load existing config
+            # If installation is found and we're in reconfigure mode, load existing config  # noqa: E501
             if self.is_installed and self.is_reconfigure_mode:
                 self._load_existing_config(install_path)
 

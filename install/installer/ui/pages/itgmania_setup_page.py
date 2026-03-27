@@ -22,7 +22,7 @@ class ITGManiaSetupPage(BasePage):
         self.default_paths = {
             "Windows": r"C:\Games\ITGmania\Program\ITGmania.exe",
             "Linux": "/opt/itgmania/Program/ITGmania",
-            "Darwin": "/Applications/ITGmania/Program/ITGmania.app/Contents/MacOS/ITGmania",
+            "Darwin": "/Applications/ITGmania/Program/ITGmania.app/Contents/MacOS/ITGmania",  # noqa: E501
         }
         self.current_os = platform.system()
         self.default_itgmania_path = self.default_paths.get(self.current_os, "")
@@ -57,7 +57,7 @@ class ITGManiaSetupPage(BasePage):
         # Introduction
         intro_text = ttk.Label(
             main_frame,
-            text="ITGMania is a popular dance game simulator. Arcade Station can integrate "
+            text="ITGMania is a popular dance game simulator. Arcade Station can integrate "  # noqa: E501
             "deeply with ITGMania to provide enhanced features, such as displaying "
             "song-specific information on the marquee display.",
             wraplength=500,
@@ -100,7 +100,7 @@ class ITGManiaSetupPage(BasePage):
         self.use_default_path_var = tk.BooleanVar(value=False)
         self.default_path_checkbox = ttk.Checkbutton(
             self.itgmania_frame,
-            text="Default installation path detected, uncheck if you'd like to set to something else.",
+            text="Default installation path detected, uncheck if you'd like to set to something else.",  # noqa: E501
             variable=self.use_default_path_var,
             command=self.toggle_default_path,
         )
@@ -139,7 +139,7 @@ class ITGManiaSetupPage(BasePage):
         # Explanation
         marquee_text = ttk.Label(
             self.marquee_frame,
-            text="ITGMania can display song-specific information on the marquee display. "
+            text="ITGMania can display song-specific information on the marquee display. "  # noqa: E501
             "To enable this feature, Arcade Station includes a special module for "
             "the Simply Love theme that must be installed.",
             wraplength=450,
@@ -292,7 +292,7 @@ class ITGManiaSetupPage(BasePage):
                             # Set path
                             if "path" in itgmania_config:
                                 self.path_var.set(itgmania_config["path"])
-                                # If the path matches the default, check the default path checkbox
+                                # If the path matches the default, check the default path checkbox  # noqa: E501
                                 if (
                                     itgmania_config["path"]
                                     == self.default_itgmania_path
@@ -307,7 +307,7 @@ class ITGManiaSetupPage(BasePage):
                             if "banner" in itgmania_config:
                                 self.image_var.set(itgmania_config["banner"])
 
-                                # Check if the banner path is the default by checking if it ends with the default relative path
+                                # Check if the banner path is the default by checking if it ends with the default relative path  # noqa: E501
                                 banner_path = itgmania_config["banner"]
                                 default_relative_path = os.path.join(
                                     "assets", "images", "banners", "itgmania.png"
@@ -319,7 +319,7 @@ class ITGManiaSetupPage(BasePage):
                                     default_relative_path
                                 )
 
-                                # Check if the banner path ends with the default relative path
+                                # Check if the banner path ends with the default relative path  # noqa: E501
                                 if banner_path.lower().endswith(
                                     default_relative_path.lower()
                                 ):
@@ -405,14 +405,14 @@ class ITGManiaSetupPage(BasePage):
                         try:
                             with open(asset_path, "w") as f:
                                 f.write("")
-                        except:
+                        except Exception:
                             pass
             elif not self.use_default_image_var.get() and self.image_var.get().strip():
                 custom_path = self.image_var.get().strip()
                 image_path = custom_path
                 self.app.user_config["itgmania"]["custom_image"] = custom_path
 
-                # If custom image is selected, copy it to the assets directory for future use
+                # If custom image is selected, copy it to the assets directory for future use  # noqa: E501
                 if "install_path" in self.app.user_config and os.path.exists(
                     custom_path
                 ):
@@ -452,7 +452,7 @@ class ITGManiaSetupPage(BasePage):
                 "banner": image_path,
             }
 
-            # IMPORTANT: Also add to binary_games which is used for metadata.pegasus.txt generation
+            # IMPORTANT: Also add to binary_games which is used for metadata.pegasus.txt generation  # noqa: E501
             if "binary_games" not in self.app.user_config:
                 self.app.user_config["binary_games"] = {}
 
@@ -466,12 +466,10 @@ class ITGManiaSetupPage(BasePage):
             if self.use_itgmania_var.get() and self.install_module_var.get():
                 try:
                     # Import and use the setup module directly
-                    import sys
                     import logging
-                    from pathlib import Path
 
-                    # Import the setup function using an absolute import path that will work with the installer structure
-                    from installer.resources.itgmania_integration.itgmania_dynamic_marquee_setup import (
+                    # Import the setup function using an absolute import path that will work with the installer structure  # noqa: E501
+                    from installer.resources.itgmania_integration.itgmania_dynamic_marquee_setup import (  # noqa: E501
                         setup_itgmania_integration,
                     )
 
@@ -502,7 +500,7 @@ class ITGManiaSetupPage(BasePage):
                         )
                         if os.path.exists(config_path):
                             logging.info(
-                                f"Found config file at: {config_path}, clearing ITGMania path"
+                                f"Found config file at: {config_path}, clearing ITGMania path"  # noqa: E501
                             )
 
                             # Check if we need to use tomli_w or manual writing
@@ -523,7 +521,7 @@ class ITGManiaSetupPage(BasePage):
                                             "itgmania_display_file_path"
                                         ] = ""
                                         logging.info(
-                                            "Cleared the existing ITGMania display file path"
+                                            "Cleared the existing ITGMania display file path"  # noqa: E501
                                         )
 
                                 # Write back
@@ -566,11 +564,11 @@ class ITGManiaSetupPage(BasePage):
                                         "itgmania_display_file_path"
                                     ]
                                     logging.info(
-                                        f"Verified config - itgmania_display_file_path: {path}"
+                                        f"Verified config - itgmania_display_file_path: {path}"  # noqa: E501
                                     )
                                 else:
                                     logging.error(
-                                        "itgmania_display_file_path not found in config after setup!"
+                                        "itgmania_display_file_path not found in config after setup!"  # noqa: E501
                                     )
                         except Exception as e:
                             logging.error(f"Error verifying config: {e}")

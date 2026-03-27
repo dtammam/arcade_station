@@ -9,7 +9,10 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
 )
 
-from arcade_station.core.common.core_functions import load_toml_config, log_message
+from arcade_station.core.common.core_functions import (  # noqa: E402
+    load_toml_config,
+    log_message,
+)
 
 
 def connect_vpn():
@@ -66,7 +69,7 @@ def connect_vpn():
         # Method 1: Use a properly formatted list with shell=False (preferred)
         subprocess.Popen([vpn_app_path, "--connect", config_profile], shell=False)
 
-        # Method 2 (fallback): If needed, use a properly formatted string with shell=True
+        # Method 2 (fallback): If needed, use a properly formatted string with shell=True  # noqa: E501
         # command = f'"{vpn_app_path}" --connect "{config_profile}"'
         # subprocess.Popen(command, shell=True)
 

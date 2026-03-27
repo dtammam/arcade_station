@@ -11,12 +11,12 @@ import os
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..")
 )
-from arcade_station.core.common.core_functions import (
+from arcade_station.core.common.core_functions import (  # noqa: E402
     kill_processes_from_toml,
     kill_process_by_identifier,
     log_message,
 )
-from arcade_station.core.common.light_control import (
+from arcade_station.core.common.light_control import (  # noqa: E402
     reset_lights,
     kill_specific_lights_process,
 )
