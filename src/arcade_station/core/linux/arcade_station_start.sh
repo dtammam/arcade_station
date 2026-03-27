@@ -17,7 +17,7 @@
 # Determine the script location and project root
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/../../../.." && pwd )"
-cd "$PROJECT_ROOT"
+cd "$PROJECT_ROOT" || exit
 
 # Check if we're running as a shell replacement
 SHELL_MODE=false
@@ -30,7 +30,7 @@ fi
 if ! command -v python3 &> /dev/null; then
     echo "Python 3 is not installed or not in PATH."
     echo "Please install Python 3.12.9."
-    read -p "Press Enter to continue..."
+    read -r -p "Press Enter to continue..."
     exit 1
 fi
 
@@ -58,19 +58,18 @@ VENV_ACTIVATE="$PROJECT_ROOT/.venv/bin/activate"
 # Check if virtual environment exists
 if [ ! -f "$VENV_ACTIVATE" ]; then
     echo "Virtual environment not found. Creating one..."
-    python3 -m venv .venv
-    if [ $? -ne 0 ]; then
+    if ! python3 -m venv .venv; then
         echo "Failed to create virtual environment."
-        read -p "Press Enter to continue..."
+        read -r -p "Press Enter to continue..."
         exit 1
     fi
-    
+
     echo "Installing requirements..."
+    # shellcheck source=/dev/null
     source "$VENV_ACTIVATE"
-    pip install -r requirements.txt
-    if [ $? -ne 0 ]; then
+    if ! pip install -r requirements.txt; then
         echo "Failed to install requirements."
-        read -p "Press Enter to continue..."
+        read -r -p "Press Enter to continue..."
         exit 1
     fi
 else
@@ -78,6 +77,7 @@ else
 fi
 
 # Activate the virtual environment
+# shellcheck source=/dev/null
 source "$VENV_ACTIVATE"
 
 # Set PYTHONPATH to include the project root
@@ -92,5 +92,5 @@ fi
 
 # Only pause if not in shell mode
 if [ "$SHELL_MODE" = false ]; then
-    read -p "Press Enter to continue..."
+    read -r -p "Press Enter to continue..."
 fi 
