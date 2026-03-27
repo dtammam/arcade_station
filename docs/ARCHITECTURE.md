@@ -44,7 +44,7 @@ arcade_station/
 ├── .claude/                  # Agent definitions, commands, hooks
 ├── .state/                   # Feature lifecycle state
 ├── hooks/                    # Git hooks (pre-commit, pre-push)
-├── tests/                    # Test suite (pytest)
+├── tests/                    # Test suite (pytest) — planned in Phase 3
 │   ├── conftest.py           # Shared test fixtures
 │   └── unit/                 # Unit tests for semantic/pure functions
 ├── pyproject.toml            # Python tool config (black, mypy, pytest, coverage)

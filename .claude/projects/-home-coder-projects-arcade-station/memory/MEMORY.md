@@ -1,1 +1,3 @@
 - [Batch to PowerShell migration](project_batch_to_powershell.md) — future tech debt: migrate .bat to .ps1 for linting
+- [Always activate venv in SDE prompts](feedback_venv_activation.md) — SDE agent needs explicit venv activation before pip/python commands
+- [Claude binary path](feedback_claude_path.md) — claude not on PATH, needs absolute path or PATH fix
