@@ -3,7 +3,7 @@
   "feature_name": "Multi-phase code hygiene initiative",
   "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:09",
+  "updated_at": "2026-03-27T00:10",
   "tasks": [
     {
       "id": "P1-T1",
@@ -30,7 +30,7 @@
       "description": "Run 'flake8 src/ install/' and fix all warnings. Common fixes: unused imports, missing whitespace, undefined names, bare excepts. Use the .flake8 config created in P1-T1. Do NOT change runtime behavior — only lint fixes (imports, whitespace, type annotations, lint pragmas).",
       "files_to_touch": ["src/**/*.py", "install/**/*.py"],
       "definition_of_done": "'python -m flake8 src/ install/' exits 0 with zero warnings.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P1-T4",
@@ -114,7 +114,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": [],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -130,6 +130,8 @@
     { "timestamp": "2026-03-27 00:06", "stage": "implementation", "note": "Starting implementation — task P1-T1: Create Python tooling config files and dev requirements" },
     { "timestamp": "2026-03-27 00:07", "stage": "review", "note": "Running code review — routing to quality-assurance agent" },
     { "timestamp": "2026-03-27 00:08", "stage": "implementation", "note": "Starting implementation — task P1-T1: Create Python tooling config files and dev requirements" },
-    { "timestamp": "2026-03-27 00:09", "stage": "implementation", "note": "Starting implementation — task P1-T2: Run black auto-format on all Python files" }
+    { "timestamp": "2026-03-27 00:09", "stage": "implementation", "note": "Starting implementation — task P1-T2: Run black auto-format on all Python files" },
+    { "timestamp": "2026-03-27 00:10", "stage": "implementation", "note": "Starting implementation — task P1-T3: Fix all flake8 warnings in src/ and install/" },
+    { "timestamp": "2026-03-27 00:11", "stage": "implementation", "note": "Completed P1-T3: Fixed all flake8 warnings — F401, E402, E501, F841, F541, E722, W291/W293, W605, F821 across 30+ files" }
   ]
 }
