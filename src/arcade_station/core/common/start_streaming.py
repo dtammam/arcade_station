@@ -12,18 +12,17 @@ import sys
 import time
 
 # Add the parent directory to the Python path if needed
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-
-from arcade_station.core.common.core_functions import (
-    load_toml_config,
-    log_message
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 )
+
+from arcade_station.core.common.core_functions import load_toml_config, log_message
 
 
 def start_streaming():
     """
     Launch OBS and optionally webcam management software based on configuration.
-    
+
     Returns:
         bool: True if successful, False otherwise
     """
@@ -31,35 +30,41 @@ def start_streaming():
         # Get configuration from TOML file
         config = load_toml_config("utility_config.toml")
         streaming_config = config.get("streaming", {})
-        
+
         # Get executable paths and settings
         obs_executable = streaming_config.get("obs_executable", "")
         webcam_executable = streaming_config.get("webcam_management_executable", "")
         launch_webcam = streaming_config.get("webcam_management_enabled", False)
         obs_arguments = streaming_config.get("obs_arguments", "")
-        
+
         # Validate OBS executable path
         if not obs_executable:
-            log_message("Error: OBS executable path is not configured in utility_config.toml", "STREAMING")
+            log_message(
+                "Error: OBS executable path is not configured in utility_config.toml",
+                "STREAMING",
+            )
             return False
-            
+
         if not os.path.exists(obs_executable):
-            log_message(f"Error: OBS executable not found at {obs_executable}", "STREAMING")
+            log_message(
+                f"Error: OBS executable not found at {obs_executable}", "STREAMING"
+            )
             return False
-        
+
         # Launch webcam management software if configured
         if launch_webcam and webcam_executable and os.path.exists(webcam_executable):
-            log_message(f"Launching webcam management software: {webcam_executable}", "STREAMING")
-            
+            log_message(
+                f"Launching webcam management software: {webcam_executable}",
+                "STREAMING",
+            )
+
             # Handle platform-specific process creation
             try:
                 current_os = platform.system().lower()
                 if current_os == "windows":
                     # Use CREATE_NO_WINDOW flag (0x08000000) on Windows
                     subprocess.Popen(
-                        [webcam_executable],
-                        creationflags=0x08000000,
-                        shell=False
+                        [webcam_executable], creationflags=0x08000000, shell=False
                     )
                 else:
                     # Linux/Mac approach
@@ -67,36 +72,39 @@ def start_streaming():
                         [webcam_executable],
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
-                        start_new_session=True
+                        start_new_session=True,
                     )
-                log_message("Webcam management software launched successfully", "STREAMING")
-                
+                log_message(
+                    "Webcam management software launched successfully", "STREAMING"
+                )
+
                 # Give webcam software a moment to initialize
                 time.sleep(2)
-                
+
             except Exception as e:
-                log_message(f"Warning: Failed to launch webcam management software: {str(e)}", "STREAMING")
-        
+                log_message(
+                    f"Warning: Failed to launch webcam management software: {str(e)}",
+                    "STREAMING",
+                )
+
         # Launch OBS
         log_message(f"Launching OBS: {obs_executable}", "STREAMING")
-        
+
         # Parse arguments if provided
         args = [obs_executable]
         if obs_arguments:
             args.extend(obs_arguments.split())
-        
+
         # Handle platform-specific process creation
         current_os = platform.system().lower()
         if current_os == "windows":
             # Get the directory containing the executable
             obs_dir = os.path.dirname(obs_executable)
             os.chdir(obs_dir)  # Change to OBS directory for proper operation
-            
+
             # Start OBS with arguments
             subprocess.Popen(
-                args,
-                creationflags=0x08000000,  # CREATE_NO_WINDOW flag
-                shell=False
+                args, creationflags=0x08000000, shell=False  # CREATE_NO_WINDOW flag
             )
         else:
             # Linux/Mac approach
@@ -104,12 +112,12 @@ def start_streaming():
                 args,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                start_new_session=True
+                start_new_session=True,
             )
-        
+
         log_message("OBS launched successfully", "STREAMING")
         return True
-        
+
     except Exception as e:
         log_message(f"Error starting streaming: {str(e)}", "STREAMING")
         return False
@@ -118,11 +126,11 @@ def start_streaming():
 if __name__ == "__main__":
     """
     Main entry point for the streaming script.
-    
+
     When run directly, this script will:
     1. Execute the start_streaming() function
     2. Exit with status code 0 on success, 1 on failure
-    
+
     Returns:
         None. Exits the process with appropriate status code.
     """

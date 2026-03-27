@@ -22,4 +22,4 @@ from arcade_station.core.common.core_functions import log_message
 
 if __name__ == "__main__":
     log_message("Starting ITGMania monitor", "BANNER")
-    monitor_itgmania_log() 
+    monitor_itgmania_log()

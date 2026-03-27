@@ -17,9 +17,9 @@ import subprocess
 script_dir = os.path.dirname(os.path.abspath(__file__))
 possible_roots = [
     # Standard path based on script location
-    os.path.abspath(os.path.join(script_dir, '..', '..', '..', '..')),
+    os.path.abspath(os.path.join(script_dir, "..", "..", "..", "..")),
     # Path if running from the installed location
-    os.path.abspath(os.path.join(script_dir, '..', '..', '..'))
+    os.path.abspath(os.path.join(script_dir, "..", "..", "..")),
 ]
 
 # Try each possible root until we find one that works
@@ -29,6 +29,7 @@ for root in possible_roots:
     try:
         # Try to import a module to verify path is correct
         import arcade_station
+
         arcade_station_found = True
         break
     except ImportError:
@@ -40,7 +41,7 @@ if not arcade_station_found:
     current_dir = os.getcwd()
     sys.path.insert(0, current_dir)
     # Also try adding src directory if it exists
-    src_dir = os.path.join(current_dir, 'src')
+    src_dir = os.path.join(current_dir, "src")
     if os.path.exists(src_dir):
         sys.path.insert(0, src_dir)
 
@@ -51,51 +52,64 @@ except ImportError as e:
     # Fallback logging if import fails
     print(f"ERROR: Could not import required modules: {e}")
     print("Python path:", sys.path)
-    
+
     # Define minimal implementations for required functions
     def log_message(message, category="ERROR"):
         """
         Fallback logging function when core_functions import fails.
-        
+
         Args:
             message (str): The message to log
             category (str): Category for the log message, defaults to "ERROR"
         """
         print(f"[{category}] {message}")
-    
+
     def kill_pegasus():
         """
         Fallback function to kill Pegasus when core_functions import fails.
-        
+
         Attempts to terminate Pegasus processes using taskkill command.
         Handles both .exe and non-.exe process names.
         """
         print("Attempting to kill Pegasus manually...")
         for proc_name in ["pegasus-fe_windows", "pegasus-fe_windows.exe"]:
             try:
-                subprocess.run(["taskkill", "/F", "/IM", proc_name], 
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(
+                    ["taskkill", "/F", "/IM", proc_name],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception:
                 pass
-    
+
     def kill_all_processes():
         """
         Fallback function to kill all Arcade Station processes when core_functions import fails.
-        
+
         Attempts to terminate a predefined list of common Arcade Station processes
         using taskkill command. Includes frontend, emulators, and utility processes.
         """
         print("Attempting to kill processes manually...")
         process_names = [
-            "cmd.exe", "explorer.exe", "gslauncher.exe", "i_view64.exe", 
-            "LightsTest.exe", "mame.exe", "notepad.exe", "pegasus-fe_windows.exe"
+            "cmd.exe",
+            "explorer.exe",
+            "gslauncher.exe",
+            "i_view64.exe",
+            "LightsTest.exe",
+            "mame.exe",
+            "notepad.exe",
+            "pegasus-fe_windows.exe",
         ]
         for proc_name in process_names:
             try:
-                subprocess.run(["taskkill", "/F", "/IM", proc_name], 
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(
+                    ["taskkill", "/F", "/IM", proc_name],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
             except Exception:
                 pass
+
 
 def create_kill_python_script():
     """
@@ -103,10 +117,10 @@ def create_kill_python_script():
     Returns the path to the created script.
     """
     log_message("Creating kill Python script", "KILL")
-    
+
     # Determine the appropriate script based on platform
     if platform.system() == "Windows":
-        script_path = os.path.join(os.environ.get('TEMP', '.'), 'kill_python.ps1')
+        script_path = os.path.join(os.environ.get("TEMP", "."), "kill_python.ps1")
         script_content = """
 # Get current process ID
 $currentPID = $PID
@@ -125,7 +139,7 @@ Write-Host "Starting Explorer..."
 Start-Process "C:\\Windows\\explorer.exe"
 """
     else:  # Linux and macOS
-        script_path = os.path.join('/tmp', 'kill_python.sh')
+        script_path = os.path.join("/tmp", "kill_python.sh")
         script_content = """#!/bin/bash
 # Get current process ID
 CURRENT_PID=$$
@@ -141,61 +155,63 @@ echo "All Python processes terminated."
 
 # No direct equivalent to explorer.exe on Linux/macOS
 """
-    
+
     # Write the script to disk
-    with open(script_path, 'w') as f:
+    with open(script_path, "w") as f:
         f.write(script_content)
-    
+
     # Make the script executable on Linux/macOS
     if platform.system() != "Windows":
         os.chmod(script_path, 0o755)
-    
+
     return script_path
+
 
 def main():
     """
     Main entry point for the Arcade Station termination process.
-    
+
     Executes a complete system reset by:
     1. Killing all standard Arcade Station processes using kill_all_processes()
     2. Specifically terminating the Pegasus frontend
     3. Creating and executing a platform-specific script to kill all Python processes
     4. On Windows, restarts Explorer as the final step
-    
+
     The function handles platform-specific differences between Windows and Unix-like
     systems (Linux/macOS) for process termination.
-    
+
     Returns:
         None. All operations are logged for debugging purposes.
     """
-    
+
     log_message("Starting full Arcade Station termination", "KILL")
-    
+
     # First, kill all running processes using the standard kill_all function
     log_message("Killing all standard processes", "KILL")
     kill_all_processes()
-    
+
     # Specifically kill Pegasus frontend
     log_message("Killing Pegasus frontend", "KILL")
     kill_pegasus()
-    
+
     # Create the kill Python script
     script_path = create_kill_python_script()
-    
+
     # Execute the script to kill all Python processes based on platform
     log_message("Executing script to kill Python processes", "KILL")
-    
+
     if platform.system() == "Windows":
         # On Windows, launch PowerShell to execute the script
         subprocess.Popen(
-            ['powershell', '-ExecutionPolicy', 'Bypass', '-File', script_path],
-            creationflags=subprocess.CREATE_NEW_CONSOLE
+            ["powershell", "-ExecutionPolicy", "Bypass", "-File", script_path],
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
         )
     else:
         # On Linux/macOS
         subprocess.Popen([script_path], start_new_session=True)
-    
+
     log_message("Kill Arcade Station process complete", "KILL")
 
+
 if __name__ == "__main__":
-    main() 
+    main()

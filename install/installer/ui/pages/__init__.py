@@ -1,6 +1,7 @@
 """
 This module contains all the pages for the Arcade Station Installer UI.
 """
+
 from .base_page import BasePage
 from .welcome_page import WelcomePage
 from .install_location_page import InstallLocationPage
@@ -15,16 +16,16 @@ from .utility_config_page import UtilityConfigPage
 from .summary_page import SummaryPage
 
 __all__ = [
-    'BasePage',
-    'WelcomePage',
-    'InstallLocationPage',
-    'KioskModePage',
-    'DisplayConfigPage',
-    'GameSetupPage',
-    'ITGManiaSetupPage',
-    'BinaryGamesPage',
-    'MAMEGamesPage',
-    'KeyBindingsPage',
-    'UtilityConfigPage',
-    'SummaryPage',
-] 
+    "BasePage",
+    "WelcomePage",
+    "InstallLocationPage",
+    "KioskModePage",
+    "DisplayConfigPage",
+    "GameSetupPage",
+    "ITGManiaSetupPage",
+    "BinaryGamesPage",
+    "MAMEGamesPage",
+    "KeyBindingsPage",
+    "UtilityConfigPage",
+    "SummaryPage",
+]
