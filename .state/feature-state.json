@@ -1,7 +1,7 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "tasks",
+  "stage": "implementation",
   "created_at": "2026-03-27",
   "updated_at": "2026-03-27",
   "tasks": [
@@ -126,6 +126,8 @@
     { "timestamp": "2026-03-27 00:02", "stage": "discovery", "note": "Exec plan written to docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md by product-manager agent" },
     { "timestamp": "2026-03-27 00:03", "stage": "design", "note": "Moving to design — routing to principal-engineer for technical design" },
     { "timestamp": "2026-03-27 00:04", "stage": "design", "note": "Design written by principal-engineer — 3-phase approach with pyproject.toml, .flake8, requirements-dev.txt, tests/ scaffolding" },
-    { "timestamp": "2026-03-27 00:05", "stage": "tasks", "note": "Task breakdown complete — 12 tasks across 3 phases (8 Phase 1, 2 Phase 2, 2 Phase 3)" }
+    { "timestamp": "2026-03-27 00:05", "stage": "tasks", "note": "Task breakdown complete — 12 tasks across 3 phases (8 Phase 1, 2 Phase 2, 2 Phase 3)" },
+    { "timestamp": "2026-03-27 00:06", "stage": "implementation", "note": "Starting implementation — task P1-T1: Create Python tooling config files and dev requirements" },
+    { "timestamp": "2026-03-27 00:07", "stage": "review", "note": "Running code review — routing to quality-assurance agent" }
   ]
 }
