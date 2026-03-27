@@ -4,8 +4,8 @@ description: claude is not on PATH in this dev environment - must use absolute p
 type: feedback
 ---
 
-The `claude` binary is installed at `/home/coder/.local/bin/claude`. This path was added to `~/.profile` so it's available in all shell environments including VS Code tasks.
+The `claude` binary is installed at `/home/coder/.local/bin/claude`. VS Code tasks use non-login, non-interactive shells that don't source `~/.profile` or `~/.bashrc`, so PATH-relative `claude` does not resolve.
 
-**Why:** VS Code tasks use non-interactive shells that don't source `.bashrc`. Adding to `~/.profile` ensures PATH resolution works everywhere.
+**Why:** Tried adding to `~/.profile` and reloading VS Code — still fails because VS Code task shells don't source login profiles.
 
-**How to apply:** Use `claude` (PATH-relative) in `.vscode/tasks.json` — do not hardcode absolute paths. The PATH is permanently configured in the remote dev environment.
+**How to apply:** Use the absolute path `/home/coder/.local/bin/claude` in `.vscode/tasks.json`. This is an environment-specific file and the hardcoded path is acceptable here. The QA "no hardcoded paths" rule applies to application config, not dev tooling.

@@ -3,7 +3,7 @@
   "feature_name": "Multi-phase code hygiene initiative",
   "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27",
+  "updated_at": "2026-03-27T00:09",
   "tasks": [
     {
       "id": "P1-T1",
@@ -12,7 +12,7 @@
       "description": "Create pyproject.toml at repo root with [tool.black], [tool.mypy], [tool.pytest.ini_options], and [tool.coverage.*] sections. Create .flake8 at repo root with max-line-length=88, extend-ignore=E203,W503, per-file-ignores for __init__.py:F401. Create requirements-dev.txt with black, flake8, mypy, pytest, pytest-cov. Update requirements.txt to remove commented dev deps and add a reference comment pointing to requirements-dev.txt. Install dev deps with pip install -r requirements-dev.txt.",
       "files_to_touch": ["pyproject.toml", ".flake8", "requirements-dev.txt", "requirements.txt"],
       "definition_of_done": "All 3 new files exist with correct content. pip install -r requirements-dev.txt succeeds. black, flake8, mypy, and pytest are importable.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P1-T2",
@@ -21,7 +21,7 @@
       "description": "Run 'black src/ install/' to auto-format all Python files. Verify with 'black --check src/ install/' exiting 0. Do NOT fix flake8 or mypy issues in this task — only black formatting.",
       "files_to_touch": ["src/**/*.py", "install/**/*.py"],
       "definition_of_done": "'python -m black --check src/ install/' exits 0 with no reformatting needed.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P1-T3",
@@ -128,6 +128,8 @@
     { "timestamp": "2026-03-27 00:04", "stage": "design", "note": "Design written by principal-engineer — 3-phase approach with pyproject.toml, .flake8, requirements-dev.txt, tests/ scaffolding" },
     { "timestamp": "2026-03-27 00:05", "stage": "tasks", "note": "Task breakdown complete — 12 tasks across 3 phases (8 Phase 1, 2 Phase 2, 2 Phase 3)" },
     { "timestamp": "2026-03-27 00:06", "stage": "implementation", "note": "Starting implementation — task P1-T1: Create Python tooling config files and dev requirements" },
-    { "timestamp": "2026-03-27 00:07", "stage": "review", "note": "Running code review — routing to quality-assurance agent" }
+    { "timestamp": "2026-03-27 00:07", "stage": "review", "note": "Running code review — routing to quality-assurance agent" },
+    { "timestamp": "2026-03-27 00:08", "stage": "implementation", "note": "Starting implementation — task P1-T1: Create Python tooling config files and dev requirements" },
+    { "timestamp": "2026-03-27 00:09", "stage": "implementation", "note": "Starting implementation — task P1-T2: Run black auto-format on all Python files" }
   ]
 }
