@@ -1,9 +1,9 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "review",
+  "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:14",
+  "updated_at": "2026-03-27T00:15",
   "tasks": [
     {
       "id": "P1-T1",
@@ -48,7 +48,7 @@
       "description": "Validate all .toml files in the repo using 'npx @taplo/cli check' or 'npx @taplo/cli fmt --check'. Fix any formatting issues in config/*.toml and pyproject.toml. The 9 config TOML files plus pyproject.toml are the targets.",
       "files_to_touch": ["config/*.toml", "pyproject.toml"],
       "definition_of_done": "'npx @taplo/cli check **/*.toml' (or equivalent) exits 0 with zero errors.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P1-T6",
@@ -114,7 +114,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -135,6 +135,7 @@
     { "timestamp": "2026-03-27 00:11", "stage": "implementation", "note": "Completed P1-T3: Fixed all flake8 warnings — F401, E402, E501, F841, F541, E722, W291/W293, W605, F821 across 30+ files" },
     { "timestamp": "2026-03-27 00:12", "stage": "implementation", "note": "Starting implementation — task P1-T4: Fix all mypy errors in src/ and install/" },
     { "timestamp": "2026-03-27 00:13", "stage": "implementation", "note": "Completed P1-T4: Fixed 83 mypy errors across 17 files — Windows-only attrs (subprocess/os/ctypes/winreg), undefined globals, Callable attr access, type mismatches, Path/str conversion" },
-    { "timestamp": "2026-03-27 00:14", "stage": "review", "note": "Running code review for P1-T4 (mypy fixes) — routing to quality-assurance agent" }
+    { "timestamp": "2026-03-27 00:14", "stage": "review", "note": "Running code review for P1-T4 (mypy fixes) — routing to quality-assurance agent" },
+    { "timestamp": "2026-03-27 00:15", "stage": "implementation", "note": "Starting implementation — task P1-T5: Add TOML validation with taplo and fix any issues" }
   ]
 }
