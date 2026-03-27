@@ -12,6 +12,16 @@
       "detail": "Switches to the project directory and activates the virtual environment"
     },
     {
+      "label": "Activate .venv (Linux)",
+      "type": "shell",
+      "command": "source ${workspaceFolder}/.venv/bin/activate",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Activates the virtual environment on Linux/macOS"
+    },
+    {
       "label": "Kill Python Processes",
       "type": "shell",
       "command": "taskkill -IM python.exe /F && taskkill -IM pythonw.exe /F",
