@@ -110,9 +110,9 @@ def force_window_focus():
         KEYEVENTF_KEYUP = 0x0002
 
         # Press and release the Alt key to force Windows to refresh focus
-        ctypes.windll.user32.keybd_event(ALT_KEY, 0, 0, 0)  # Alt press
+        ctypes.windll.user32.keybd_event(ALT_KEY, 0, 0, 0)  # type: ignore[attr-defined]  # noqa: E501  # Alt press
         time.sleep(0.1)
-        ctypes.windll.user32.keybd_event(ALT_KEY, 0, KEYEVENTF_KEYUP, 0)  # Alt release
+        ctypes.windll.user32.keybd_event(ALT_KEY, 0, KEYEVENTF_KEYUP, 0)  # type: ignore[attr-defined]  # noqa: E501  # Alt release
         log_message("Forced window focus refresh", "GAME")
     except Exception as e:
         log_message(f"Failed to force window focus: {e}", "GAME")

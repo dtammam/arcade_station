@@ -77,7 +77,7 @@ class BasePage:
             photo = ImageTk.PhotoImage(img)
 
             label = ttk.Label(parent, image=photo)
-            label.image = photo  # Keep a reference
+            label.image = photo  # type: ignore[attr-defined]  # Keep a reference
             return label
         except Exception:
             # Fallback to text if image loading fails

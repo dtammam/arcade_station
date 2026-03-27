@@ -343,7 +343,7 @@ class SummaryPage(BasePage):
             install_path = self.app.user_config.get("install_path")
             if install_path and os.path.exists(install_path):
                 if platform.system().lower() == "windows":
-                    os.startfile(install_path)
+                    os.startfile(install_path)  # type: ignore[attr-defined]
                 elif platform.system().lower() == "darwin":  # macOS
                     subprocess.run(["open", install_path])
                 else:  # Linux
@@ -427,7 +427,7 @@ class SummaryPage(BasePage):
             install_path = self.app.user_config.get("install_path")
             if install_path and os.path.exists(install_path):
                 if platform.system().lower() == "windows":
-                    os.startfile(install_path)
+                    os.startfile(install_path)  # type: ignore[attr-defined]
                 elif platform.system().lower() == "darwin":  # macOS
                     subprocess.run(["open", install_path])
                 else:  # Linux
@@ -441,7 +441,7 @@ class SummaryPage(BasePage):
 
     def export_config(self):
         """Export the configuration to a JSON file."""
-        save_path = tk.filedialog.asksaveasfilename(
+        save_path = tk.filedialog.asksaveasfilename(  # type: ignore[attr-defined]
             defaultextension=".json",
             filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
             title="Export Configuration",

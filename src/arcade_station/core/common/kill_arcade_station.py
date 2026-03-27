@@ -207,7 +207,7 @@ def main():
         # On Windows, launch PowerShell to execute the script
         subprocess.Popen(
             ["powershell", "-ExecutionPolicy", "Bypass", "-File", script_path],
-            creationflags=subprocess.CREATE_NEW_CONSOLE,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]
         )
     else:
         # On Linux/macOS

@@ -134,7 +134,7 @@ def try_launch_pegasus(binary_path):
                 binary_path,
                 shell=True,
                 cwd=working_dir,
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]  # noqa: E501
             )
         else:
             # macOS and Linux

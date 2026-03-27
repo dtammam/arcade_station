@@ -97,7 +97,7 @@ def reset_lights():
             # Run in a separate process with a short timeout
             process = subprocess.Popen(
                 [executable_path],
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]
                 shell=False,
             )
             # Allow it to run briefly
@@ -155,7 +155,7 @@ def launch_mame_lights():
             # Launch mame2lit.exe directly as an executable, not as a Python script
             process = subprocess.Popen(
                 [mame_executable_path],
-                creationflags=subprocess.CREATE_NO_WINDOW,
+                creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]
                 shell=False,
             )
 

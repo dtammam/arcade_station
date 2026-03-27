@@ -65,7 +65,7 @@ def setup_logging():
     )
 
     # Configure logging to write to file and possibly console
-    handlers = [logging.FileHandler(log_file)]
+    handlers: list[logging.Handler] = [logging.FileHandler(log_file)]
 
     # Only add console handler if not redirected or -console flag is specified
     if not is_redirected or "-console" in sys.argv:

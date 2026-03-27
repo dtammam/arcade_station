@@ -62,8 +62,8 @@ def restart_process(process_name, process_path):
         log_message(f"Attempting to stop process: {process_name}", "ICLOUD")
 
         # Try to terminate the process gracefully with hidden window
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo = subprocess.STARTUPINFO()  # type: ignore[attr-defined]
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore[attr-defined]  # noqa: E501
         startupinfo.wShowWindow = 0  # SW_HIDE
 
         # Use more precise targeting to minimize disruption
@@ -86,8 +86,8 @@ def restart_process(process_name, process_path):
             return False
 
         # Ensure the process starts with minimal UI disruption
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo = subprocess.STARTUPINFO()  # type: ignore[attr-defined]
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore[attr-defined]  # noqa: E501
         startupinfo.wShowWindow = 0  # SW_HIDE
 
         # Use a lower priority for starting
@@ -258,7 +258,7 @@ def icloud_manager():
             foreground_hwnd = None
             if has_focus_modules:
                 try:
-                    foreground_hwnd = ctypes.windll.user32.GetForegroundWindow()
+                    foreground_hwnd = ctypes.windll.user32.GetForegroundWindow()  # type: ignore[name-defined]  # noqa: E501
                     log_message(
                         "Saved current foreground window handle for later restoration",
                         "ICLOUD",
@@ -291,14 +291,14 @@ def icloud_manager():
             if has_focus_modules and foreground_hwnd:
                 try:
                     # Restore the original foreground window
-                    ctypes.windll.user32.SetForegroundWindow(foreground_hwnd)
+                    ctypes.windll.user32.SetForegroundWindow(foreground_hwnd)  # type: ignore[name-defined]  # noqa: E501
 
                     # Force Windows to refresh focus by simulating Alt key press
                     ALT_KEY = 0x12
                     KEYEVENTF_KEYUP = 0x0002
-                    ctypes.windll.user32.keybd_event(ALT_KEY, 0, 0, 0)  # Alt press
+                    ctypes.windll.user32.keybd_event(ALT_KEY, 0, 0, 0)  # type: ignore[name-defined]  # noqa: E501  # Alt press
                     time.sleep(0.1)
-                    ctypes.windll.user32.keybd_event(
+                    ctypes.windll.user32.keybd_event(  # type: ignore[name-defined]
                         ALT_KEY, 0, KEYEVENTF_KEYUP, 0
                     )  # Alt release
 

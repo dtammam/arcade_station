@@ -81,7 +81,7 @@ def find_itgmania_window():
                 results.append(hwnd)
         return True
 
-    windows = []
+    windows: list[int] = []
     win32gui.EnumWindows(enum_windows_callback, windows)
 
     if windows:
@@ -148,7 +148,7 @@ def monitor_itgmania_log(config_path="display_config.toml"):
 
         # Initialize debounce variables
         last_content = ""
-        last_update_time = 0
+        last_update_time: float = 0
 
         if not log_file.parent.exists():
             log_message(
@@ -248,9 +248,9 @@ def update_marquee_from_file(file_path, config):
         # For debouncing - store the last displayed banner path
         # Use a function attribute to persist between calls
         if not hasattr(update_marquee_from_file, "last_banner_path"):
-            update_marquee_from_file.last_banner_path = ""
+            update_marquee_from_file.last_banner_path = ""  # type: ignore[attr-defined]
         if not hasattr(update_marquee_from_file, "last_display_time"):
-            update_marquee_from_file.last_display_time = 0
+            update_marquee_from_file.last_display_time = 0  # type: ignore[attr-defined]
 
         # Kill any existing marquee image process before displaying a new one
         log_message("Killing any existing marquee image processes", "BANNER")
@@ -290,8 +290,8 @@ def update_marquee_from_file(file_path, config):
             # Debounce logic - don't show the same image within 1 second
             current_time = time.time()
             if (
-                banner_path == update_marquee_from_file.last_banner_path
-                and current_time - update_marquee_from_file.last_display_time < 1.0
+                banner_path == update_marquee_from_file.last_banner_path  # type: ignore[attr-defined]  # noqa: E501
+                and current_time - update_marquee_from_file.last_display_time < 1.0  # type: ignore[attr-defined]  # noqa: E501
             ):
                 log_message(
                     f"Debouncing - skipping duplicate display of {banner_path}",
@@ -305,8 +305,8 @@ def update_marquee_from_file(file_path, config):
                 log_message(f"Showing banner for {event_type}: {banner_path}", "BANNER")
 
                 # Update debounce tracking
-                update_marquee_from_file.last_banner_path = banner_path
-                update_marquee_from_file.last_display_time = current_time
+                update_marquee_from_file.last_banner_path = banner_path  # type: ignore[attr-defined]  # noqa: E501
+                update_marquee_from_file.last_display_time = current_time  # type: ignore[attr-defined]  # noqa: E501
 
         # Wait a moment for the display to update
         time.sleep(0.5)

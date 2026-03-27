@@ -19,6 +19,11 @@ import keyboard
 import sys
 import time
 
+# Module-level globals initialized by open_header()
+exit_code: int = -1
+log_file_path: str = ""
+log_tail_path: str = ""
+
 
 def open_header(script_name):
     """
@@ -411,7 +416,7 @@ def start_pegasus():
             log_message("Trying alternative launch method...", "GAME")
             if os.name == "nt":  # Windows
                 try:
-                    os.startfile(pegasus_binary)
+                    os.startfile(pegasus_binary)  # type: ignore[attr-defined]
                     log_message("Launched using os.startfile", "GAME")
                     return True
                 except Exception as e:
@@ -473,7 +478,7 @@ def start_app(executable_path):
                 # The 0 parameter means "hide the window"
                 subprocess.Popen(
                     ["wscript.exe", executable_path],
-                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]  # noqa: E501
                 )
             else:
                 log_message("VBScript is not supported on non-Windows systems.", "MENU")
@@ -596,9 +601,9 @@ def launch_script(script_path, identifier=None, extra_args=None):
 
     # Windows-specific options: hide the console window.
     if os.name == "nt":
-        creationflags = subprocess.CREATE_NO_WINDOW
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        creationflags = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+        startupinfo = subprocess.STARTUPINFO()  # type: ignore[attr-defined]
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # type: ignore[attr-defined]  # noqa: E501
         startupinfo.wShowWindow = 0  # 0 means SW_HIDE.
     else:
         creationflags = 0
@@ -680,7 +685,7 @@ def start_process(file_path):
         if os_type.startswith("win"):
             # Windows: Use startfile or subprocess
             if file_path.endswith(".exe"):
-                os.startfile(file_path)
+                os.startfile(file_path)  # type: ignore[attr-defined]
             else:
                 subprocess.Popen(["python", file_path], shell=True)
         elif os_type.startswith("darwin"):
@@ -824,7 +829,7 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            creationflags=subprocess.CREATE_NO_WINDOW,
+            creationflags=subprocess.CREATE_NO_WINDOW,  # type: ignore[attr-defined]
         )
 
         log_message(f"Successfully started process: {file_path}", "PS")

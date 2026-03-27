@@ -606,7 +606,7 @@ marquee_image.exe"""
     def validate(self):
         """Validate key bindings configuration."""
         # Check for duplicate key bindings
-        used_keys = {}
+        used_keys: dict[str, str] = {}
         for display_var, script_var, key_var, _ in self.key_bindings:
             if not display_var or not key_var or not script_var:
                 continue

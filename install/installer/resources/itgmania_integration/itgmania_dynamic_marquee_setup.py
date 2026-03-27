@@ -612,7 +612,9 @@ def setup_itgmania_integration(itgmania_path, banner_image_path=None):
         banner_path = banner_image_path if banner_image_path else dest_image
 
         if not update_config(
-            ROOT_DIR / "config" / "display_config.toml", log_file_path, str(banner_path)
+            str(ROOT_DIR / "config" / "display_config.toml"),
+            log_file_path,
+            str(banner_path),
         ):
             return False
 

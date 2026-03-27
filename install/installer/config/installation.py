@@ -114,18 +114,18 @@ class InstallationManager:
         try:
             import winreg
 
-            startup_key = winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
+            startup_key = winreg.OpenKey(  # type: ignore[attr-defined]
+                winreg.HKEY_CURRENT_USER,  # type: ignore[attr-defined]
                 r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run",
             )
 
             try:
-                value, _ = winreg.QueryValueEx(startup_key, "ArcadeStation")
+                value, _ = winreg.QueryValueEx(startup_key, "ArcadeStation")  # type: ignore[attr-defined]  # noqa: E501
                 return "arcade_station" in value.lower()
             except FileNotFoundError:
                 return False
             finally:
-                winreg.CloseKey(startup_key)
+                winreg.CloseKey(startup_key)  # type: ignore[attr-defined]
         except Exception:
             return False
 
@@ -189,8 +189,8 @@ class InstallationManager:
             if self.is_windows:
                 import ctypes
 
-                user32 = ctypes.windll.user32
-                return user32.GetSystemMetrics(80)  # SM_CMONITORS
+                user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+                return user32.GetSystemMetrics(80)  # type: ignore[no-any-return]  # noqa: E501  # SM_CMONITORS
             else:
                 # For Linux/Mac, try using screeninfo if available
                 try:
@@ -492,7 +492,7 @@ class InstallationManager:
 
         # Create a fresh installed_games structure
         installed_games_path = os.path.join(config_dir, "installed_games.toml")
-        installed_games = {"games": {}}
+        installed_games: Dict[str, Any] = {"games": {}}
 
         # Load existing installed_games.toml only to preserve structure and metadata
         if os.path.exists(installed_games_path):
@@ -563,7 +563,7 @@ class InstallationManager:
         # Generate default_config.toml
         log_dir = os.path.join(config_dir, "logs")
         if config.get("log_dir"):
-            log_dir = config.get("log_dir")
+            log_dir = config.get("log_dir")  # type: ignore[assignment]
 
         # Create the log directory if it doesn't exist
         os.makedirs(log_dir, exist_ok=True)
@@ -1048,7 +1048,7 @@ assets.box_front: {}
         try:
             import ctypes
 
-            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0  # type: ignore[attr-defined]  # noqa: E501
             if not is_admin:
                 self.logger.error(
                     "Administrator privileges required for Windows-specific setup"
@@ -1091,14 +1091,17 @@ assets.box_front: {}
 
             reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
-            with winreg.OpenKey(
-                winreg.HKEY_LOCAL_MACHINE, reg_path, 0, winreg.KEY_WRITE
+            with winreg.OpenKey(  # type: ignore[attr-defined]
+                winreg.HKEY_LOCAL_MACHINE,  # type: ignore[attr-defined]
+                reg_path,
+                0,
+                winreg.KEY_WRITE,  # type: ignore[attr-defined]
             ) as key:
-                winreg.SetValueEx(key, "DefaultUserName", 0, winreg.REG_SZ, username)
-                winreg.SetValueEx(key, "DefaultPassword", 0, winreg.REG_SZ, password)
-                winreg.SetValueEx(key, "AutoAdminLogon", 0, winreg.REG_SZ, "1")
+                winreg.SetValueEx(key, "DefaultUserName", 0, winreg.REG_SZ, username)  # type: ignore[attr-defined]  # noqa: E501
+                winreg.SetValueEx(key, "DefaultPassword", 0, winreg.REG_SZ, password)  # type: ignore[attr-defined]  # noqa: E501
+                winreg.SetValueEx(key, "AutoAdminLogon", 0, winreg.REG_SZ, "1")  # type: ignore[attr-defined]  # noqa: E501
                 # Add ForceAutoLogon to prevent password changes from breaking auto-logon  # noqa: E501
-                winreg.SetValueEx(key, "ForceAutoLogon", 0, winreg.REG_SZ, "1")
+                winreg.SetValueEx(key, "ForceAutoLogon", 0, winreg.REG_SZ, "1")  # type: ignore[attr-defined]  # noqa: E501
 
             self.logger.info(f"Configured Windows auto-logon for user '{username}'")
         except Exception as e:
@@ -1170,19 +1173,25 @@ exit /b
 
             # Register as shell replacement
             shell_reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
-            with winreg.OpenKey(
-                winreg.HKEY_LOCAL_MACHINE, shell_reg_path, 0, winreg.KEY_WRITE
+            with winreg.OpenKey(  # type: ignore[attr-defined]
+                winreg.HKEY_LOCAL_MACHINE,  # type: ignore[attr-defined]
+                shell_reg_path,
+                0,
+                winreg.KEY_WRITE,  # type: ignore[attr-defined]
             ) as key:
                 # Ensure the path is properly quoted
-                winreg.SetValueEx(key, "Shell", 0, winreg.REG_SZ, f'"{startup_path}"')
+                winreg.SetValueEx(key, "Shell", 0, winreg.REG_SZ, f'"{startup_path}"')  # type: ignore[attr-defined]  # noqa: E501
 
             # Also add to startup for non-shell replacement mode
             startup_reg_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
-            with winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER, startup_reg_path, 0, winreg.KEY_WRITE
+            with winreg.OpenKey(  # type: ignore[attr-defined]
+                winreg.HKEY_CURRENT_USER,  # type: ignore[attr-defined]
+                startup_reg_path,
+                0,
+                winreg.KEY_WRITE,  # type: ignore[attr-defined]
             ) as key:
-                winreg.SetValueEx(
-                    key, "ArcadeStation", 0, winreg.REG_SZ, f'"{startup_path}"'
+                winreg.SetValueEx(  # type: ignore[attr-defined]
+                    key, "ArcadeStation", 0, winreg.REG_SZ, f'"{startup_path}"'  # type: ignore[attr-defined]  # noqa: E501
                 )
 
             self.logger.info("Configured Windows shell replacement")

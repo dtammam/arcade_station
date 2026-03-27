@@ -311,23 +311,26 @@ class InstallerApp:
 
                 reg_path = r"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
-                with winreg.OpenKey(
-                    winreg.HKEY_LOCAL_MACHINE, reg_path, 0, winreg.KEY_READ
+                with winreg.OpenKey(  # type: ignore[attr-defined]
+                    winreg.HKEY_LOCAL_MACHINE,  # type: ignore[attr-defined]
+                    reg_path,
+                    0,
+                    winreg.KEY_READ,  # type: ignore[attr-defined]
                 ) as key:
                     try:
-                        value, _ = winreg.QueryValueEx(key, "DefaultUserName")
+                        value, _ = winreg.QueryValueEx(key, "DefaultUserName")  # type: ignore[attr-defined]  # noqa: E501
                         self.user_config["kiosk_username"] = value
                     except Exception:
                         pass
 
                     try:
-                        value, _ = winreg.QueryValueEx(key, "AutoAdminLogon")
+                        value, _ = winreg.QueryValueEx(key, "AutoAdminLogon")  # type: ignore[attr-defined]  # noqa: E501
                         self.user_config["enable_kiosk_mode"] = value == "1"
                     except Exception:
                         pass
 
                     try:
-                        value, _ = winreg.QueryValueEx(key, "Shell")
+                        value, _ = winreg.QueryValueEx(key, "Shell")  # type: ignore[attr-defined]  # noqa: E501
                         self.user_config["kiosk_replace_shell"] = (
                             value != "explorer.exe"
                         )

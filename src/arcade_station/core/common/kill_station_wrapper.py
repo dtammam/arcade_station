@@ -60,10 +60,10 @@ def main():
         if platform.system() == "Windows":
             import ctypes
 
-            if not ctypes.windll.shell32.IsUserAnAdmin():
+            if not ctypes.windll.shell32.IsUserAnAdmin():  # type: ignore[attr-defined]
                 print("Requesting administrator privileges...")
                 # Re-run the script with admin privileges
-                ctypes.windll.shell32.ShellExecuteW(
+                ctypes.windll.shell32.ShellExecuteW(  # type: ignore[attr-defined]
                     None, "runas", sys.executable, __file__, None, 1
                 )
                 return
@@ -135,7 +135,7 @@ def main():
 
                 subprocess.Popen(
                     ["powershell", "-Command", ps_script],
-                    creationflags=subprocess.CREATE_NEW_CONSOLE,
+                    creationflags=subprocess.CREATE_NEW_CONSOLE,  # type: ignore[attr-defined]  # noqa: E501
                 )
                 # Note: Don't launch explorer here since the PowerShell script will do it  # noqa: E501
 

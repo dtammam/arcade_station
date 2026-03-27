@@ -40,7 +40,7 @@ class WelcomePage(BasePage):
                 photo = ImageTk.PhotoImage(img)
 
                 logo_label = ttk.Label(welcome_frame, image=photo)
-                logo_label.image = photo  # Keep a reference
+                logo_label.image = photo  # type: ignore[attr-defined]  # noqa: E501  # Keep a reference
                 logo_label.pack(pady=20)
         except ImportError:
             # PIL not available, use text instead
