@@ -1,9 +1,9 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "review",
+  "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:19",
+  "updated_at": "2026-03-27T00:21",
   "tasks": [
     {
       "id": "P1-T1",
@@ -75,7 +75,7 @@
       "description": "Add a new task to .vscode/tasks.json labeled 'Activate .venv (Linux)' with command 'source ${workspaceFolder}/.venv/bin/activate', type shell, reveal always, panel shared, detail 'Activates the virtual environment on Linux/macOS'.",
       "files_to_touch": [".vscode/tasks.json"],
       "definition_of_done": ".vscode/tasks.json contains both the existing Windows 'Activate .venv' task and the new Linux-compatible task.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P2-T1",
@@ -114,7 +114,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -140,6 +140,8 @@
     { "timestamp": "2026-03-27 00:16", "stage": "implementation", "note": "Starting implementation — task P1-T6: Add shellcheck validation and fix shell script issues" },
     { "timestamp": "2026-03-27 00:17", "stage": "implementation", "note": "Starting implementation — task P1-T7: Add PSScriptAnalyzer validation and fix PowerShell script issues" },
     { "timestamp": "2026-03-27 00:18", "stage": "implementation", "note": "Completed P1-T7: Installed pwsh 7.6.0 and PSScriptAnalyzer; fixed 3 warning types across 5 files — renamed Write-Log→Write-InstallLog (PSAvoidOverwritingBuiltInCmdlets), added SuppressMessageAttribute for PSAvoidUsingWriteHost and PSUseShouldProcessForStateChangingFunctions, removed trailing whitespace from install_logic.ps1/start_mame.ps1/core_functions.psm1; zero warnings on all 6 target files" },
-    { "timestamp": "2026-03-27 00:19", "stage": "review", "note": "Running code review for P1-T7 (PSScriptAnalyzer fixes for PowerShell scripts) — routing to quality-assurance agent" }
+    { "timestamp": "2026-03-27 00:19", "stage": "review", "note": "Running code review for P1-T7 (PSScriptAnalyzer fixes for PowerShell scripts) — routing to quality-assurance agent" },
+    { "timestamp": "2026-03-27 00:20", "stage": "implementation", "note": "Starting implementation — task P1-T8: Add Linux-compatible VS Code .venv activation task" },
+    { "timestamp": "2026-03-27 00:21", "stage": "implementation", "note": "Completed P1-T8: Added 'Activate .venv (Linux)' task to .vscode/tasks.json — placed immediately after Windows 'Activate .venv' task; all 7 existing tasks unchanged; JSON valid" }
   ]
 }
