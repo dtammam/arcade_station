@@ -1,9 +1,9 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "implementation",
+  "stage": "review",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:24",
+  "updated_at": "2026-03-28T00:01",
   "tasks": [
     {
       "id": "P1-T1",
@@ -96,6 +96,15 @@
       "status": "done"
     },
     {
+      "id": "P1-T9",
+      "phase": 1,
+      "title": "Provision Python 3.12 and recreate virtual environment",
+      "description": "Install Python 3.12 on the dev environment (Debian 12) using pyenv or deadsnakes PPA. Recreate the .venv using Python 3.12. Reinstall requirements.txt and requirements-dev.txt. Verify all tools (black, flake8, mypy, pytest) work under 3.12. Confirm the black Python 3.12 target-version warning is gone from pre-commit hooks.",
+      "files_to_touch": [".venv/", "pyproject.toml"],
+      "definition_of_done": "python --version inside .venv reports 3.12.x. All dev tools run without version warnings. Pre-commit hook runs clean with no Python version mismatch warning.",
+      "status": "done"
+    },
+    {
       "id": "P3-T1",
       "phase": 3,
       "title": "Create test directory structure and pytest configuration",
@@ -114,7 +123,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1", "P2-T2"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1", "P2-T2", "P1-T9"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -145,6 +154,9 @@
     { "timestamp": "2026-03-27 00:21", "stage": "implementation", "note": "Completed P1-T8: Added 'Activate .venv (Linux)' task to .vscode/tasks.json — placed immediately after Windows 'Activate .venv' task; all 7 existing tasks unchanged; JSON valid" },
     { "timestamp": "2026-03-27 00:22", "stage": "implementation", "note": "Starting implementation — task P2-T1: Fix markdownlint errors in all 7 failing markdown files" },
     { "timestamp": "2026-03-27 00:23", "stage": "implementation", "note": "Completed P2-T1: Fixed 50 markdownlint errors across 7 files — MD009 (trailing spaces), MD012 (multiple blank lines), MD007 (list indentation 4→2), MD030 (list marker spacing), MD042 (empty link), MD045 (missing alt text), MD047 (missing trailing newlines), MD058 (blanks around tables), MD059 (non-descriptive link text)" },
-    { "timestamp": "2026-03-27 00:24", "stage": "implementation", "note": "Starting implementation — task P2-T2: Remove temporary markdownlint ignore entries from .markdownlint-cli2.jsonc" }
+    { "timestamp": "2026-03-27 00:24", "stage": "implementation", "note": "Starting implementation — task P2-T2: Remove temporary markdownlint ignore entries from .markdownlint-cli2.jsonc" },
+    { "timestamp": "2026-03-27 00:25", "stage": "implementation", "note": "Inserted P1-T9 (Provision Python 3.12) between P2-T2 and P3-T1 — pulled forward from TD-002 because Phase 3 test scaffolding should run on the correct Python version" },
+    { "timestamp": "2026-03-28 00:00", "stage": "implementation", "note": "Completed P1-T9: Installed Python 3.12.9 via pyenv (deadsnakes PPA unavailable on Debian 12). Recreated .venv with Python 3.12.9. Reinstalled all requirements. Fixed 19 mypy errors introduced by newer PyQt5/Pillow stubs under py312 (Qt flag attrs, QScreen union-attr, Image.LANCZOS attr-defined, Image resize assignment). All quality gates pass: black, flake8, mypy exit 0, pre-commit clean with no version mismatch warning." },
+    { "timestamp": "2026-03-28 00:01", "stage": "review", "note": "Running code review for P1-T9 (Python 3.12 provisioning), hook changes, pyproject.toml target-version, and P2-T2 markdownlint ignores — routing to quality-assurance agent" }
   ]
 }
