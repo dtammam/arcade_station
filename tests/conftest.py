@@ -6,19 +6,18 @@ import pytest
 
 
 @pytest.fixture
-def toml_config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def toml_config_dir(tmp_path: Path) -> Path:
     """Provide a temporary directory with a minimal TOML configuration.
 
-    Creates a ``config/`` subdirectory inside ``tmp_path``, writes a minimal
-    ``games.toml`` file into it, and sets the ``ARCADE_STATION_CONFIG_DIR``
-    environment variable so tests can redirect config lookups to the temp
-    directory.
+    Creates a ``config/`` subdirectory inside ``tmp_path`` and writes a
+    minimal ``games.toml`` file into it.  Tests that need to redirect
+    ``load_toml_config`` lookups should patch ``builtins.open`` directly,
+    since that function computes its path from ``__file__`` rather than
+    reading an environment variable.
 
     Args:
         tmp_path: pytest built-in fixture providing a per-test temporary
             directory that is cleaned up automatically after the test.
-        monkeypatch: pytest built-in fixture for safely patching attributes
-            and environment variables within a test's scope.
 
     Returns:
         Path: The temporary config directory (``tmp_path / "config"``)
@@ -29,9 +28,5 @@ def toml_config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
     # Write a minimal valid TOML file for tests that need a real config file.
     (config_dir / "games.toml").write_text("[games]\n", encoding="utf-8")
-
-    # Point the well-known env var at the temp dir so modules that honour it
-    # will resolve configs from the temporary location instead of the real one.
-    monkeypatch.setenv("ARCADE_STATION_CONFIG_DIR", str(config_dir))
 
     return config_dir
