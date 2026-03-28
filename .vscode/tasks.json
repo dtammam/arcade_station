@@ -36,6 +36,7 @@
       "label": "Run Product Manager",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent product-manager @.state/inbox/product-manager.md",
+      "detail": "NOTE: claude path is absolute because VS Code task shells don't source login profiles. Update path if your claude install location differs.",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
