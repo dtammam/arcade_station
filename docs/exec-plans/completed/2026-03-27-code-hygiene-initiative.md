@@ -97,31 +97,31 @@ may change.
 
 ### Phase 1
 
-- [ ] `python -m black --check src/ install/` exits 0 with no reformatting needed.
-- [ ] `python -m flake8 src/ install/` exits 0 with zero warnings.
-- [ ] `python -m mypy src/ install/` exits 0 with zero errors.
-- [ ] `npx @taplo/cli check **/*.toml` (or equivalent invocation) exits 0 with zero errors on all `.toml` files in the repo.
-- [ ] `Invoke-ScriptAnalyzer` run against all `.ps1` files under `bin/windows/` reports zero warnings or errors.
-- [ ] `shellcheck` run against all `.sh` files under `bin/unix/` and the repo root exits 0 with zero warnings.
-- [ ] `.vscode/tasks.json` contains both a Windows "Activate .venv" task (existing) and a new Linux-compatible "Activate .venv" task using Unix paths.
-- [ ] Running `git commit` on a staged change triggers the pre-commit hook and all checks pass without `--no-verify`.
-- [ ] `requirements.txt` (or equivalent dev requirements file) includes `black`, `flake8`, `mypy`, and `pytest` as uncommented entries.
+- [x] `python -m black --check src/ install/` exits 0 with no reformatting needed.
+- [x] `python -m flake8 src/ install/` exits 0 with zero warnings.
+- [x] `python -m mypy src/ install/` exits 0 with zero errors.
+- [x] `npx @taplo/cli check **/*.toml` (or equivalent invocation) exits 0 with zero errors on all `.toml` files in the repo.
+- [x] `Invoke-ScriptAnalyzer` run against all `.ps1` files under `bin/windows/` reports zero warnings or errors.
+- [x] `shellcheck` run against all `.sh` files under `bin/unix/` and the repo root exits 0 with zero warnings.
+- [x] `.vscode/tasks.json` contains both a Windows "Activate .venv" task (existing) and a new Linux-compatible "Activate .venv" task using Unix paths.
+- [x] Running `git commit` on a staged change triggers the pre-commit hook and all checks pass without `--no-verify`.
+- [x] `requirements.txt` (or equivalent dev requirements file) includes `black`, `flake8`, `mypy`, and `pytest` as uncommented entries.
 
 ### Phase 2
 
-- [ ] `npx markdownlint-cli2 '**/*.md'` exits 0 with zero errors across all markdown files.
-- [ ] `.markdownlint-cli2.jsonc` contains no temporary ignore entries for pre-existing files (`README.md`, `PLAN.MD`, `THANKS.md`, `examples/DDR.md`, `examples/LAPTOP.md`, `src/arcade_station/core/windows/README_ICLOUD.md`, `src/pegasus-fe/themes/micro/README.md`).
-- [ ] All 7 previously-failing markdown files parse and render without lint errors.
+- [x] `npx markdownlint-cli2 '**/*.md'` exits 0 with zero errors across all markdown files.
+- [x] `.markdownlint-cli2.jsonc` contains no temporary ignore entries for pre-existing files (`README.md`, `PLAN.MD`, `THANKS.md`, `examples/DDR.md`, `examples/LAPTOP.md`, `src/arcade_station/core/windows/README_ICLOUD.md`, `src/pegasus-fe/themes/micro/README.md`).
+- [x] All 7 previously-failing markdown files parse and render without lint errors.
 
 ### Phase 3
 
-- [ ] A `tests/` directory exists at the repo root with at least one subdirectory or `conftest.py` following pytest conventions.
-- [ ] Pytest configuration exists (`pyproject.toml` `[tool.pytest.ini_options]` section or `pytest.ini`) and `python -m pytest --collect-only` discovers at least one test.
-- [ ] Unit tests exist for every stable pure function in `src/arcade_station/core/common/core_functions.py` (one test per distinct code path, not tautological).
-- [ ] `python -m pytest` exits 0 with zero failures and zero errors.
-- [ ] `python -m pytest` completes in under 30 seconds.
-- [ ] Running `git push` triggers the pre-push hook and `python -m pytest` runs for real (not skipped) and passes.
-- [ ] `pytest-cov` (or equivalent) is installed and `python -m pytest --cov=src/arcade_station` produces a coverage report without error.
+- [x] A `tests/` directory exists at the repo root with at least one subdirectory or `conftest.py` following pytest conventions.
+- [x] Pytest configuration exists (`pyproject.toml` `[tool.pytest.ini_options]` section or `pytest.ini`) and `python -m pytest --collect-only` discovers at least one test.
+- [x] Unit tests exist for every stable pure function in `src/arcade_station/core/common/core_functions.py` (one test per distinct code path, not tautological).
+- [x] `python -m pytest` exits 0 with zero failures and zero errors.
+- [x] `python -m pytest` completes in under 30 seconds.
+- [x] Running `git push` triggers the pre-push hook and `python -m pytest` runs for real (not skipped) and passes.
+- [x] `pytest-cov` (or equivalent) is installed and `python -m pytest --cov=src/arcade_station` produces a coverage report without error.
 
 ## Design
 
@@ -596,6 +596,12 @@ Done when: PSScriptAnalyzer reports zero warnings, or documented skip note.
 Add "Activate .venv (Linux)" task to `.vscode/tasks.json`.
 Files: `.vscode/tasks.json`
 Done when: Both Windows and Linux activation tasks exist in tasks.json.
+
+**P1-T9: Provision Python 3.12 and recreate virtual environment**
+Install Python 3.12.9 via pyenv. Recreate `.venv`. Reinstall all requirements.
+Fix any new mypy errors from stricter py312 stubs. Confirm all tools pass.
+Files: `.venv/`, `pyproject.toml`
+Done when: Python 3.12.x in venv, all quality gates pass, no version warnings.
 
 ### Phase 2: Markdown linting (2 tasks)
 

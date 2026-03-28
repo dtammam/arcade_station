@@ -127,4 +127,4 @@ npx markdownlint-cli2 '**/*.md'
 ## Active work
 
 Active exec plans: (none)
-Completed plans: (none yet)
+Completed plans: `docs/exec-plans/completed/2026-03-27-code-hygiene-initiative.md`
