@@ -2,14 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Activate .venv",
+      "label": "Activate .venv (Windows)",
       "type": "shell",
       "command": "cd C:\\Repositories\\arcade_station && .venv\\Scripts\\activate",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
       },
-      "detail": "Switches to the project directory and activates the virtual environment"
+      "detail": "Switches to the project directory and activates the virtual environment on Windows."
     },
     {
       "label": "Activate .venv (Linux)",
@@ -19,17 +19,17 @@
         "reveal": "always",
         "panel": "shared"
       },
-      "detail": "Activates the virtual environment on Linux/macOS"
+      "detail": "Activates the virtual environment on Linux/macOS."
     },
     {
-      "label": "Kill Python Processes",
+      "label": "Kill Python Processes (Windows)",
       "type": "shell",
       "command": "taskkill -IM python.exe /F && taskkill -IM pythonw.exe /F",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
       },
-      "detail": "Force kills all running Python processes",
+      "detail": "Force kills all running Python processes on Windows.",
       "problemMatcher": []
     },
     {
