@@ -36,7 +36,7 @@
       "label": "Run Product Manager",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent product-manager @.state/inbox/product-manager.md",
-      "detail": "NOTE: claude path is absolute because VS Code task shells don't source login profiles. Update path if your claude install location differs.",
+      "detail": "Run /discover or /accept before triggering the PM. NOTE:",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -44,6 +44,7 @@
       "label": "Run Principal Engineer",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent principal-engineer @.state/inbox/principal-engineer.md",
+      "detail": "Run /design before triggering the PE. NOTE:",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -51,6 +52,7 @@
       "label": "Run Software Developer",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent software-developer @.state/inbox/software-developer.md",
+      "detail": "Run /implement before triggering the SDE. NOTE:",      
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -58,6 +60,7 @@
       "label": "Run Build Specialist",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent build-specialist @.state/inbox/build-specialist.md",
+      "detail": "Run /verify before triggering the Build Specialist.",      
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -65,6 +68,7 @@
       "label": "Run Quality Assurance",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent quality-assurance @.state/inbox/quality-assurance.md",
+      "detail": "Run /review before triggering the QA. NOTE:",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     }

@@ -1,9 +1,9 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "review",
+  "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-28T00:01",
+  "updated_at": "2026-03-28T00:03",
   "tasks": [
     {
       "id": "P1-T1",
@@ -111,7 +111,7 @@
       "description": "Create tests/__init__.py (empty), tests/conftest.py (with toml_config_dir fixture using tmp_path and monkeypatch), tests/unit/__init__.py (empty). Verify pyproject.toml already has [tool.pytest.ini_options] from P1-T1. Verify [tool.coverage.*] sections exist in pyproject.toml. Run 'python -m pytest --collect-only' to confirm pytest discovers the test directory.",
       "files_to_touch": ["tests/__init__.py", "tests/conftest.py", "tests/unit/__init__.py"],
       "definition_of_done": "tests/ directory exists with conftest.py and unit/ subdirectory. 'python -m pytest --collect-only' runs without error (may find 0 tests, which is fine at this stage).",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P3-T2",
@@ -123,7 +123,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1", "P2-T2", "P1-T9"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1", "P2-T2", "P1-T9", "P3-T1"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -157,6 +157,8 @@
     { "timestamp": "2026-03-27 00:24", "stage": "implementation", "note": "Starting implementation — task P2-T2: Remove temporary markdownlint ignore entries from .markdownlint-cli2.jsonc" },
     { "timestamp": "2026-03-27 00:25", "stage": "implementation", "note": "Inserted P1-T9 (Provision Python 3.12) between P2-T2 and P3-T1 — pulled forward from TD-002 because Phase 3 test scaffolding should run on the correct Python version" },
     { "timestamp": "2026-03-28 00:00", "stage": "implementation", "note": "Completed P1-T9: Installed Python 3.12.9 via pyenv (deadsnakes PPA unavailable on Debian 12). Recreated .venv with Python 3.12.9. Reinstalled all requirements. Fixed 19 mypy errors introduced by newer PyQt5/Pillow stubs under py312 (Qt flag attrs, QScreen union-attr, Image.LANCZOS attr-defined, Image resize assignment). All quality gates pass: black, flake8, mypy exit 0, pre-commit clean with no version mismatch warning." },
-    { "timestamp": "2026-03-28 00:01", "stage": "review", "note": "Running code review for P1-T9 (Python 3.12 provisioning), hook changes, pyproject.toml target-version, and P2-T2 markdownlint ignores — routing to quality-assurance agent" }
+    { "timestamp": "2026-03-28 00:01", "stage": "review", "note": "Running code review for P1-T9 (Python 3.12 provisioning), hook changes, pyproject.toml target-version, and P2-T2 markdownlint ignores — routing to quality-assurance agent" },
+    { "timestamp": "2026-03-28 00:02", "stage": "implementation", "note": "Starting implementation — task P3-T1: Create test directory structure and pytest configuration" },
+    { "timestamp": "2026-03-28 00:03", "stage": "implementation", "note": "Completed P3-T1: Created tests/__init__.py, tests/unit/__init__.py, tests/conftest.py with toml_config_dir fixture (tmp_path + monkeypatch). Confirmed pyproject.toml has [tool.pytest.ini_options], [tool.coverage.run], [tool.coverage.report]. pytest --collect-only discovers tests/ with 0 tests (expected). black, flake8, mypy all pass." }
   ]
 }
