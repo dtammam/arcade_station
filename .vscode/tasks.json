@@ -36,7 +36,7 @@
       "label": "Run Product Manager",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent product-manager @.state/inbox/product-manager.md",
-      "detail": "Run /discover or /accept before triggering the PM. NOTE:",
+      "detail": "Run /discover or /accept before triggering the PM.",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -44,7 +44,7 @@
       "label": "Run Principal Engineer",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent principal-engineer @.state/inbox/principal-engineer.md",
-      "detail": "Run /design before triggering the PE. NOTE:",
+      "detail": "Run /design before triggering the PE.",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -52,7 +52,7 @@
       "label": "Run Software Developer",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent software-developer @.state/inbox/software-developer.md",
-      "detail": "Run /implement before triggering the SDE. NOTE:",      
+      "detail": "Run /implement before triggering the SDE.",      
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     },
@@ -68,7 +68,7 @@
       "label": "Run Quality Assurance",
       "type": "shell",
       "command": "/home/coder/.local/bin/claude --dangerously-skip-permissions --agent quality-assurance @.state/inbox/quality-assurance.md",
-      "detail": "Run /review before triggering the QA. NOTE:",
+      "detail": "Run /review before triggering the QA.",
       "group": "none",
       "presentation": { "reveal": "always", "panel": "new" }
     }
