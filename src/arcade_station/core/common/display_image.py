@@ -61,19 +61,19 @@ class ImageWindow(QMainWindow):
         # Qt.Tool tells Windows this is a tool window (not a main app window), they don't show in taskbar and don't steal focus  # noqa: E501
         # Qt.WindowDoesNotAcceptFocus prevents the window from accepting keyboard focus
         self.setWindowFlags(
-            Qt.FramelessWindowHint
-            | Qt.WindowStaysOnTopHint
-            | Qt.Tool
-            | Qt.WindowDoesNotAcceptFocus
+            Qt.FramelessWindowHint  # type: ignore[attr-defined]
+            | Qt.WindowStaysOnTopHint  # type: ignore[attr-defined]
+            | Qt.Tool  # type: ignore[attr-defined]
+            | Qt.WindowDoesNotAcceptFocus  # type: ignore[attr-defined]
         )
 
         # Add additional attribute to never activate the window
-        self.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)  # type: ignore[attr-defined]
 
         # Handle transparency specially
         if background_color.lower() == "transparent":
             # Enable window transparency
-            self.setAttribute(Qt.WA_TranslucentBackground)
+            self.setAttribute(Qt.WA_TranslucentBackground)  # type: ignore[attr-defined]
             # Use transparent stylesheet
             self.setStyleSheet("background-color: rgba(0, 0, 0, 0);")
         else:
@@ -90,18 +90,20 @@ class ImageWindow(QMainWindow):
         if background_color.lower() == "transparent" and image_path.lower().endswith(
             ".png"
         ):
-            pixmap.setMask(pixmap.createMaskFromColor(Qt.transparent))
+            qt_transparent = Qt.transparent  # type: ignore[attr-defined]
+            pixmap.setMask(pixmap.createMaskFromColor(qt_transparent))
 
         # Determine the maximum size for the image to fit within the screen
+        primary_screen = QApplication.primaryScreen()
         screen_width = (
             screen_geometry.width()
             if screen_geometry
-            else QApplication.primaryScreen().size().width()
+            else primary_screen.size().width()  # type: ignore[union-attr]
         )
         screen_height = (
             screen_geometry.height()
             if screen_geometry
-            else QApplication.primaryScreen().size().height()
+            else primary_screen.size().height()  # type: ignore[union-attr]
         )
 
         # Calculate the maximum width and height while maintaining aspect ratio

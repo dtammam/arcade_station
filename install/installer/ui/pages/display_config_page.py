@@ -50,7 +50,7 @@ class DisplayConfigPage(BasePage):
                 qt_app = QApplication.instance()
                 if not qt_app:
                     qt_app = QApplication([])
-                return len(qt_app.screens())
+                return len(qt_app.screens())  # type: ignore[attr-defined]
             except Exception:
                 # Fallback: assume at least one monitor
                 return max(1, app.install_manager.get_monitor_count())
@@ -69,7 +69,7 @@ class DisplayConfigPage(BasePage):
                 qt_app = QApplication.instance()
                 if not qt_app:
                     qt_app = QApplication([])
-                return len(qt_app.screens())
+                return len(qt_app.screens())  # type: ignore[attr-defined]
             except Exception:
                 # Fallback: assume at least one monitor
                 return max(1, self.app.install_manager.get_monitor_count())
@@ -413,7 +413,7 @@ class DisplayConfigPage(BasePage):
             if not app:
                 app = QApplication([])
 
-            screens = app.screens()
+            screens = app.screens()  # type: ignore[attr-defined]
 
             # Create a temporary window for each monitor
             for i, screen in enumerate(screens):

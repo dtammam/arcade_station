@@ -73,7 +73,8 @@ class BasePage:
         """
         try:
             img = Image.open(image_path)
-            img = img.resize(size, Image.LANCZOS)
+            resample = Image.LANCZOS  # type: ignore[attr-defined]
+            img = img.resize(size, resample)  # type: ignore[assignment]
             photo = ImageTk.PhotoImage(img)
 
             label = ttk.Label(parent, image=photo)

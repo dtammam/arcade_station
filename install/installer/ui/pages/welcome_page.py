@@ -36,7 +36,8 @@ class WelcomePage(BasePage):
             logo_path = os.path.join(self.app.install_manager.resources_dir, "logo.png")
             if os.path.exists(logo_path):
                 img = Image.open(logo_path)
-                img = img.resize((200, 200), Image.LANCZOS)
+                resample = Image.LANCZOS  # type: ignore[attr-defined]
+                img = img.resize((200, 200), resample)  # type: ignore[assignment]
                 photo = ImageTk.PhotoImage(img)
 
                 logo_label = ttk.Label(welcome_frame, image=photo)
