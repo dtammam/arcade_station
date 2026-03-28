@@ -3,7 +3,7 @@
   "feature_name": "Multi-phase code hygiene initiative",
   "stage": "implementation",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-27T00:21",
+  "updated_at": "2026-03-27T00:22",
   "tasks": [
     {
       "id": "P1-T1",
@@ -84,7 +84,7 @@
       "description": "Fix all 39 markdownlint errors across: README.md, PLAN.MD, THANKS.md, examples/DDR.md, examples/LAPTOP.md, src/arcade_station/core/windows/README_ICLOUD.md, src/pegasus-fe/themes/micro/README.md. Common fixes: heading levels, blank lines, trailing whitespace, list formatting, fenced code blocks. Do NOT change the meaning or content of any documentation.",
       "files_to_touch": ["README.md", "PLAN.MD", "THANKS.md", "examples/DDR.md", "examples/LAPTOP.md", "src/arcade_station/core/windows/README_ICLOUD.md", "src/pegasus-fe/themes/micro/README.md"],
       "definition_of_done": "'npx markdownlint-cli2 README.md PLAN.MD THANKS.md examples/DDR.md examples/LAPTOP.md src/arcade_station/core/windows/README_ICLOUD.md src/pegasus-fe/themes/micro/README.md' exits 0.",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "P2-T2",
@@ -114,7 +114,7 @@
       "status": "pending"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -142,6 +142,8 @@
     { "timestamp": "2026-03-27 00:18", "stage": "implementation", "note": "Completed P1-T7: Installed pwsh 7.6.0 and PSScriptAnalyzer; fixed 3 warning types across 5 files — renamed Write-Log→Write-InstallLog (PSAvoidOverwritingBuiltInCmdlets), added SuppressMessageAttribute for PSAvoidUsingWriteHost and PSUseShouldProcessForStateChangingFunctions, removed trailing whitespace from install_logic.ps1/start_mame.ps1/core_functions.psm1; zero warnings on all 6 target files" },
     { "timestamp": "2026-03-27 00:19", "stage": "review", "note": "Running code review for P1-T7 (PSScriptAnalyzer fixes for PowerShell scripts) — routing to quality-assurance agent" },
     { "timestamp": "2026-03-27 00:20", "stage": "implementation", "note": "Starting implementation — task P1-T8: Add Linux-compatible VS Code .venv activation task" },
-    { "timestamp": "2026-03-27 00:21", "stage": "implementation", "note": "Completed P1-T8: Added 'Activate .venv (Linux)' task to .vscode/tasks.json — placed immediately after Windows 'Activate .venv' task; all 7 existing tasks unchanged; JSON valid" }
+    { "timestamp": "2026-03-27 00:21", "stage": "implementation", "note": "Completed P1-T8: Added 'Activate .venv (Linux)' task to .vscode/tasks.json — placed immediately after Windows 'Activate .venv' task; all 7 existing tasks unchanged; JSON valid" },
+    { "timestamp": "2026-03-27 00:22", "stage": "implementation", "note": "Starting implementation — task P2-T1: Fix markdownlint errors in all 7 failing markdown files" },
+    { "timestamp": "2026-03-27 00:23", "stage": "implementation", "note": "Completed P2-T1: Fixed 50 markdownlint errors across 7 files — MD009 (trailing spaces), MD012 (multiple blank lines), MD007 (list indentation 4→2), MD030 (list marker spacing), MD042 (empty link), MD045 (missing alt text), MD047 (missing trailing newlines), MD058 (blanks around tables), MD059 (non-descriptive link text)" }
   ]
 }
