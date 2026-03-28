@@ -1,9 +1,9 @@
 {
   "feature_id": "code-hygiene-initiative",
   "feature_name": "Multi-phase code hygiene initiative",
-  "stage": "implementation",
+  "stage": "review",
   "created_at": "2026-03-27",
-  "updated_at": "2026-03-28T00:03",
+  "updated_at": "2026-03-28T00:05",
   "tasks": [
     {
       "id": "P1-T1",
@@ -120,10 +120,10 @@
       "description": "Create tests/unit/test_core_functions.py with unit tests for: (1) determine_operating_system — mock platform.system() for Windows/Linux/Darwin, (2) convert_path_for_platform — parametrize with Windows/Unix paths plus None/empty edge cases, (3) load_toml_config — use tmp_path fixture with valid TOML, test FileNotFoundError for missing file, test TOMLDecodeError for invalid TOML, (4) load_key_mappings_from_toml — fixture with TOML containing [key_mappings], test empty mappings, (5) load_installed_games/load_game_config/load_mame_config — mock load_toml_config to verify correct TOML filename, (6) log_message — capture output, verify timestamp format and prefix. All tests must follow Google-style docstrings. Use unittest.mock.patch for IO-dependent functions. Do NOT refactor core_functions.py.",
       "files_to_touch": ["tests/unit/test_core_functions.py"],
       "definition_of_done": "'python -m pytest tests/unit/test_core_functions.py -v' exits 0 with all tests passing. Each testable function has at least one test per distinct code path. Test suite completes in under 30 seconds. 'python -m pytest --cov=src/arcade_station' produces a coverage report without error.",
-      "status": "pending"
+      "status": "done"
     }
   ],
-  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1", "P2-T2", "P1-T9", "P3-T1"],
+  "completed_tasks": ["P1-T1", "P1-T2", "P1-T3", "P1-T4", "P1-T5", "P1-T6", "P1-T7", "P1-T8", "P2-T1", "P2-T2", "P1-T9", "P3-T1", "P3-T2"],
   "artifacts": {
     "requirements": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
     "design": "docs/exec-plans/active/2026-03-27-code-hygiene-initiative.md",
@@ -159,6 +159,8 @@
     { "timestamp": "2026-03-28 00:00", "stage": "implementation", "note": "Completed P1-T9: Installed Python 3.12.9 via pyenv (deadsnakes PPA unavailable on Debian 12). Recreated .venv with Python 3.12.9. Reinstalled all requirements. Fixed 19 mypy errors introduced by newer PyQt5/Pillow stubs under py312 (Qt flag attrs, QScreen union-attr, Image.LANCZOS attr-defined, Image resize assignment). All quality gates pass: black, flake8, mypy exit 0, pre-commit clean with no version mismatch warning." },
     { "timestamp": "2026-03-28 00:01", "stage": "review", "note": "Running code review for P1-T9 (Python 3.12 provisioning), hook changes, pyproject.toml target-version, and P2-T2 markdownlint ignores — routing to quality-assurance agent" },
     { "timestamp": "2026-03-28 00:02", "stage": "implementation", "note": "Starting implementation — task P3-T1: Create test directory structure and pytest configuration" },
-    { "timestamp": "2026-03-28 00:03", "stage": "implementation", "note": "Completed P3-T1: Created tests/__init__.py, tests/unit/__init__.py, tests/conftest.py with toml_config_dir fixture (tmp_path + monkeypatch). Confirmed pyproject.toml has [tool.pytest.ini_options], [tool.coverage.run], [tool.coverage.report]. pytest --collect-only discovers tests/ with 0 tests (expected). black, flake8, mypy all pass." }
+    { "timestamp": "2026-03-28 00:03", "stage": "implementation", "note": "Completed P3-T1: Created tests/__init__.py, tests/unit/__init__.py, tests/conftest.py with toml_config_dir fixture (tmp_path + monkeypatch). Confirmed pyproject.toml has [tool.pytest.ini_options], [tool.coverage.run], [tool.coverage.report]. pytest --collect-only discovers tests/ with 0 tests (expected). black, flake8, mypy all pass." },
+    { "timestamp": "2026-03-28 00:04", "stage": "implementation", "note": "Starting implementation — task P3-T2: Write unit tests for core_functions.py (retry — previous attempt reverted; SDE redoing from scratch with QA findings incorporated)" },
+    { "timestamp": "2026-03-28 00:05", "stage": "review", "note": "Running code review for P3-T2 (unit tests for core_functions.py — redo after revert) — routing to quality-assurance agent" }
   ]
 }

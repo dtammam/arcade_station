@@ -2,3 +2,4 @@
 - [Always activate venv in SDE prompts](feedback_venv_activation.md) — SDE agent needs explicit venv activation before pip/python commands
 - [Claude binary path](feedback_claude_path.md) — claude not on PATH, needs absolute path or PATH fix
 - [Python 3.12 not in dev env](project_python312_debt.md) — running 3.11, 3.12 provisioning is follow-on work
+- [No direct code changes](feedback_no_direct_code_changes.md) — always route code changes through SDE, never edit directly
