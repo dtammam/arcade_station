@@ -9,14 +9,15 @@ The motivation behind this project is a desire to recreate the [ddr-picker](http
 
 ### Language(s)
 - The primary language that will be used for this project will be Python:
-    - It's compatible with Windows, Linux and Mac
-    - It's got a rich set of libraries that will allow me to extend functionality
-    - It's a tried and true, battle-tested language
-    - Getting more hands-on, real-world experience with Python is a personal skill development
+  - It's compatible with Windows, Linux and Mac
+  - It's got a rich set of libraries that will allow me to extend functionality
+  - It's a tried and true, battle-tested language
+  - Getting more hands-on, real-world experience with Python is a personal skill development
 - If any lower-level interactions are needed, I will sparingly opt for the built-in OS' scripting language (PowerShell and Bash).
 
 ### Analyze Existing Code
 #### Application Dependencies:
+
 | Application                                   | Purpose                                                                       | Windows | Linux | Mac |
 |-----------------------------------------------|-------------------------------------------------------------------------------|---------|-------|-----|
 | pegasus-fe                                    | Frontend interface for displaying the games                                   | 🪟      | 🐧    | 🍏  |
@@ -58,6 +59,7 @@ This phase is complete when a user can take the installer, run it on their Windo
 - Create additional support for flexible options (File sync clients, multiple versions of the game, extended options for streaming, etc.)
 
 ### Implement Translation
+
 | Function Needed      | Proposed Solution                                                | Reasoning                                                                                                    |
 |----------------------|------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
 | Core module/library  | Refactor existing library, incorporate popular public libraries  | Will plan to use original logic within `CoreModules.psd1` in a new `CoreModules.py` and extend as required   |
@@ -73,7 +75,7 @@ This phase is complete when a user can take the installer, run it on their Windo
 1. Production Testing
     - Physical arcade cabinet hardware validation
     - Community beta testing program for real-world validation
-    
+
 2. Development Testing
     - Virtual machine validation for all platforms
         - Windows: Clean Windows 10/11 installations
@@ -81,9 +83,9 @@ This phase is complete when a user can take the installer, run it on their Windo
 
 #### Testing Framework
 - Implementation of pytest for unit and integration testing
-    - Integration tests for cross-platform compatibility
-    - `pytest` for module/functional testing with GitHub actions
-    - Ad-hoc creation of tests for failure modes as code is written
+  - Integration tests for cross-platform compatibility
+  - `pytest` for module/functional testing with GitHub actions
+  - Ad-hoc creation of tests for failure modes as code is written
 
 ### Code Maintenance and Documentation
 #### Development Standards

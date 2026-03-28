@@ -74,7 +74,7 @@ Let's go over where I am as I start this process:
 
 #### Configuring MAME
 6. I'm asked if I want to setup any MAME games. I don't right now, so I'll select `Next`.
-- But if I did, I'd check the box, input my `mame.exe` path and `mame.ini` path, then `Add Another MAME-Based Game`, filling it out similarly to how I did the binaries (with the addition of ROMs and save states). 
+- But if I did, I'd check the box, input my `mame.exe` path and `mame.ini` path, then `Add Another MAME-Based Game`, filling it out similarly to how I did the binaries (with the addition of ROMs and save states).
 
    <img src="../assets/images/example/laptop/70.png" alt="MAME games configuration screen with option to enable MAME games unchecked">
 
@@ -82,12 +82,12 @@ Let's go over where I am as I start this process:
 7. I'm asked to setup key bindings and processes to kill - very important.
 - In the `Key Bindings` tab, there are a set of default key bindings to do things like reset back to the menu, close Arcade Station, and even start streaming.
 - If I have any custom scripts or apps I want to run with a button press, I can add them here.
-- The main one for me is `Reset back to menu` (which closes the games and brings me back) which will get triggered if I click `Ctrl + Space`. 
+- The main one for me is `Reset back to menu` (which closes the games and brings me back) which will get triggered if I click `Ctrl + Space`.
 - I'm happy with these bindings for now, so I'll leave them - but I can add, edit, or remove as needed.
 
    <img src="../assets/images/example/laptop/80.png" alt="Key Bindings setup screen showing default keyboard shortcuts for Arcade Station functions">
 
-8. Near the top, there's a `Process Management` tab. This is the list of processes to close when resetting back to the menu or exiting Arcade Station. 
+8. Near the top, there's a `Process Management` tab. This is the list of processes to close when resetting back to the menu or exiting Arcade Station.
 - Since I'm adding Megatouch, I need to add the processes it launches to make sure they get closed.
 - I added the list to the top and selected `Next`, leaving everything else.
 
@@ -116,7 +116,7 @@ Let's go over where I am as I start this process:
 - There's a streaming setting, so that I can pick my streaming program like OBS to have it auto-started on a button press from the key bindings earlier
 - By default, the installer includes an audio app that is used to show volume controls in kiosk mode whenever it's used
 - It also gives an option to save screenshots to a folder, which will map to a button press from the key bindings earlier
-- I'll leave this all as default and select `Next`. 
+- I'll leave this all as default and select `Next`.
 
    <img src="../assets/images/example/laptop/110.png" alt="Utilities setup screen showing default configuration options for audio, screenshots, and other features">
 

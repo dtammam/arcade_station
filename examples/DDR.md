@@ -29,14 +29,13 @@ This guide will cover setting up Arcade Station on a dedicated DDR cabinet. This
 
 ### MAME Configuration (Optional)
 On MAME specifically,
-- You can download it [here](https://drive.google.com/file/d/1MeW7KpsYcS2fmws7ZQG0OomuIFVHAcid/view?usp=sharing), [here](https://mega.nz/file/ICVRFJwI#ksriX9qHzXEdDwwjsqYv84MN1V43CSedjK8lEosV_7Y), or [here](https://archive.org/download/ddr573-mame/ddr573-mame.zip). 
+- You can download it on [Google Drive](https://drive.google.com/file/d/1MeW7KpsYcS2fmws7ZQG0OomuIFVHAcid/view?usp=sharing), [Mega](https://mega.nz/file/ICVRFJwI#ksriX9qHzXEdDwwjsqYv84MN1V43CSedjK8lEosV_7Y), or [Archive.org](https://archive.org/download/ddr573-mame/ddr573-mame.zip).
 - It includes:
-    - A custom build of [bemani-mame](https://github.com/987123879113/mame/wiki)
-    - Pre-built NVRAM for (almost) every game, negating the need to install each game manually
-    - Save states that drop you right into the title screen of the game with event mode already enabled, skipping the lengthy boot process
-    - All the game data you need to get it going
-        - Once you have the MAME pack downloaded, you should extract it as-is (for this example, it'll be in `C:\Games\ddr-573`)
-
+  - A custom build of [bemani-mame](https://github.com/987123879113/mame/wiki)
+  - Pre-built NVRAM for (almost) every game, negating the need to install each game manually
+  - Save states that drop you right into the title screen of the game with event mode already enabled, skipping the lengthy boot process
+  - All the game data you need to get it going
+    - Once you have the MAME pack downloaded, you should extract it as-is (for this example, it'll be in `C:\Games\ddr-573`)
 
 ### DDR Cabinet Installation Walkthrough
 
@@ -110,7 +109,7 @@ Let's go over where I am as I start this process:
 
 #### Configuring MAME
 
-14. I now see the MAME games setup page. We're leveraging the ddr-573 MAME setup mentioned earlier, so I'll use that context for configuring it here. 
+14. I now see the MAME games setup page. We're leveraging the ddr-573 MAME setup mentioned earlier, so I'll use that context for configuring it here.
 
     <img src="../assets/images/example/ddr/106.png" alt="MAME games configuration screen with checkbox to enable MAME games">
 
@@ -138,10 +137,9 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/115.png" alt="Windows Explorer showing save state file 'o' in the ddrmax2 folder">
 
-21.  For the banner image, I'll select `Browse...`, will find and select the banner for DDRMAX2 and will select `Open`.
+21. For the banner image, I'll select `Browse...`, will find and select the banner for DDRMAX2 and will select `Open`.
     <img src="../assets/images/example/generic/ddrmax2 banner.png" alt="DDRMAX2 game banner image showing the DDR MAX2 logo">
     <img src="../assets/images/example/ddr/117.png" alt="MAME game configuration form with DDRMAX2 banner image selected and displayed">
-     
 
 22. I'll rinse and repeat for DDRMAX and 5thMIX. selecting `Next` once done.
 
@@ -149,7 +147,7 @@ Let's go over where I am as I start this process:
 
 #### Configuring Key Bindings and Processes
 
-23. I now see the Key Bindings Setup page. These show bundled scripts provided with Arcade Station that do things like reset back to the menu, take screenshots, or restart the computer. I'm actually okay with all of these defaults, but if I wanted to change them, I'd point to different scripts or reference [available keys for keybindings here](https://github.com/boppreh/keyboard/blob/master/README.md#api). 
+23. I now see the Key Bindings Setup page. These show bundled scripts provided with Arcade Station that do things like reset back to the menu, take screenshots, or restart the computer. I'm actually okay with all of these defaults, but if I wanted to change them, I'd point to different scripts or reference [available keys for keybindings here](https://github.com/boppreh/keyboard/blob/master/README.md#api).
      - The most important one will be `Reset back to menu`, which kills any open game or console and goes back to the main menu, which is triggered when pressing `ctrl` + `space` by default.
      - I also plan to use the `Take screenshot` buttons, which will require us to pick a place to save them - we'll do that later.
 
@@ -173,14 +171,14 @@ Let's go over where I am as I start this process:
 
 27. I now see the Utilities Setup page, which will allow me to configure things like lights management (for litboards or stacboards), setup a streaming button to launch OBS, setup a VPN client to autostart, add a volume OSD (since kiosk mode doesn't natively have one), or configure a location for screenshots. I'll go ahead and configure a combination of settings I need, which include a streaming button, a VPN to autostart, and screenshots being saved into a specific folder. After configuring the desired options, I'll select `Next`.
 
-    <img src="../assets/images/example/ddr/150.png" alt="Utilities setup screen showing various configuration options for lights, streaming, VPN, and screenshots">    
+    <img src="../assets/images/example/ddr/150.png" alt="Utilities setup screen showing various configuration options for lights, streaming, VPN, and screenshots">
     <img src="../assets/images/example/ddr/151.png" alt="Utilities configuration screen with specific settings for streaming, VPN, and screenshot folder paths">
 
 #### Installation Summary
 
 28. I now see the Installation Summary page, which shows a recap of all selected options for final review. I'm ready for it to complete and will select `Finish`!
 
-    <img src="../assets/images/example/ddr/160.png">
+    <img src="../assets/images/example/ddr/160.png" alt="Installation Summary screen showing recap of all selected options for final review">
 
 29. After a few moments, I'm shown a success message, which advises me to launch Arcade Station once before rebooting to fully setup kiosk mode. I'll select `OK`, and after another few moments, my Arcade Station install folder opens with a final success message, letting me know I'm good to go!
 
@@ -197,11 +195,9 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/180.png" width="40%" alt="Arcade Station main menu showing configured games with dynamic marquee displaying default image">
 
-
 - Per the instructions, at this point, I will reboot to go into `Kiosk Mode`.
 
 ---
-
 
 #### Testing ITGmania and Integrations
 
@@ -224,7 +220,6 @@ Let's go over where I am as I start this process:
     <img src="../assets/images/example/ddr/187.png" width="40%" alt="Dynamic marquee displaying NotITG banner when game is selected">
     <img src="../assets/images/example/ddr/188.png" width="40%" alt="Dynamic marquee displaying DDRMAX banner when MAME game is selected">
     <img src="../assets/images/example/ddr/190.png" width="40%" alt="Dynamic marquee displaying DDR 5thMIX banner when MAME game is selected">
-    
 
 #### Screenshot Example
 35. For 5thMIX, I'll quickly test my screenshot function by pressing `/` - it saves to a folder which automatically uploads to my iCloud, and the screenshot looks crisp!
@@ -285,7 +280,6 @@ Let's go over where I am as I start this process:
 
     <img src="../assets/images/example/ddr/300.png" alt="Reconfiguration success dialog advising to launch Arcade Station before rebooting">
     <img src="../assets/images/example/ddr/301.png" alt="Windows Explorer showing Arcade Station folder after successful reconfiguration">
-
 
 47. I'll right-click `launch_arcade_station.bat` in the window that just opened (my install of Arcade Station) and will run it as Administrator.
 

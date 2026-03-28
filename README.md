@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12.9-blue.svg)](https://www.python.org/downloads/release/python-3129/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
 
 <div align="center">
    <img src="assets/images/readme/logo.png" width="300" alt="Arcade Station logo featuring retro arcade-style text design"/>
@@ -51,9 +51,9 @@ This project was born from several personal and professional development goals:
 ### Kiosk Mode and UAC
 Arcade Station is primarily intended for use in dedicated, modern arcade cabinets, where a seamless kiosk-like experience is expected. In such cases, system-level operations - such as replacing the Windows shell, executing PowerShell scripts, and managing background processes - may be disrupted by User Account Control (UAC):
 
-- For this reason, disabling UAC may be considered in tightly controlled kiosk environments. 
+- For this reason, disabling UAC may be considered in tightly controlled kiosk environments.
 - However, this should only be done with compensating security measures in place (e.g., restricted physical and network access).
-- Disabling UAC is not recommended for general-purpose computers or setups not operating in kiosk mode. 
+- Disabling UAC is not recommended for general-purpose computers or setups not operating in kiosk mode.
 
 This recommendation is not made lightly, and future releases aim to improve compatibility and reduce reliance on this configuration.
 
@@ -68,7 +68,7 @@ This recommendation is not made lightly, and future releases aim to improve comp
 
    <img src="assets/images/readme/python.png" alt="Python 3.12.9 installer showing 'Add Python to PATH' and 'Install for all users' options checked" />
 
-2. If intending on using this with kiosk mode, disable UAC. 
+2. If intending on using this with kiosk mode, disable UAC.
 3. Download Arcade Station by cloning the repo or by clicking `Code/Download ZIP`
 
    <img src="assets/images/readme/download.png" alt="GitHub repository page showing Code dropdown menu with Download ZIP option highlighted" />

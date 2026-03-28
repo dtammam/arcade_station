@@ -1,4 +1,4 @@
-![](.meta/screenshot_a.png) ![](.meta/screenshot_b.png)
+![Screenshot A](.meta/screenshot_a.png) ![Screenshot B](.meta/screenshot_b.png)
 
 # Grid Micro theme for Pegasus
 

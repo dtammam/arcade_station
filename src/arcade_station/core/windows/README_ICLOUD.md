@@ -54,9 +54,9 @@ The manager works by:
 
 1. Loading configuration from the TOML file
 2. Starting a daemon thread that runs in the background
-3. Periodically stopping and restarting iCloud services 
+3. Periodically stopping and restarting iCloud services
 4. Waiting for the specified interval
 5. Deleting files from the upload directory if enabled
 6. Repeating the cycle
 
-This approach ensures that iCloud services are regularly refreshed, which helps prevent them from stalling and ensures photos are synced to iCloud properly. 
+This approach ensures that iCloud services are regularly refreshed, which helps prevent them from stalling and ensures photos are synced to iCloud properly.
