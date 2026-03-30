@@ -28,7 +28,7 @@ contract between the user and the implementation agents.
 
 Ask the user to fill in (or confirm) these fields:
 
-```text
+```
 Goal: [What problem does this solve? One sentence.]
 Scope: [What's included. Be specific about boundaries.]
 Out of scope: [What's explicitly NOT included.]
@@ -120,7 +120,7 @@ For each acceptance criterion:
 
 Present a structured report:
 
-```text
+```
 Acceptance Report: [Feature Name]
 
 [✓] Criterion 1 — PASS

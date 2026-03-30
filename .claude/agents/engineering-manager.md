@@ -39,7 +39,7 @@ After reading state and updating it:
 2. **Tell the user** which VS Code task to run. Close your response with a block
    like this:
 
-```text
+```
 ---
 **Prompt written to:** `.state/inbox/<agent-name>.md`
 
@@ -85,7 +85,7 @@ Update `updated_at` and append to `history` on every stage transition.
 
 ## Workflow stages
 
-```text
+```
 Bootstrap → Discovery → Design → Tasks → Implementation → Verification → Acceptance → Done
                                               ↑                  |
                                               └── (next task) ───┘

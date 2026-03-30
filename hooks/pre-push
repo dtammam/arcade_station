@@ -4,11 +4,18 @@ set -euo pipefail
 # Load user tool paths (hooks run with a stripped environment)
 [ -f "$HOME/.profile" ] && . "$HOME/.profile"
 
+# Resolve repo root and venv binaries
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+VENV_BIN="$REPO_ROOT/.venv/bin"
+VENV_PYTHON="$VENV_BIN/python"
+
 echo "=== pre-push ==="
 
-# Run test suite
-if command -v python &>/dev/null && python -c "import pytest" 2>/dev/null; then
-  python -m pytest
+# Run test suite (exit 5 = no tests collected, treat as pass)
+if [ -x "$VENV_PYTHON" ] && "$VENV_PYTHON" -c "import pytest" 2>/dev/null; then
+  "$VENV_PYTHON" -m pytest || [ $? -eq 5 ]
+elif command -v python &>/dev/null && python -c "import pytest" 2>/dev/null; then
+  python -m pytest || [ $? -eq 5 ]
 else
   echo "SKIP: pytest not found (install via pip install pytest)"
 fi

@@ -3,6 +3,7 @@
 ## What this does
 
 Invokes the engineering-manager agent to:
+
 1. Set the feature stage to "done" in `.state/feature-state.json`
 2. Move the exec plan from `docs/exec-plans/active/` to `docs/exec-plans/completed/`
 3. Update CLAUDE.md's "Active work" section
@@ -10,6 +11,7 @@ Invokes the engineering-manager agent to:
 5. Reset the state file to `{}` for the next feature
 
 Then the main session will:
+
 6. Stage, commit, and push all changes
 7. Create a pull request targeting `main`
 8. Ask the user if they want to tag a release
@@ -39,19 +41,18 @@ $ARGUMENTS is not typically needed.
 4. After the PR is created, ask the user:
 
    "Would you like to tag a release? If yes, provide the version (e.g., v1.2.0)
-   and I'll create the tag and push it — the release workflow will build
-   binaries and create a GitHub Release automatically."
+   and I'll create the tag and push it."
 
    If yes: run `git tag <version>` and `git push origin <version>`.
    If no: done.
 
 ---
 
-## ▶ WHAT HAPPENS
+## What happens
 
-This command handles everything end-to-end: archive → commit → push → PR → optional release.
+This command handles everything end-to-end: archive -> commit -> push -> PR -> optional release.
 
-## ✅ WHEN DONE
+## When done
 
 The feature is closed. The PR is open. Merge when ready. Run **`/kickoff`** to start the next feature.
 

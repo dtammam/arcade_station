@@ -1,7 +1,6 @@
 # Implement the next incomplete task.
 
-Routes to the Software Developer agent, who writes code and tests for ONE task,
-runs quality checks, and reports what changed.
+Routes to the Software Developer agent, who writes code and tests for ONE task, runs quality checks, and reports what changed.
 
 ## Input
 
@@ -24,14 +23,14 @@ incomplete task in order.
 
 ---
 
-## ▶ NEXT STEP
+## Next step
 
-Run the VS Code task **"Run Software Developer"** via **Terminal → Run Task…**
+Run the VS Code task **"Run Software Developer"** via **Terminal -> Run Task...**
 
-## ✅ WHEN DONE
+## When done
 
-- If **more tasks remain** → run **`/implement`** again for the next task
-- If **all tasks are complete** → run **`/verify`** to validate the build
+- If **more tasks remain** -> run **`/implement`** again for the next task
+- If **all tasks are complete** -> run **`/verify`** to validate the build
 - Optional: run **`/review`** for a code review at any point
 
 ---

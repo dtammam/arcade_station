@@ -29,21 +29,13 @@ Before writing code, state:
 
 - Which files you'll create or modify
 - What the change does in 1-2 sentences
-- For each new function: is it **semantic** (pure, testable, named for what it does) or **pragmatic** (orchestration, named for where it's used)?
 - What tests you'll write
 
 This is a sanity check, not a design doc. Keep it brief.
 
 ### Step 2: Implement
 
-Write the code. Follow the design principles and **three-pillar framework** in
-`docs/CONTRIBUTING.md`. Key rules that affect every implementation:
-
-- No boolean parameters that switch behavior — use enums
-- Return types must encode invariants (struct or tuple, not Vec, if count is fixed)
-- Named structs for multi-field domain objects — field names are documentation
-- Pure functions must not transform data they don't own
-- Only `main()` and CLI/IO boundary code should be pragmatic
+Write the code. Follow the design principles in `docs/CONTRIBUTING.md`.
 
 When creating or modifying `.md` files, ensure: blank lines around fenced code
 blocks, no trailing spaces, and files end with a single newline.
@@ -57,20 +49,15 @@ Every public function or behavior change gets a test. Tests should:
 - Be readable without referring to the implementation
 - Use descriptive test names that state the expected behavior
 
-Apply the testing pillar rules from `docs/CONTRIBUTING.md`:
-
-- Every test must exercise a **distinct code path** — no tautological tests
-- Semantic functions get **unit tests**; pragmatic/CLI behavior gets **integration tests** that invoke the binary
-- Edge cases (multi-character delimiters, unicode, empty input) must have explicit tests
-
 ### Step 4: Run quality checks
 
-Before reporting completion, run:
+Before reporting completion, run the project's quality gate commands
+(see `docs/CONTRIBUTING.md` or CLAUDE.md for the exact commands):
 
-- The project's lint command
-- The project's type-check command (if applicable)
-- The project's test suite
-- `npx markdownlint-cli2 '**/*.md'` if any `.md` files were created or modified
+- Build
+- Lint / format check
+- Test suite
+- Markdown lint (if `.md` files were created or modified)
 
 If any check fails, fix it. Do not report completion with failing checks.
 If a failure seems unrelated to your change, note it but still fix it if possible.
@@ -79,7 +66,7 @@ If a failure seems unrelated to your change, note it but still fix it if possibl
 
 Provide a concise summary:
 
-```text
+```
 Task: [task description]
 Status: Complete
 

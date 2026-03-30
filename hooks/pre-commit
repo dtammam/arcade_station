@@ -4,23 +4,31 @@ set -euo pipefail
 # Load user tool paths (hooks run with a stripped environment)
 [ -f "$HOME/.profile" ] && . "$HOME/.profile"
 
+# Resolve repo root and venv binaries
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+VENV_BIN="$REPO_ROOT/.venv/bin"
+
 echo "=== pre-commit ==="
 
 # Python format check
-if command -v black &>/dev/null; then
+if [ -x "$VENV_BIN/black" ]; then
+  "$VENV_BIN/black" --check src/ install/
+elif command -v black &>/dev/null; then
   black --check src/ install/
 else
   echo "SKIP: black not found (install via pip install black)"
 fi
 
 # Python lint
-if command -v flake8 &>/dev/null; then
+if [ -x "$VENV_BIN/flake8" ]; then
+  "$VENV_BIN/flake8" src/ install/
+elif command -v flake8 &>/dev/null; then
   flake8 src/ install/
 else
   echo "SKIP: flake8 not found (install via pip install flake8)"
 fi
 
-# Markdown lint
+# Markdown lint (npm tool — no venv tier)
 if command -v npx &>/dev/null; then
   npx markdownlint-cli2 '**/*.md'
 else

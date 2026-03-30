@@ -3,10 +3,12 @@
 ## What this does
 
 Invokes the engineering-manager agent to:
+
 1. Read current state
 2. Write the exact prompt for the **quality-assurance** agent to `.state/inbox/quality-assurance.md`
 
 The quality-assurance engineer (run separately by you) will:
+
 - Run `git diff main` to identify all changed files
 - Review each file for correctness, security, performance, and standards compliance
 - Report findings as CRITICAL / WARNING / SUGGESTION
@@ -31,15 +33,15 @@ $ARGUMENTS is not typically needed. Can include "focus on security" or similar g
 
 ---
 
-## ▶ NEXT STEP
+## Next step
 
-Run the VS Code task **"Run Quality Assurance"** via **Terminal → Run Task…**
+Run the VS Code task **"Run Quality Assurance"** via **Terminal -> Run Task...**
 
-## ✅ WHEN DONE
+## When done
 
-- If verdict is **APPROVE** → run `/done` to close the feature
-- If verdict is **REQUEST CHANGES** → run `/implement` to fix the issues
-- If verdict is **NEEDS DISCUSSION** → discuss with the team, then decide
+- If verdict is **APPROVE** -> run `/done` to close the feature
+- If verdict is **REQUEST CHANGES** -> run `/implement` to fix the issues
+- If verdict is **NEEDS DISCUSSION** -> discuss with the team, then decide
 
 ---
 
