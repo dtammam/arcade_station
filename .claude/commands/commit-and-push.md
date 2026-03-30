@@ -1,28 +1,22 @@
 # Safely commit and push to origin with all quality gates enforced.
 
-## Input
+## Required input
 
-$ARGUMENTS is the commit message. If empty, draft one from the diff.
+- Commit message provided as $ARGUMENTS.
+- Reject generic messages (update, fix, wip).
+- If no message provided, ask for one.
 
-## Procedure
+## Workflow
 
-1. Reject generic messages ("update", "fix", "changes").
-2. Run `git status` and `git diff --staged` to understand changes.
-3. Stage files explicitly by path (never `git add .` or `git add -A`).
-4. Commit using HEREDOC format:
+1. Run git status and git diff.
+2. Stage changes by file (explicit paths, not git add .).
+3. Commit using HEREDOC format with co-author trailer.
+4. Push to origin: git push.
 
-git commit -m "$(cat <<'EOF'
-$ARGUMENTS
+## Failure handling
 
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
+If any step fails — stop. Do not retry blindly. Do not amend or force-push.
+Read the error. Fix the root cause. Re-run from step 1.
+Never use --no-verify. Never force-push.
 
-5. Push to origin: `git push -u origin <current-branch>`.
-6. If any step fails, stop and report the error. Never force-push.
-
-## Rules
-
-- Do NOT use `git add .` or `git add -A`.
-- Do NOT use `--no-verify`, `--no-gpg-sign`, or `--force`.
-- Stop on failure. Do not retry blindly.
+If the same failure repeats, add it to docs/exec-plans/tech-debt-tracker.md.

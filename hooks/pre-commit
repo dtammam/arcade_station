@@ -6,25 +6,8 @@ set -euo pipefail
 
 echo "=== pre-commit ==="
 
-# Python format check
-if command -v black &>/dev/null; then
-  black --check src/ install/
-else
-  echo "SKIP: black not found (install via pip install black)"
-fi
-
-# Python lint
-if command -v flake8 &>/dev/null; then
-  flake8 src/ install/
-else
-  echo "SKIP: flake8 not found (install via pip install flake8)"
-fi
-
-# Markdown lint
-if command -v npx &>/dev/null; then
-  npx markdownlint-cli2 '**/*.md'
-else
-  echo "SKIP: npx not found (install Node.js for markdownlint)"
-fi
+black --check src/ install/
+flake8 src/ install/
+npx markdownlint-cli2 '**/*.md'
 
 echo "pre-commit checks passed"

@@ -1,7 +1,6 @@
 # Validate the implementation against acceptance criteria.
 
-Routes to the Product Manager agent, who checks every criterion explicitly
-and reports pass/fail — without fixing anything.
+Routes to the Product Manager agent, who checks every criterion explicitly and reports pass/fail — without fixing anything.
 
 ## Input
 
@@ -22,14 +21,14 @@ $ARGUMENTS is not typically needed.
 
 ---
 
-## ▶ NEXT STEP
+## Next step
 
-Run the VS Code task **"Run Product Manager"** via **Terminal → Run Task…**
+Run the VS Code task **"Run Product Manager"** via **Terminal -> Run Task...**
 
-## ✅ WHEN DONE
+## When done
 
-- If all criteria **pass** → run **`/done`** to close the feature
-- If any criteria **fail** → run **`/implement`** to fix, or defer to tech debt
+- If all criteria **pass** -> run **`/done`** to close the feature
+- If any criteria **fail** -> run **`/implement`** to fix, or defer to tech debt
 
 ---
 

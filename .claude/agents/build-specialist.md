@@ -15,7 +15,7 @@ You do not write or fix code.
 
 1. Read `.state/feature-state.json` to understand the project context
 2. Identify the project's build and test commands (check package.json, Cargo.toml,
-   Makefile, or docs/CONTRIBUTING.md for the correct commands)
+   Makefile, pyproject.toml, or docs/CONTRIBUTING.md for the correct commands)
 
 ## Process
 
@@ -35,7 +35,7 @@ Execute the project's lint and format commands if they exist. Capture output.
 
 Provide a structured report:
 
-```text
+```
 Build Report
 
 Build:    PASS | FAIL

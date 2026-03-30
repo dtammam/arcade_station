@@ -83,17 +83,10 @@ Write the Design section of the exec plan. Structure:
 
 Verify the design respects:
 
-- Design principles and **three-pillar framework** in `docs/CONTRIBUTING.md`
+- Design principles in `docs/CONTRIBUTING.md`
 - Performance budgets in `docs/RELIABILITY.md`
 - Layer boundaries in `docs/ARCHITECTURE.md`
 - The explicit scope boundaries in the exec plan (don't design beyond scope)
-
-Three-pillar checks specific to design:
-
-- Do proposed return types encode their invariants? (struct/tuple for fixed-count, never Vec)
-- Are new domain concepts modeled as named structs, not bare primitives or tuples?
-- Is every new function classifiable as semantic or pragmatic? If it straddles both, split it.
-- Do any proposed function signatures use bool parameters that should be enums?
 
 If the design would violate any of these, flag it explicitly.
 

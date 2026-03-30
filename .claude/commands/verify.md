@@ -1,7 +1,6 @@
 # Run the build and test suite.
 
-Routes to the Build Specialist agent, who runs all quality gates and reports
-pass/fail — without fixing anything.
+Routes to the Build Specialist agent, who runs all quality gates and reports pass/fail — without fixing anything.
 
 ## Input
 
@@ -21,15 +20,15 @@ $ARGUMENTS is not typically needed. Can include "verbose" for full output.
 
 ---
 
-## ▶ NEXT STEP
+## Next step
 
-Run the VS Code task **"Run Build Specialist"** via **Terminal → Run Task…**
+Run the VS Code task **"Run Build Specialist"** via **Terminal -> Run Task...**
 
-## ✅ WHEN DONE
+## When done
 
-- If all checks **pass** and tasks remain → run **`/implement`** for the next task
-- If all checks **pass** and all tasks complete → run **`/accept`**
-- If any checks **fail** → run **`/implement`** to fix, or handle manually
+- If all checks **pass** and tasks remain -> run **`/implement`** for the next task
+- If all checks **pass** and all tasks complete -> run **`/accept`**
+- If any checks **fail** -> run **`/implement`** to fix, or handle manually
 - Optional: run **`/review`** for a code review before acceptance
 
 ---
