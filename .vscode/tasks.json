@@ -47,41 +47,6 @@
       },
       "detail": "Force kills all running Python processes",
       "problemMatcher": []
-    },
-    {
-      "label": "Run Product Manager",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent product-manager @.state/inbox/product-manager.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Principal Engineer",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent principal-engineer @.state/inbox/principal-engineer.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Software Developer",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent software-developer @.state/inbox/software-developer.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Build Specialist",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent build-specialist @.state/inbox/build-specialist.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Quality Assurance",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent quality-assurance @.state/inbox/quality-assurance.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
     }
   ]
 }
