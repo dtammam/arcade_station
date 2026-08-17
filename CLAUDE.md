@@ -1,130 +1,88 @@
-# CLAUDE.md
+# CLAUDE.md - Arcade Station
 
-This file is the Claude Code entry point for this repo.
+Arcade Station is a front-end for launching rhythm games and arcade software on a dedicated cabinet or a regular PC. It wraps the Pegasus frontend, launches games from TOML configuration, drives a secondary marquee display, and handles kiosk-mode concerns. Python 3.12, with PowerShell reserved for low-level Windows work.
 
-## What YOU (the main session) do
+`PLAN.MD` holds project direction and phasing. This file holds how the work gets done.
 
-You are NOT any of the agents listed below. You are the user's interface.
-Your only job is to:
+## Core Working Principles
 
-1. Receive the user's request
-2. Invoke the engineering-manager agent via the Agent tool
-3. Relay the engineering-manager's output — including its routing instructions — verbatim to the user
+Lean mode: a single agent owns the whole lifecycle, with no role hand-offs. Two pillars are non-negotiable.
 
-Do NOT roleplay as the engineering-manager. Do NOT directly invoke
-product-manager, principal-engineer, software-developer, or any other
-agent. Always go through engineering-manager.
+1. **The two-reviewer gate.** Non-trivial work does not merge without passing both codified reviewers in `.claude/agents/` - the QA seat, then the adversarial seat. Both must return APPROVE.
+2. **Ruthless honesty.** Report failures verbatim, including the actual error text. Never downplay a regression. State plainly what was verified and what was not - "not launch-tested on the cabinet" is a complete and acceptable sentence.
 
-If you catch yourself coordinating the pipeline, reading state files,
-or delegating to specialist agents directly — STOP. Invoke the EM instead.
+## Reviewer Structure
 
-## Agent architecture
+| Seat | Agent | Focus |
+|------|-------|-------|
+| QA | `quality-assurance` | Correctness, regressions, security, standards, comment accuracy |
+| Adversarial | `adversarial-reviewer` | Assumes the implementer *and* QA both missed something; breaks claims by measurement |
 
-The engineering-manager is an **advisor and state manager**, not a delegator.
-It writes the specialist prompt to `.state/inbox/<agent-name>.md` and tells the
-user which VS Code task to run. The user launches each specialist via
-**Terminal → Run Task…** in VS Code, which spawns a fresh Claude Code session
-that reads the inbox file automatically. This keeps every agent's output directly
-visible to the user — no intermediary summaries, no copy-paste.
+CRITICAL findings block the merge. WARNINGs block unless explicitly declared safe to ship and disclosed in the summary. Trivial changes - typo fixes, documentation wording - may skip the gate, but say so when you skip it rather than letting it pass silently.
 
-### Agents (`.claude/agents/`)
+## Testing and Verification
 
-| Agent | What it does | How to run it |
-|-------|-------------|---------------|
-| `engineering-manager` | Tracks feature state, routes work to specialists, manages stage transitions | Invoked automatically by `/commands` |
-| `product-manager` | Gathers requirements + acceptance criteria (Discovery), validates delivered work (Acceptance) | VS Code task **"Run Product Manager"** |
-| `principal-engineer` | Reads requirements and codebase, produces technical design with approach, risks, alternatives | VS Code task **"Run Principal Engineer"** |
-| `software-developer` | Implements ONE task at a time — writes code, tests, runs quality checks | VS Code task **"Run Software Developer"** |
-| `build-specialist` | Runs build + test + lint + format checks, reports pass/fail (never fixes code) | VS Code task **"Run Build Specialist"** |
-| `quality-assurance` | Reviews code for correctness, security, performance, standards compliance (never fixes code) | VS Code task **"Run Quality Assurance"** |
+**There is no test suite and no CI in this repository today.** The pytest and GitHub Actions plan in `PLAN.MD` is aspirational and not yet built. Do not claim a test run. Do not write "tests pass."
 
-### Commands (`.claude/commands/`)
+Building a **characterization baseline** is the current priority: tests that capture what the code actually does today, so that later changes can be made with confidence. When writing them:
 
-Each command moves the feature one stage forward. Run them in order.
+- Assert observed behavior, not intended behavior. The point is to pin down the current contract before it moves.
+- If you discover a bug while writing a baseline test, **report it and encode the buggy behavior as-is**. Fixing it in the same change destroys the baseline's value as a before/after reference.
+- Prefer tests that need no cabinet hardware. Config parsing, path resolution, argument construction, and TOML round-tripping are all testable in isolation.
 
-| Command | What it does | Then you do |
-|---------|-------------|-------------|
-| **`/kickoff`** | Initializes state, reads project context, summarizes starting point | Review summary → **`/discover`** |
-| **`/discover`** | Routes to PM to gather requirements and write exec plan | Run task **"Run Product Manager"** → **`/design`** |
-| **`/design`** | Routes to PE to produce technical design in exec plan | Run task **"Run Principal Engineer"** → **`/tasks`** |
-| **`/tasks`** | EM breaks design into small, testable tasks with definitions of done | Review tasks → **`/implement`** |
-| **`/implement`** | Routes ONE task to SDE for implementation | Run task **"Run Software Developer"** → repeat or **`/verify`** |
-| **`/verify`** | Routes to build specialist to run all quality gates | Run task **"Run Build Specialist"** → **`/accept`** |
-| **`/review`** | Routes to QA for code review (optional, recommended for non-trivial changes) | Run task **"Run Quality Assurance"** → fix or proceed |
-| **`/accept`** | Routes to PM to validate every acceptance criterion | Run task **"Run Product Manager"** → **`/done`** |
-| **`/done`** | Archives plan, commits, pushes, creates PR, offers release tagging | Merge PR → **`/kickoff`** for next feature |
-| **`/commit-only`** | Stages and commits (no push) | — |
-| **`/commit-and-push`** | Stages, commits, pushes | — |
+Until that baseline exists, verification means:
 
-### VS Code tasks (`.vscode/tasks.json`)
+- **Python changes:** `python -m py_compile <file>` at minimum.
+- **Any TOML edit:** parse it back with `tomllib` before declaring done. A malformed `installed_games.toml` takes down *every* game, not one.
+- **Launch-path changes:** prove argument and quoting behavior with a dry run that echoes rather than launches, when a real launch is not possible.
+- **Cabinet behavior:** only claimable if actually run. Otherwise say it was not.
 
-Each specialist agent has a corresponding VS Code task that spawns a fresh
-Claude Code session reading from `.state/inbox/<agent-name>.md`. Run via
-**Terminal → Run Task…** in VS Code.
+Update this section when the baseline lands.
 
-### Shared state
+## Repository Constraints
 
-`.state/feature-state.json` tracks the current feature lifecycle. The
-engineering-manager reads and updates it at every stage transition.
+These are non-obvious and have caused real problems. Read before touching configuration.
 
-`.state/inbox/` holds ephemeral prompt files written by the EM for specialist
-agents. These are `.gitignore`d — only `.gitkeep` is tracked.
+### Personalized files carry skip-worktree
 
-### Workflow
+Twelve tracked files are flagged `skip-worktree` so that personal values are never committed:
 
-```text
-/kickoff → /discover → /design → /tasks → /implement → /verify → /accept → /done
-                                              ↑            |
-                                              └── (next) ──┘
-
-Optional at any point: /review (code review)
+```
+config/*.toml                                    (all 9)
+src/pegasus-fe/config/metafiles/metadata.pegasus.txt
+src/pegasus-fe/config/settings.txt
+src/pegasus-fe/config/stats.db
 ```
 
-Every stage transition requires explicit user approval. No auto-progression.
-The user runs each command manually. The engineering-manager runs ONE stage
-per invocation and stops.
+Consequences that matter:
 
-## Reference docs
+- **Edits to these files never appear in `git status` or `git diff`.** That is intended. Do not try to "fix" it.
+- **An empty `git diff` does not prove you restored the tree.** If you mutate a config file while testing, restore it explicitly and verify by reading the file back. This is the single easiest way to silently destroy someone's game list.
+- To change what a *fresh clone* receives, change the installer, not the file. See below.
+- Never run `git update-index --no-skip-worktree` on these without asking first.
 
-Read these before touching any code:
+### The installer owns config schema
 
-1. `docs/index.md` — knowledge map
-2. `docs/ARCHITECTURE.md` — system design, repo layout
-3. `docs/RELIABILITY.md` — performance budgets (non-negotiable)
-4. `docs/CONTRIBUTING.md` — design principles and coding standards
+`install/installer/config/installation.py` regenerates configuration on every run. **Any setting it does not know about is silently dropped when a user reconfigures.** When adding a config key, add it to the installer too, or the feature quietly dies at the next install.
 
-For active work: `docs/exec-plans/active/`
-For tech debt: `docs/exec-plans/tech-debt-tracker.md`
+### Config format
 
-## Non-negotiables
+TOML, parsed with `tomllib`. Use literal strings - single quotes - for values that contain double quotes. Validate after writing.
 
-- Performance budgets in `docs/RELIABILITY.md` — flag regressions before proceeding
-- Python 3.12.9 required; no other Python version supported
-- Runtime dependencies limited to: PyQt5, keyboard, psutil, tomli_w, Pillow
-- No hardcoded paths or credentials — all paths come from TOML config files in `config/`
-- Platform-specific code must live in `src/arcade_station/core/{windows,linux,macos}/`
+## Project Specifics
 
-## Coding standards
+- **Language:** Python 3.12.9. PowerShell only for low-level Windows work (`core_functions.psm1`, `*.ps1`).
+- **Dependencies:** `venv` plus `requirements.txt`. `pyproject.toml` is a deliberate non-choice - do not introduce it.
+- **Frontend:** Pegasus (`src/pegasus-fe`), Micro theme written in QML.
+- **Entry points:** `launch_arcade_station.bat`, `install_arcade_station.bat`, `kill_arcade_station.bat`.
+- **Logging:** `log_message(message, prefix)` from `core_functions`. Match the existing prefix vocabulary - `GAME_LAUNCH`, `PS`, `STARTUP`.
+- **Docstrings:** Google style, per `PLAN.MD`.
+- **Platforms:** Windows is the working target. Linux and macOS are Phase 2 intent - do not claim cross-platform support that has not been run.
 
-See `docs/CONTRIBUTING.md` for design principles, coding standards, and the three-pillar code quality framework.
+## Git Norms
 
-## Quality gates
-
-- `pre-commit`: `black --check src/ install/` && `flake8 src/ install/` && `npx markdownlint-cli2 '**/*.md'`
-- `pre-push`: `python -m pytest`
-- Never use `--no-verify`. Fix the root cause.
-
-## Commands
-
-```text
-black --check src/ install/
-flake8 src/ install/
-mypy src/ install/
-python -m pytest
-npx markdownlint-cli2 '**/*.md'
-```
-
-## Active work
-
-Active exec plans: (none)
-Completed plans: (none yet)
+- Branch, gate, then merge. Do not commit to `main` directly.
+- **Commit messages are plain sentence case**, not Conventional Commits. Match the existing log: "Logic for a default game launching on system boot".
+- Stage explicitly by path. Never `git add -A` or `git add .` - untracked personal assets live in this tree.
+- Confirm a commit landed by inspecting `git log`, not by assuming.
+- Push only when asked.
