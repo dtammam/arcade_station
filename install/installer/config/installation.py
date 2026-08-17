@@ -475,6 +475,7 @@ class InstallationManager:
         installed_games = {"games": {}}
         
         # Load existing installed_games.toml only to preserve structure and metadata
+        existing_games = {}
         if os.path.exists(installed_games_path):
             try:
                 with open(installed_games_path, "rb") as f:
@@ -483,9 +484,34 @@ class InstallationManager:
                     for key, value in existing_config.items():
                         if key != "games":
                             installed_games[key] = value
+                    existing_games = existing_config.get("games", {}) or {}
             except Exception as e:
                 logging.warning(f"Failed to load existing installed_games.toml: {e}")
-        
+
+        def carry_forward_unmanaged_keys(game_id, entry):
+            """Copy settings the wizard cannot collect onto a rebuilt game entry.
+
+            The games table is rebuilt from scratch on every run, so a key the
+            wizard has no field for is deleted unless it is carried over. 'args'
+            is documented in the README as hand-edited, and the binary games
+            page reloads only display_name, path and banner, so without this a
+            reconfigure silently strips it and the game launches bare.
+
+            Args:
+                game_id (str): Key of the game in the games table.
+                entry (dict): The freshly built entry to add preserved keys to.
+
+            Returns:
+                dict: The same entry, for convenience when assigning.
+            """
+            previous = existing_games.get(game_id)
+            if isinstance(previous, dict):
+                for key in ("args",):
+                    if key not in entry and previous.get(key):
+                        entry[key] = previous[key]
+            return entry
+
+
         # Only update games if we're not skipping configuration
         if not config.get("skip_games", False):
             # Add ITGMania if configured from either source
@@ -499,18 +525,17 @@ class InstallationManager:
                 elif config["itgmania"].get("custom_image"):
                     itg_image = config["itgmania"]["custom_image"]
                     
-                installed_games["games"]["itgmania"] = {
-                    "path": itg_path,
-                    "banner": itg_image
-                }
+                installed_games["games"]["itgmania"] = carry_forward_unmanaged_keys(
+                    "itgmania", {"path": itg_path, "banner": itg_image}
+                )
                 
             # Also check binary_games for ITGMania as a fallback
             elif config.get("binary_games", {}).get("itgmania"):
                 game_info = config["binary_games"]["itgmania"]
-                installed_games["games"]["itgmania"] = {
-                    "path": game_info["path"],
-                    "banner": game_info.get("banner", "")
-                }
+                installed_games["games"]["itgmania"] = carry_forward_unmanaged_keys(
+                    "itgmania",
+                    {"path": game_info["path"], "banner": game_info.get("banner", "")}
+                )
             
             # Add other binary games if configured
             if config.get("binary_games"):
@@ -525,11 +550,15 @@ class InstallationManager:
                     }
 
                     # Optional command-line arguments passed to the executable,
-                    # e.g. browser flags and a URL for a web-based entry
+                    # e.g. browser flags and a URL for a web-based entry. The
+                    # wizard has no field for these yet, so in practice the
+                    # value is carried over from the previous config below.
                     if game_info.get("args"):
                         game_entry["args"] = game_info["args"]
 
-                    installed_games["games"][game_id] = game_entry
+                    installed_games["games"][game_id] = carry_forward_unmanaged_keys(
+                        game_id, game_entry
+                    )
 
             # Add MAME games if configured
             if config.get("mame_games"):
@@ -549,6 +578,18 @@ class InstallationManager:
         # Create the log directory if it doesn't exist
         os.makedirs(log_dir, exist_ok=True)
             
+        # The wizard has no page for the boot-to-game setting, so read whatever
+        # is already on disk and fall back to that. Without this a reconfigure
+        # rewrites the section with defaults and silently turns the feature off.
+        existing_default_game = {}
+        default_config_path = os.path.join(config_dir, "default_config.toml")
+        if os.path.exists(default_config_path):
+            try:
+                with open(default_config_path, "rb") as f:
+                    existing_default_game = tomllib.load(f).get("default_game", {}) or {}
+            except Exception as e:
+                logging.warning(f"Failed to load existing default_config.toml: {e}")
+
         default_config = {
             "logging": {
                 "logdirectory": log_dir
@@ -557,8 +598,14 @@ class InstallationManager:
                 "pegasus_base_path": "../../../pegasus-fe"
             },
             "default_game": {
-                "default_game_start": config.get("default_game_start", False),
-                "default_game": config.get("default_game", "")
+                "default_game_start": config.get(
+                    "default_game_start",
+                    existing_default_game.get("default_game_start", False)
+                ),
+                "default_game": config.get(
+                    "default_game",
+                    existing_default_game.get("default_game", "")
+                )
             }
         }
         self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)
