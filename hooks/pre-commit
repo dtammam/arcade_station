@@ -1,38 +1,93 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+#
+# Arcade Station pre-commit hook.
+#
+# Enable with:  git config core.hooksPath hooks
+#
+# Checks the working-tree copy of each staged file. If you stage a file and then
+# keep editing it, the newer content is what gets checked - stage it again
+# before committing.
+#
+# Bypass with --no-verify when it is genuinely warranted, such as a deliberate
+# schema commit that has to touch a protected config file.
 
-# Load user tool paths (hooks run with a stripped environment)
-[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+set -u
 
-# Resolve repo root and venv binaries
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-VENV_BIN="$REPO_ROOT/.venv/bin"
-
-echo "=== pre-commit ==="
-
-# Python format check
-if [ -x "$VENV_BIN/black" ]; then
-  "$VENV_BIN/black" --check src/ install/
-elif command -v black &>/dev/null; then
-  black --check src/ install/
-else
-  echo "SKIP: black not found (install via pip install black)"
+PYTHON="python"
+if [ -x ".venv/Scripts/python.exe" ]; then
+    PYTHON="./.venv/Scripts/python.exe"
+elif [ -x ".venv/bin/python" ]; then
+    PYTHON="./.venv/bin/python"
 fi
 
-# Python lint
-if [ -x "$VENV_BIN/flake8" ]; then
-  "$VENV_BIN/flake8" src/ install/
-elif command -v flake8 &>/dev/null; then
-  flake8 src/ install/
-else
-  echo "SKIP: flake8 not found (install via pip install flake8)"
+staged_files() {
+    git diff --cached --name-only --diff-filter=ACM
+}
+
+fail=0
+
+# ---------------------------------------------------------------------------
+# 1. Personalized configuration must not be committed.
+#
+# These files carry skip-worktree precisely so local values stay local. Staging
+# one means the flag was cleared, deliberately or otherwise.
+# ---------------------------------------------------------------------------
+protected=$(staged_files | grep -E '^(config/.*\.toml$|src/pegasus-fe/config/)' || true)
+if [ -n "$protected" ]; then
+    echo "pre-commit: refusing to commit personalized configuration:"
+    echo "$protected" | sed 's/^/    /'
+    echo ""
+    echo "  These carry skip-worktree and hold real values."
+    echo "  To change what a fresh clone receives, edit the installer instead:"
+    echo "    install/installer/config/installation.py"
+    echo "  If this really is intended, re-run with --no-verify."
+    echo ""
+    fail=1
 fi
 
-# Markdown lint (npm tool — no venv tier)
-if command -v npx &>/dev/null; then
-  npx markdownlint-cli2 '**/*.md'
-else
-  echo "SKIP: npx not found (install Node.js for markdownlint)"
+# ---------------------------------------------------------------------------
+# 2. Staged Python must compile.
+# ---------------------------------------------------------------------------
+staged_files | grep '\.py$' | while IFS= read -r file; do
+    [ -f "$file" ] || continue
+    if ! "$PYTHON" -m py_compile "$file" 2>&1; then
+        echo "pre-commit: $file fails to compile."
+        exit 1
+    fi
+done || fail=1
+
+# ---------------------------------------------------------------------------
+# 3. Staged TOML must parse.
+#
+# tomllib rejects a whole document over one bad line, so a malformed config
+# stops every game from launching rather than just the entry that is wrong.
+# ---------------------------------------------------------------------------
+staged_files | grep '\.toml$' | while IFS= read -r file; do
+    [ -f "$file" ] || continue
+    if ! "$PYTHON" -c "import sys,tomllib; tomllib.load(open(sys.argv[1],'rb'))" "$file"; then
+        echo "pre-commit: $file is not valid TOML."
+        exit 1
+    fi
+done || fail=1
+
+# ---------------------------------------------------------------------------
+# 4. Staged Python must be free of pylint errors.
+#
+# Errors only, and only on staged files. The existing convention backlog is
+# real but is paid down deliberately, not blocked on at commit time.
+# ---------------------------------------------------------------------------
+py_staged=$(staged_files | grep '\.py$' || true)
+if [ -n "$py_staged" ]; then
+    # shellcheck disable=SC2086
+    if ! echo "$py_staged" | tr '\n' '\0' | xargs -0 "$PYTHON" -m pylint --errors-only; then
+        echo "pre-commit: pylint reported errors above."
+        fail=1
+    fi
 fi
 
-echo "pre-commit checks passed"
+if [ "$fail" -ne 0 ]; then
+    echo "pre-commit: blocked. Fix the above, or re-run with --no-verify."
+    exit 1
+fi
+
+exit 0

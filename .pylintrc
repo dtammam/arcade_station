@@ -1,0 +1,30 @@
+[MAIN]
+# Runtime code inserts src/ onto sys.path before importing arcade_station, and
+# tests/conftest.py does the same. pylint executes neither, so without this it
+# reports ~30 false import-error findings across the tree and two more in the
+# test suite.
+#
+# source-roots resolves packages for files that live under those roots;
+# init-hook is what lets files outside them - the tests - import from them.
+source-roots = src,install
+init-hook = "import os, sys; sys.path[:0] = [os.path.abspath('src'), os.path.abspath('install')]"
+
+# PyQt5 is a compiled extension; without this pylint reports no-name-in-module
+# for every symbol imported from it.
+extension-pkg-allow-list = PyQt5
+
+ignore-paths = .*[\\/]\.venv[\\/].*,
+               .*[\\/]pegasus-fe[\\/].*
+
+[FORMAT]
+max-line-length = 120
+
+[MESSAGES CONTROL]
+# Nothing is disabled here on purpose. This codebase currently reports ~730
+# messages, dominated by trailing-whitespace and line-too-long. Silencing them
+# globally would forgive the debt instead of paying it down; the pre-commit
+# hook gates on errors only, so the backlog does not block work while the
+# full signal stays available when pylint is run by hand.
+
+[REPORTS]
+score = yes

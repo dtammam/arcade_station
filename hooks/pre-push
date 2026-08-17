@@ -1,23 +1,33 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+#
+# Arcade Station pre-push hook.
+#
+# Enable with:  git config core.hooksPath hooks
+#
+# Runs the test suite before anything leaves the machine. The suite is
+# characterization-first: it pins current behavior so refactors have something
+# to fail against. A failure here means behavior moved - decide whether that
+# was intended before pushing.
+#
+# Bypass with --no-verify only when you have a reason you would say out loud.
 
-# Load user tool paths (hooks run with a stripped environment)
-[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+set -u
 
-# Resolve repo root and venv binaries
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-VENV_BIN="$REPO_ROOT/.venv/bin"
-VENV_PYTHON="$VENV_BIN/python"
-
-echo "=== pre-push ==="
-
-# Run test suite (exit 5 = no tests collected, treat as pass)
-if [ -x "$VENV_PYTHON" ] && "$VENV_PYTHON" -c "import pytest" 2>/dev/null; then
-  "$VENV_PYTHON" -m pytest || [ $? -eq 5 ]
-elif command -v python &>/dev/null && python -c "import pytest" 2>/dev/null; then
-  python -m pytest || [ $? -eq 5 ]
-else
-  echo "SKIP: pytest not found (install via pip install pytest)"
+PYTHON="python"
+if [ -x ".venv/Scripts/python.exe" ]; then
+    PYTHON="./.venv/Scripts/python.exe"
+elif [ -x ".venv/bin/python" ]; then
+    PYTHON="./.venv/bin/python"
 fi
 
-echo "pre-push checks passed"
+echo "pre-push: running test suite..."
+
+if ! "$PYTHON" -m pytest -q; then
+    echo ""
+    echo "pre-push: tests failed. Push blocked."
+    echo "  If the behavior change is intended, update the characterization"
+    echo "  tests in the same change so the new baseline is explicit."
+    exit 1
+fi
+
+exit 0
