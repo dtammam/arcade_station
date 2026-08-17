@@ -30,7 +30,7 @@ Agent definitions are read when the session starts, so one added or edited mid-s
 
 Run both seats against the full merge surface - `git diff origin/main...HEAD`, not just the most recent commit. **Diff against `origin/main`, not `main`.** A local `main` goes stale silently, and a stale one is wrong in **both** directions: it hides files that are in the real surface, and it shows files that are not - deletions that already merged upstream reappear as if this branch made them. This file previously said `main...HEAD`, and while the local branch sat behind, following it literally hid the entire harness reconciliation from both seats, which was the highest-risk part of the change.
 
-Do not try to reason about the size of that gap from the two file counts. Three separate attempts to state it as a number in this paragraph were wrong, because subtracting the totals gives a net figure - hidden files minus spuriously shown ones - not the number hidden. Fetch, then diff against the remote, and the question does not arise.
+Do not try to reason about the size of that gap from the two file counts. Both earlier attempts to state it as a number in this paragraph were wrong, because subtracting the totals gives a net figure - hidden files minus spuriously shown ones - not the number hidden. Fetch, then diff against the remote, and the question does not arise.
 
 The first run of this gate found three CRITICALs in work that had already been described as verified, two of which were destroying config on reconfigure.
 
