@@ -51,6 +51,11 @@ def fixture_captured_launch(monkeypatch):
 
     monkeypatch.setattr(launch_game_module, "start_process_with_powershell", fake_start)
     monkeypatch.setattr(launch_game_module.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(
+        launch_game_module,
+        "log_message",
+        lambda message, *a, **k: captured.setdefault("logs", []).append(str(message)),
+    )
     monkeypatch.setattr(launch_game_module, "load_toml_config",
                         lambda _name: {"dynamic_marquee": {"enabled": False}})
     monkeypatch.setattr(launch_game_module, "kill_pegasus", lambda: None)
@@ -210,6 +215,25 @@ class TestLogRedaction:
         """The constructed command embeds the same value, so it needs the same treatment."""
         command = f"Start-ProcessSilently -Arguments {quote_powershell_literal(ARGS_VALUE)}"
         assert "v=abc" not in redact_urls_for_log(command)
+
+    def test_launch_game_does_not_log_the_query_string_either(self, captured_launch):
+        """The launcher logs the args itself, two frames before the helper sees them.
+
+        The first version of this fix redacted only inside
+        start_process_with_powershell, which left launch_game's own two log
+        lines writing the value verbatim. Driving launch_game end to end is the
+        only way to catch that, so this test does.
+        """
+        secret = '--start-fullscreen "https://example.com/watch.html?token=s3cr3t&v=abc"'
+        result = captured_launch({"path": "C:/app/demo.exe", "args": secret})
+        written = "\n".join(result.get("logs", []))
+        assert written, "precondition: launch_game should have logged something"
+        assert "s3cr3t" not in written, "credential reached the log from launch_game"
+        assert "v=abc" not in written
+        assert result["arguments"] == secret, (
+            "redaction must apply to the log only - the launched process still "
+            "needs the real arguments"
+        )
 
     def test_the_launcher_actually_calls_it(self, monkeypatch):
         """Wiring, not availability.
