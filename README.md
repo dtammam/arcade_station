@@ -20,6 +20,7 @@
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Walkthroughs](#walkthroughs)
+- [Configuration](#configuration)
 - [Known Issues](#known-issues)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -91,6 +92,36 @@ For detailed walkthroughs with examples showing complete installation and usage 
 
 - **[Laptop Setup Guide](examples/LAPTOP.md)** - Portable multi-monitor setup using a Surface Laptop Studio with external displays, configuring ITGmania and Megatouch Maxx, and demonstrating dynamic marquee functionality
 - **[DDR Cabinet Setup Guide](examples/DDR.md)** - Dedicated DDR cabinet configuration with rhythm games including ITGmania, ITG2, OpenITG, and MAME-based 573 games, plus advanced features like kiosk mode and reconfiguration
+
+## Configuration
+
+The installer writes your settings to TOML files under `config/`. These can also be edited directly after installation.
+
+### Launch arguments for binary games
+
+Entries in `config/installed_games.toml` accept an optional `args` key, passed to the executable on launch. This is useful for games that need launch flags, or for entries that are really a browser pointed at a URL:
+
+```toml
+[games.my_web_app]
+display_name = "my_web_app"
+path = "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+args = '--start-fullscreen "https://example.com/"'
+banner = "C:/Games/arcade_station/assets/images/banners/my_web_app.png"
+```
+
+Note the single quotes around `args`. When your arguments contain double quotes, use a TOML literal string so the quotes are preserved as written.
+
+### Launching a game on startup
+
+To boot directly into a game rather than the frontend grid, set the `[default_game]` section in `config/default_config.toml`:
+
+```toml
+[default_game]
+default_game_start = true
+default_game = "itgmania"
+```
+
+`default_game` is the game's key in `installed_games.toml` (the part after `[games.]`). Leave `default_game_start = false` to start at the frontend as usual.
 
 ## Known Issues
 
