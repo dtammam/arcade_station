@@ -518,12 +518,19 @@ class InstallationManager:
                     if game_id == "itgmania":
                         continue
                         
-                    installed_games["games"][game_id] = {
+                    game_entry = {
                         "display_name": game_info["display_name"],
                         "path": game_info["path"],
                         "banner": game_info.get("banner", "")
                     }
-            
+
+                    # Optional command-line arguments passed to the executable,
+                    # e.g. browser flags and a URL for a web-based entry
+                    if game_info.get("args"):
+                        game_entry["args"] = game_info["args"]
+
+                    installed_games["games"][game_id] = game_entry
+
             # Add MAME games if configured
             if config.get("mame_games"):
                 for game_id, game_info in config["mame_games"].items():
@@ -548,6 +555,10 @@ class InstallationManager:
             },
             "paths": {
                 "pegasus_base_path": "../../../pegasus-fe"
+            },
+            "default_game": {
+                "default_game_start": config.get("default_game_start", False),
+                "default_game": config.get("default_game", "")
             }
         }
         self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)
@@ -1192,7 +1203,11 @@ Categories=Game;
                     # Convert backslashes to forward slashes for paths
                     if any(path_key in key.lower() for path_key in ['path', 'banner', 'rom', 'state']):
                         value = value.replace('\\', '/')
-                    file.write(f'{key} = "{value}"\n')
+                    # Escape backslashes and double quotes so values that contain
+                    # either one (Windows log directories, launch arguments wrapping
+                    # a URL in quotes) still emit a valid TOML basic string.
+                    escaped = value.replace('\\', '\\\\').replace('"', '\\"')
+                    file.write(f'{key} = "{escaped}"\n')
                 elif isinstance(value, bool):
                     file.write(f"{key} = {str(value).lower()}\n")
                 else:
