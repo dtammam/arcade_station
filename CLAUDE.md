@@ -4,6 +4,12 @@ Arcade Station is a front-end for launching rhythm games and arcade software on 
 
 `PLAN.MD` holds project direction and phasing. This file holds how the work gets done.
 
+## Product Intent
+
+The bar is **plug-and-play, not plug-and-tinker**. A user turns the cabinet on and it works - no desktop, no taskbar, no config file, no manual step they have to remember. When a change introduces something the user must do by hand, that is a cost to be justified rather than a neutral trade-off.
+
+This is the standard the installer and any post-install configuration flow are held to.
+
 ## Core Working Principles
 
 Lean mode: a single agent owns the whole lifecycle, with no role hand-offs. Two pillars are non-negotiable.
@@ -78,6 +84,7 @@ TOML, parsed with `tomllib`. Use literal strings - single quotes - for values th
 - **Logging:** `log_message(message, prefix)` from `core_functions`. Match the existing prefix vocabulary - `GAME_LAUNCH`, `PS`, `STARTUP`.
 - **Docstrings:** Google style, per `PLAN.MD`.
 - **Platforms:** Windows is the working target. Linux and macOS are Phase 2 intent - do not claim cross-platform support that has not been run.
+- **Reuse before inventing.** When you hit a problem this codebase already solves, use the existing solution rather than writing a second one alongside it. `core_functions.py` is the first place to look. Parallel implementations of the same idea are how this project accumulates drift, and a new helper that duplicates an old one is a defect even when it works.
 
 ## Git Norms
 
