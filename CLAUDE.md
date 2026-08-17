@@ -28,22 +28,33 @@ CRITICAL findings block the merge. WARNINGs block unless explicitly declared saf
 
 ## Testing and Verification
 
-**There is no test suite and no CI in this repository today.** The pytest and GitHub Actions plan in `PLAN.MD` is aspirational and not yet built. Do not claim a test run. Do not write "tests pass."
+Run the suite with `python -m pytest`. Tooling is in `requirements-dev.txt`. Enable the hooks once per clone with `git config core.hooksPath hooks`.
 
-Building a **characterization baseline** is the current priority: tests that capture what the code actually does today, so that later changes can be made with confidence. When writing them:
+**There is no CI.** Nothing runs these tests except you and the pre-push hook.
 
-- Assert observed behavior, not intended behavior. The point is to pin down the current contract before it moves.
-- If you discover a bug while writing a baseline test, **report it and encode the buggy behavior as-is**. Fixing it in the same change destroys the baseline's value as a before/after reference.
-- Prefer tests that need no cabinet hardware. Config parsing, path resolution, argument construction, and TOML round-tripping are all testable in isolation.
+The suite is a **characterization baseline** and it is still thin - it covers config loading, the installer's TOML writer, and the launch-argument contract. Large parts of the codebase have no coverage at all. Do not read a green run as "this change is safe." Read it as "the behavior these tests pin did not move."
 
-Until that baseline exists, verification means:
+When adding to it:
 
-- **Python changes:** `python -m py_compile <file>` at minimum.
-- **Any TOML edit:** parse it back with `tomllib` before declaring done. A malformed `installed_games.toml` takes down *every* game, not one.
+- Assert observed behavior, not intended behavior. The point is to pin the current contract before it moves. Mark such tests `@pytest.mark.characterization`.
+- If you find a bug while writing a baseline test, **report it and encode the buggy behavior as-is**. Fixing it in the same change destroys the baseline's value as a before/after reference.
+- **Never assert config values.** Every file under `config/` carries skip-worktree, so a fresh clone sees near-empty defaults where a real install sees personal content. Assert structure, or the suite passes for you and fails for everyone else.
+- Prefer tests that need no cabinet hardware.
+
+Beyond the suite:
+
+- **Python changes:** `python -m py_compile <file>` at minimum; the pre-commit hook does this for staged files.
+- **Any TOML edit:** parse it back with `tomllib`. A malformed `installed_games.toml` takes down *every* game, not one.
 - **Launch-path changes:** prove argument and quoting behavior with a dry run that echoes rather than launches, when a real launch is not possible.
 - **Cabinet behavior:** only claimable if actually run. Otherwise say it was not.
 
-Update this section when the baseline lands.
+### Linting
+
+`python -m pylint src/arcade_station install/installer`, configured in `.pylintrc`.
+
+The tree currently reports roughly 730 messages, overwhelmingly `trailing-whitespace` and `line-too-long`. Nothing is globally disabled, because silencing the backlog forgives it rather than paying it down. The pre-commit hook gates on **errors only**, and only on staged files, so the existing debt does not block work while new code is still held to the standard.
+
+Three genuine `possibly-used-before-assignment` errors are outstanding, in `manage_icloud.py` and `monitor_itgmania.py` - conditional imports referenced unconditionally. They predate this file and have not been fixed.
 
 ## Repository Constraints
 
@@ -93,3 +104,5 @@ TOML, parsed with `tomllib`. Use literal strings - single quotes - for values th
 - Stage explicitly by path. Never `git add -A` or `git add .` - untracked personal assets live in this tree.
 - Confirm a commit landed by inspecting `git log`, not by assuming.
 - Push only when asked.
+
+Hooks live in `hooks/` and are enabled per clone with `git config core.hooksPath hooks`. `pre-commit` blocks staged personalized config, Python that will not compile, malformed TOML, and pylint errors. `pre-push` runs the test suite. Both can be bypassed with `--no-verify`, which is occasionally correct and should be said out loud when used.

@@ -4,12 +4,38 @@
     {
       "label": "Activate .venv",
       "type": "shell",
-      "command": "cd C:\\Repositories\\arcade_station && .venv\\Scripts\\activate",
+      "command": "cd '${workspaceFolder}'; .venv\\Scripts\\activate",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
       },
       "detail": "Switches to the project directory and activates the virtual environment"
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe -m pytest",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Runs the pytest suite (configured in pytest.ini)",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe -m pylint src/arcade_station install/installer",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Runs pylint across the source tree (configured in .pylintrc)",
+      "problemMatcher": []
     },
     {
       "label": "Kill Python Processes",
