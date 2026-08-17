@@ -26,6 +26,10 @@ Lean mode: a single agent owns the whole lifecycle, with no role hand-offs. Two 
 
 CRITICAL findings block the merge. WARNINGs block unless explicitly declared safe to ship and disclosed in the summary. Trivial changes - typo fixes, documentation wording - may skip the gate, but say so when you skip it rather than letting it pass silently.
 
+Agent definitions are read when the session starts, so one added or edited mid-session is not selectable until Claude Code is restarted. If a seat cannot be invoked by name, that is why. As a fallback, a general-purpose agent told to read the definition file and adopt it produces the same review.
+
+Run both seats against the full merge surface - `git diff main...HEAD`, not just the most recent commit. The first run of this gate found three CRITICALs in work that had already been described as verified, two of which were destroying config on reconfigure.
+
 ## Testing and Verification
 
 Run the suite with `python -m pytest`. Tooling is in `requirements-dev.txt`. Enable the hooks once per clone with `git config core.hooksPath hooks`.
@@ -50,11 +54,21 @@ Beyond the suite:
 
 ### Linting
 
-`python -m pylint src/arcade_station install/installer`, configured in `.pylintrc`.
+`python -m pylint src/arcade_station install/installer`, configured in `.pylintrc`. **Run it from the repository root** - the `init-hook` resolves paths relative to the working directory, and running it from elsewhere reports spurious import errors in `tests/`.
 
-The tree currently reports roughly 730 messages, overwhelmingly `trailing-whitespace` and `line-too-long`. Nothing is globally disabled, because silencing the backlog forgives it rather than paying it down. The pre-commit hook gates on **errors only**, and only on staged files, so the existing debt does not block work while new code is still held to the standard.
+The tree reports **2,129 messages** and scores **5.68/10**. It is dominated by `trailing-whitespace` (1,423) and `line-too-long` (64). Nothing is globally disabled, because silencing the backlog forgives it rather than paying it down. The pre-commit hook gates on **errors only**, and only on staged files, so the debt does not block unrelated work.
 
-Three genuine `possibly-used-before-assignment` errors are outstanding, in `manage_icloud.py` and `monitor_itgmania.py` - conditional imports referenced unconditionally. They predate this file and have not been fixed.
+Re-measure before quoting these numbers. They were wrong by a factor of three in an earlier revision of this file, and a reader calibrating "did my change make this worse" needs a baseline that is actually true.
+
+Four errors are outstanding, all predating this file:
+
+| Location | Error | Note |
+|---|---|---|
+| `manage_icloud.py:237` | `possibly-used-before-assignment` | `ctypes`, conditionally imported |
+| `monitor_itgmania.py:75,99` | `possibly-used-before-assignment` | `win32gui`, `win32con` |
+| `app.py:260` | `import-error` | imports `tomli`, which is absent from `requirements.txt` and not installed |
+
+The `app.py` one **blocks commits to that file** through the pre-commit hook. It is a real missing dependency rather than a false positive, so it is left visible instead of suppressed. Use `--no-verify` if you have to touch that file before it is fixed, and say so.
 
 ## Repository Constraints
 

@@ -1,17 +1,37 @@
 [MAIN]
 # Runtime code inserts src/ onto sys.path before importing arcade_station, and
-# tests/conftest.py does the same. pylint executes neither, so without this it
-# reports ~30 false import-error findings across the tree and two more in the
-# test suite.
+# tests/conftest.py does the same. pylint executes neither, so without help it
+# reports 36 false import errors.
 #
-# source-roots resolves packages for files that live under those roots;
-# init-hook is what lets files outside them - the tests - import from them.
+# init-hook is the setting that actually does the work: it is the only one of
+# the two that makes tests/ resolve imports from src/ and install/. Measured
+# error counts, by scope:
+#
+#                        both  source-roots  init-hook  neither
+#   src + installer         5             5          5       36
+#   tests                   0             4          0        4
+#
+# source-roots is therefore redundant here. It is kept because it is resolved
+# relative to this file, so editors and IDE integrations that decline to
+# execute init-hook still resolve the source tree correctly.
+#
+# init-hook is resolved relative to the CURRENT WORKING DIRECTORY, so pylint
+# must be run from the repository root. The pre-commit hook and the VS Code
+# Lint task both satisfy that. Running it from elsewhere reports spurious
+# import errors in tests/.
 source-roots = src,install
 init-hook = "import os, sys; sys.path[:0] = [os.path.abspath('src'), os.path.abspath('install')]"
 
-# PyQt5 is a compiled extension; without this pylint reports no-name-in-module
-# for every symbol imported from it.
+# PyQt5 is a compiled extension pylint cannot introspect; without this it
+# reports no-name-in-module for every symbol imported from it.
 extension-pkg-allow-list = PyQt5
+
+# PIL.Image assigns LANCZOS dynamically, so pylint reports a false no-member
+# for it. Verified at runtime: PIL.Image.LANCZOS is present and equals 1.
+# Being an error rather than a warning, it blocked commits to base_page.py
+# through the pre-commit hook. extension-pkg-allow-list does NOT fix this -
+# that setting is for C extensions, and this is a plain Python attribute.
+ignored-modules = PIL.Image
 
 ignore-paths = .*[\\/]\.venv[\\/].*,
                .*[\\/]pegasus-fe[\\/].*
@@ -20,11 +40,11 @@ ignore-paths = .*[\\/]\.venv[\\/].*,
 max-line-length = 120
 
 [MESSAGES CONTROL]
-# Nothing is disabled here on purpose. This codebase currently reports ~730
-# messages, dominated by trailing-whitespace and line-too-long. Silencing them
-# globally would forgive the debt instead of paying it down; the pre-commit
-# hook gates on errors only, so the backlog does not block work while the
-# full signal stays available when pylint is run by hand.
+# Nothing is disabled here on purpose. The tree reports a large backlog,
+# dominated by trailing-whitespace and line-too-long. Silencing them globally
+# would forgive the debt instead of paying it down; the pre-commit hook gates
+# on errors only, so the backlog does not block work while the full signal
+# stays available when pylint is run by hand.
 
 [REPORTS]
 score = yes

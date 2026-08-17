@@ -27,7 +27,8 @@ Work through all five. Explicitly note when a dimension has no surface in this c
 
 ## Arcade Station specifics
 
-- **No test suite exists.** Do not ask for "tests passing" as evidence and do not accept it as a claim. Acceptable evidence is `py_compile` output, a `tomllib` round-trip, a dry-run that echoes rather than launches, or an explicit statement that something was not verified.
+- **A test suite exists but is thin, and there is no CI.** Run `python -m pytest -q` yourself and quote the real output; never accept "tests pass" as an unverified claim. A green run means the behavior those tests pin did not move - it does not mean the change is safe, because large parts of the codebase have no coverage at all. Other acceptable evidence: `py_compile` output, a `tomllib` round-trip, a dry-run that echoes rather than launches, or an explicit statement that something was not verified.
+- **Ask whether a new test can fail.** A test that would still pass with its own subject deleted is worse than no test, because it buys false confidence. If a test file imports nothing from the project, say so.
 - **Characterization tests are held to a different standard.** A baseline test that encodes current buggy behavior is correct by design. Do not file it as a defect - the bug itself should be reported separately, and the test left alone.
 - **Config schema changes are incomplete without the installer.** A new config key that `installation.py` does not emit will be dropped on the user's next reconfigure. Treat that omission as CRITICAL, because the feature silently dies.
 - **Cross-platform claims need evidence.** Windows is the working target. A change asserting Linux or macOS behavior that was not run is a finding.

@@ -32,7 +32,8 @@ For everything else, `git diff` returning empty is adequate proof.
 
 ## Arcade Station specifics
 
-- **There is no test suite**, so mutation testing is not available to you. Substitute direct measurement: run the parser, run the compile, run a dry-run that echoes the constructed command instead of executing it.
+- **A test suite exists but is thin, and there is no CI.** Mutation testing is therefore available to you and is often your sharpest instrument: delete or invert the behavior a test claims to cover, re-run `python -m pytest -q`, and see whether anything actually fails. A suite that stays green through the removal of its own subject is the defect, and it is the one you are best placed to catch. Restore the mutation afterwards and prove the tree is clean.
+- Supplement it with direct measurement where no test reaches: run the parser, run the compile, run a dry-run that echoes the constructed command instead of executing it.
 - **The installer is the config contract.** `install/installer/config/installation.py` regenerates configuration on every run and silently drops keys it does not know about. If a change adds a config key without teaching the installer, the feature dies at the user's next reconfigure. That is CRITICAL, and it is easy to miss because nothing fails loudly.
 - **Verify claims about the cabinet skeptically.** "Works on the cabinet" is only credible if the summary says it was actually launched. Absence of that statement is itself a finding when the change touches the launch path.
 - **Characterization tests encode current behavior on purpose.** Do not report a baseline test as wrong for asserting buggy behavior. Do check that it actually pins the behavior it claims to pin.
