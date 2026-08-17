@@ -119,8 +119,12 @@ TOML, parsed with `tomllib`. Use literal strings - single quotes - for values th
 
 - Branch, gate, then merge. Do not commit to `main` directly.
 - **Commit messages are plain sentence case**, not Conventional Commits. Match the existing log: "Logic for a default game launching on system boot".
+- **Merge commits follow the same rule.** GitHub defaults to "Merge pull request #NN from owner/branch", which says nothing about the change. Set the subject explicitly at merge time: `gh pr merge <N> --merge --subject "Sentence case description"`. This has to be done when merging - `main` cannot be rewritten afterwards, see below.
+- **Never add attribution trailers.** No `Co-Authored-By: Claude`, no "Generated with Claude Code" footer, in commit messages or PR bodies.
 - Stage explicitly by path. Never `git add -A` or `git add .` - untracked personal assets live in this tree.
 - Confirm a commit landed by inspecting `git log`, not by assuming.
 - Push only when asked.
+
+`main` is governed by an active repository **ruleset** named `protectMain`, not by classic branch protection - so `GET /repos/:owner/:repo/branches/main/protection` returns 404 and tells you nothing. Query `GET /repos/:owner/:repo/rules/branches/main` instead. It enforces `non_fast_forward` (no force-push), `deletion`, and `pull_request` (changes must arrive via a PR, zero approvals required). A history rewrite on `main` is therefore not available, which is why a merge subject has to be right the first time.
 
 Hooks live in `hooks/` and are enabled per clone with `git config core.hooksPath hooks`. `pre-commit` blocks staged personalized config, Python that will not compile, malformed TOML, and pylint errors. `pre-push` runs the test suite. Both can be bypassed with `--no-verify`, which is occasionally correct and should be said out loud when used.
