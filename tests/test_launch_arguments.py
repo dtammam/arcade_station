@@ -83,6 +83,57 @@ def test_args_reach_the_windows_launch_call(captured_launch):
     assert result["file_path"] == "C:/app/demo.exe"
 
 
+@pytest.fixture(name="captured_ps_command")
+def fixture_captured_ps_command(monkeypatch):
+    """Call the real start_process_with_powershell, capturing the argv it builds.
+
+    captured_launch stubs start_process_with_powershell, so it pins what
+    launch_game hands the helper - not what the helper constructs. Nothing else
+    in this suite looks at the command that actually reaches Popen, which is
+    where the -Arguments clause either appears or does not.
+    """
+    captured = {}
+
+    class _Proc:  # pylint: disable=too-few-public-methods
+        pid = 4242
+
+    def fake_popen(command, *args, **kwargs):
+        captured["argv"] = command
+        return _Proc()
+
+    monkeypatch.setattr(core_functions.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(core_functions, "log_message", lambda *a, **k: None)
+
+    def run(arguments=None):
+        captured.clear()
+        core_functions.start_process_with_powershell(
+            "C:/app/demo.exe", working_dir="C:/app", arguments=arguments
+        )
+        # -Command is the last argv element powershell.exe receives.
+        return captured["argv"][-1]
+
+    return run
+
+
+def test_arguments_reach_the_command_handed_to_powershell(captured_ps_command):
+    """The -Arguments clause is what carries the value to the process.
+
+    Deleting that clause makes every URL-bearing game launch bare. Measured
+    before writing this: with the clause removed, the other 47 tests all still
+    passed, so nothing in the suite guarded it.
+    """
+    ps_command = captured_ps_command(ARGS_VALUE)
+    assert "-Arguments" in ps_command
+    assert quote_powershell_literal(ARGS_VALUE) in ps_command
+    assert "<redacted>" not in ps_command, "the launched command must never be redacted"
+
+
+def test_no_arguments_clause_when_the_entry_has_none(captured_ps_command):
+    """Entries without 'args' must build the pre-feature command exactly."""
+    assert "-Arguments" not in captured_ps_command("")
+    assert "-Arguments" not in captured_ps_command(None)
+
+
 def test_entry_without_args_passes_empty_string(captured_launch):
     """Entries with no 'args' must behave exactly as they did before the feature.
 
