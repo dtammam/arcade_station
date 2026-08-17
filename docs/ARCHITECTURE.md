@@ -73,8 +73,9 @@ hooks, which are enabled per clone with `git config core.hooksPath hooks`:
   compile, malformed TOML, and pylint errors on staged files
 - `pre-push`: runs the pytest suite
 
-Linting is `pylint`, configured in `.pylintrc`. `black`, `flake8` and `mypy`
-are not used here - see the "Not currently used" block in `requirements.txt`.
+Linting is `pylint`, configured in `.pylintrc`. `black` and `mypy` are not used
+here - `requirements.txt` lists both under a "Not currently used" block.
+`flake8` is neither a dependency nor run anywhere.
 
 ## Key protocols / APIs
 

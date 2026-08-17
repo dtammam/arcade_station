@@ -28,7 +28,9 @@ CRITICAL findings block the merge. WARNINGs block unless explicitly declared saf
 
 Agent definitions are read when the session starts, so one added or edited mid-session is not selectable until Claude Code is restarted. If a seat cannot be invoked by name, that is why. As a fallback, a general-purpose agent told to read the definition file and adopt it produces the same review.
 
-Run both seats against the full merge surface - `git diff main...HEAD`, not just the most recent commit. The first run of this gate found three CRITICALs in work that had already been described as verified, two of which were destroying config on reconfigure.
+Run both seats against the full merge surface - `git diff origin/main...HEAD`, not just the most recent commit. **Diff against `origin/main`, not `main`.** A local `main` goes stale silently: this file previously said `main...HEAD`, and at a point when the local branch was six commits behind, following it literally showed 42 files where the true surface was 71. The 29 it hid were the highest-risk part of the change. Fetch first if you are unsure.
+
+The first run of this gate found three CRITICALs in work that had already been described as verified, two of which were destroying config on reconfigure.
 
 ## Testing and Verification
 
@@ -36,7 +38,7 @@ Run the suite with `python -m pytest`. Tooling is in `requirements-dev.txt`. Ena
 
 **There is no CI.** Nothing runs these tests except you and the pre-push hook.
 
-The suite is a **characterization baseline** and it is still thin - it covers config loading, the installer's TOML writer, and the launch-argument contract. Large parts of the codebase have no coverage at all. Do not read a green run as "this change is safe." Read it as "the behavior these tests pin did not move."
+The suite is a **characterization baseline** and it is still thin. Five files: config loading, the installer's TOML writer, what a reconfigure preserves and what it discards, the install-location page's cleanup path, and the launch-argument contract. Large parts of the codebase have no coverage at all - notably `start_frontend_apps.py`, including the boot-to-game path, which has none. Do not read a green run as "this change is safe." Read it as "the behavior these tests pin did not move."
 
 When adding to it:
 
