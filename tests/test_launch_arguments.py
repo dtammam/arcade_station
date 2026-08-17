@@ -16,7 +16,11 @@ import tomllib
 
 import pytest
 
-from arcade_station.core.common.core_functions import quote_powershell_literal
+from arcade_station.core.common import core_functions
+from arcade_station.core.common.core_functions import (
+    quote_powershell_literal,
+    redact_urls_for_log,
+)
 from arcade_station.launchers import launch_game as launch_game_module
 
 ARGS_VALUE = '--start-fullscreen "https://example.com/watch.html?v=abc&ctx=%7B%22sort%22:%22x%22%7D"'
@@ -167,3 +171,68 @@ class TestConfigFileFormat:
         entry = tomllib.loads(self.GOOD)["games"]["demo"]
         assert entry["args"] == ARGS_VALUE
         assert shlex.split(entry["args"])[0] == "--start-fullscreen"
+
+
+class TestLogRedaction:
+    """Launch arguments reach the log, so a URL query string must not.
+
+    'args' is hand-edited and routinely holds a URL. Before the feature existed
+    this log line always received None, so nothing was written; now it receives
+    whatever the entry declares, on every launch, into a file that persists.
+    """
+
+    def test_query_string_is_removed_but_the_url_is_still_identifiable(self):
+        """The diagnosable part survives; the part that could hold a token does not."""
+        redacted = redact_urls_for_log(ARGS_VALUE)
+        assert "v=abc" not in redacted
+        assert "%22sort%22" not in redacted
+        assert "https://example.com/watch.html?<redacted>" in redacted
+        assert redacted.startswith("--start-fullscreen")
+
+    def test_a_credential_bearing_query_string_does_not_survive(self):
+        """The case this exists for."""
+        assert "s3cr3t" not in redact_urls_for_log(
+            "--url https://example.com/stream?token=s3cr3t"
+        )
+
+    def test_arguments_without_a_url_are_untouched(self):
+        """A bare '?' is a wildcard or a batch parameter, not a query string."""
+        assert redact_urls_for_log("--kiosk --profile C:/Users/x/AppData") == (
+            "--kiosk --profile C:/Users/x/AppData"
+        )
+        assert redact_urls_for_log("/select ?foo") == "/select ?foo"
+
+    def test_none_passes_through(self):
+        """Entries without 'args' hand None to the launcher; that must not become 'None'."""
+        assert redact_urls_for_log(None) is None
+
+    def test_the_full_powershell_command_is_redacted_too(self):
+        """The constructed command embeds the same value, so it needs the same treatment."""
+        command = f"Start-ProcessSilently -Arguments {quote_powershell_literal(ARGS_VALUE)}"
+        assert "v=abc" not in redact_urls_for_log(command)
+
+    def test_the_launcher_actually_calls_it(self, monkeypatch):
+        """Wiring, not availability.
+
+        The tests above prove the helper works. This one proves it is reached:
+        without it they would all still pass with both call sites deleted.
+        """
+        logged = []
+        monkeypatch.setattr(
+            core_functions, "log_message", lambda message, *a, **k: logged.append(str(message))
+        )
+
+        class _Proc:  # pylint: disable=too-few-public-methods
+            pid = 4242
+
+        monkeypatch.setattr(
+            core_functions.subprocess, "Popen", lambda *a, **k: _Proc()
+        )
+        core_functions.start_process_with_powershell(
+            "C:/app/demo.exe", arguments=ARGS_VALUE
+        )
+        written = "\n".join(logged)
+        assert written, "precondition: the launcher should have logged something"
+        assert "v=abc" not in written, "query string reached the log"
+        assert "%22sort%22" not in written
+        assert "<redacted>" in written
