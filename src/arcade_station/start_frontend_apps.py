@@ -212,7 +212,8 @@ def main():
     5. Launches the keyboard shortcut listener
     6. Starts conditional background services based on configuration
     7. Launches the Pegasus frontend
-    8. If in shell replacement mode, keeps the process running
+    8. Launches the default game, when default_game_start is enabled
+    9. If in shell replacement mode, keeps the process running
     
     Command-line Arguments:
         --shell-mode: Run in shell replacement mode, keeping the process alive
@@ -263,7 +264,11 @@ def main():
         
         if default_game_start and default_game:
             log_message(f"Default game launch enabled, will launch: {default_game}", "STARTUP")
-            # Wait for Pegasus to fully load before launching game
+            # Give Pegasus a head start. This is a fixed delay, not a readiness
+            # check - nothing here confirms Pegasus is actually up. On a slow
+            # cold boot it may still be starting when launch_game calls
+            # kill_pegasus, in which case the kill matches no process and
+            # Pegasus draws on top of the game that just launched.
             log_message("Waiting for Pegasus to initialize...", "STARTUP")
             time.sleep(5)
             
