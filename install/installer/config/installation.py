@@ -608,6 +608,25 @@ class InstallationManager:
                 )
             }
         }
+
+        # Carrying the setting forward is only correct while the game it names
+        # still exists. The games table is rebuilt from scratch every run and
+        # can come back without it - most starkly when skip_games discards the
+        # table wholesale - which would emit a config that says boot into a
+        # game that is not installed. That fails softly at boot (launch_game
+        # logs and returns, so Pegasus survives) but the config contradicts
+        # itself, and a reader seeing the name may simply re-enable it. Drop
+        # the pointer instead of writing it out dangling.
+        chosen_default_game = default_config["default_game"]["default_game"]
+        if chosen_default_game and chosen_default_game not in installed_games["games"]:
+            logging.warning(
+                "Default game '%s' is not present in the games table; "
+                "disabling boot-to-game rather than emitting a dangling pointer.",
+                chosen_default_game
+            )
+            default_config["default_game"]["default_game_start"] = False
+            default_config["default_game"]["default_game"] = ""
+
         self._write_toml(os.path.join(config_dir, "default_config.toml"), default_config)
         
         # Generate display_config.toml
