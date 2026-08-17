@@ -27,7 +27,8 @@ interval_seconds = 360        # Interval between service restarts
 delete_after_upload = true    # Whether to delete files after they're uploaded
 upload_directory = "C:/Users/me/Pictures/Uploads"  # Directory to monitor
 apple_services_path = "C:/Program Files (x86)/Common Files/Apple/Internet Services/"  # Path to Apple services
-processes_to_restart = [      # iCloud processes to restart
+# iCloud processes to restart
+processes_to_restart = [      
   "iCloudServices",
   "iCloudPhotos"
 ]

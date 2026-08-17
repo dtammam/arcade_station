@@ -212,7 +212,8 @@ def main():
     5. Launches the keyboard shortcut listener
     6. Starts conditional background services based on configuration
     7. Launches the Pegasus frontend
-    8. If in shell replacement mode, keeps the process running
+    8. Launches the default game, when default_game_start is enabled
+    9. If in shell replacement mode, keeps the process running
     
     Command-line Arguments:
         --shell-mode: Run in shell replacement mode, keeping the process alive
@@ -253,6 +254,33 @@ def main():
     reset_script = os.path.join(base_dir, "core", "common", "kill_all_and_reset_pegasus.py")
     reset_process = launch_script(reset_script, identifier="kill_all_and_reset_pegasus")
     log_message(f"Launched kill_all_and_reset_pegasus.py with PID: {reset_process.pid}", "RESET")
+    
+    # Check for default game launch on system startup
+    try:
+        default_config = load_toml_config('default_config.toml')
+        default_game_config = default_config.get('default_game', {})
+        default_game_start = default_game_config.get('default_game_start', False)
+        default_game = default_game_config.get('default_game', '')
+        
+        if default_game_start and default_game:
+            log_message(f"Default game launch enabled, will launch: {default_game}", "STARTUP")
+            # Give Pegasus a head start. This is a fixed delay, not a readiness
+            # check - nothing here confirms Pegasus is actually up. On a slow
+            # cold boot it may still be starting when launch_game calls
+            # kill_pegasus, in which case the kill matches no process and
+            # Pegasus draws on top of the game that just launched.
+            log_message("Waiting for Pegasus to initialize...", "STARTUP")
+            time.sleep(5)
+            
+            # Launch the default game
+            from arcade_station.launchers.launch_game import launch_game
+            log_message(f"Launching default game: {default_game}", "STARTUP")
+            launch_game(default_game)
+        elif default_game_start and not default_game:
+            log_message("default_game_start is enabled but default_game is not set", "STARTUP")
+    except Exception as e:
+        log_message(f"Error checking default game config: {e}", "STARTUP")
+        log_message(traceback.format_exc(), "STARTUP")
     
     # If running in shell replacement mode, we need to keep this process running
     if args.shell_mode:
