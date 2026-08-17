@@ -28,7 +28,7 @@ CRITICAL findings block the merge. WARNINGs block unless explicitly declared saf
 
 Agent definitions are read when the session starts, so one added or edited mid-session is not selectable until Claude Code is restarted. If a seat cannot be invoked by name, that is why. As a fallback, a general-purpose agent told to read the definition file and adopt it produces the same review.
 
-Run both seats against the full merge surface - `git diff origin/main...HEAD`, not just the most recent commit. **Diff against `origin/main`, not `main`.** A local `main` goes stale silently: this file previously said `main...HEAD`, and at a point when the local branch was six commits behind, following it literally showed 42 files where the true surface was 71. The 29 it hid were the highest-risk part of the change. Fetch first if you are unsure.
+Run both seats against the full merge surface - `git diff origin/main...HEAD`, not just the most recent commit. **Diff against `origin/main`, not `main`.** A local `main` goes stale silently: this file previously said `main...HEAD`, and when the local branch sat six commits behind, following it literally hid roughly thirty files from both seats - the entire harness reconciliation, which was the highest-risk part of the change. The exact counts move with every commit; the failure mode does not. Fetch first if you are unsure.
 
 The first run of this gate found three CRITICALs in work that had already been described as verified, two of which were destroying config on reconfigure.
 
