@@ -11,6 +11,7 @@ with platform-specific implementations when necessary.
 
 import os
 import logging
+import re
 import tomllib
 import platform
 import subprocess
@@ -709,6 +710,56 @@ def run_powershell_script(script_path, params=None):
         log_message(f"Error running PowerShell script: {e}", "PS")
         return None
 
+def quote_powershell_literal(value):
+    """
+    Wrap a value in a PowerShell single-quoted string, escaping embedded quotes.
+
+    PowerShell literal strings take their contents verbatim with one exception:
+    a single quote ends the string, and is escaped by doubling it. Interpolating
+    an unescaped value therefore lets the value terminate the string and have the
+    remainder parsed as code.
+
+    Args:
+        value: The value to quote. Coerced to str.
+
+    Returns:
+        str: The value wrapped in single quotes, safe to embed in a command.
+
+    Note:
+        Without this, an apostrophe in an otherwise ordinary value - a URL such
+        as https://example.com/it's-here, or an install path like
+        C:/Users/Dean's Games - produces a parse error rather than a launch, and
+        a crafted value executes arbitrary PowerShell.
+    """
+    return "'" + str(value).replace("'", "''") + "'"
+
+_URL_QUERY_STRING = re.compile(r"(https?://[^\s\"']*?)\?[^\s\"']*", re.IGNORECASE)
+
+def redact_urls_for_log(value):
+    """
+    Mask URL query strings so launch arguments are safe to write to a log file.
+
+    Launch arguments are hand-edited into installed_games.toml and can carry a
+    URL, and a query string is where a credential would appear - a session
+    token, a signed link. The log is a plain file on disk that outlives the
+    launch it describes, so the query string is dropped while the scheme, host
+    and path are kept, since those are what make a failed launch diagnosable.
+
+    Args:
+        value: The value to redact. Coerced to str. None is returned unchanged.
+
+    Returns:
+        str: The value with each URL query string replaced by a marker, or the
+            original value when it is None.
+
+    Note:
+        Only http and https URLs are touched. A bare '?' elsewhere in the
+        arguments - a wildcard, a batch parameter - is left alone.
+    """
+    if value is None:
+        return value
+    return _URL_QUERY_STRING.sub(r"\1?<redacted>", str(value))
+
 def start_process_with_powershell(file_path, working_dir=None, arguments=None):
     """
     Launch a process silently using PowerShell to hide console windows.
@@ -734,20 +785,20 @@ def start_process_with_powershell(file_path, working_dir=None, arguments=None):
     ))
     
     # Construct the PowerShell command
-    ps_command = f"Import-Module '{ps_module_path}'; "
-    ps_command += f"Start-ProcessSilently -FilePath '{file_path}'"
-    
+    ps_command = f"Import-Module {quote_powershell_literal(ps_module_path)}; "
+    ps_command += f"Start-ProcessSilently -FilePath {quote_powershell_literal(file_path)}"
+
     if working_dir:
-        ps_command += f" -WorkingDirectory '{working_dir}'"
-    
+        ps_command += f" -WorkingDirectory {quote_powershell_literal(working_dir)}"
+
     if arguments:
-        ps_command += f" -Arguments '{arguments}'"
+        ps_command += f" -Arguments {quote_powershell_literal(arguments)}"
     
     # Log detailed information about what's being executed
     log_message(f"Starting process using PowerShell: {file_path}", "PS")
     log_message(f"Working directory: {working_dir}", "PS_DETAIL")
-    log_message(f"Arguments: {arguments}", "PS_DETAIL")
-    log_message(f"PowerShell command: {ps_command}", "PS_COMMAND")
+    log_message(f"Arguments: {redact_urls_for_log(arguments)}", "PS_DETAIL")
+    log_message(f"PowerShell command: {redact_urls_for_log(ps_command)}", "PS_COMMAND")
     
     try:
         # Execute the PowerShell command

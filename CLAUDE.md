@@ -1,130 +1,126 @@
-# CLAUDE.md
+# CLAUDE.md - Arcade Station
 
-This file is the Claude Code entry point for this repo.
+Arcade Station is a front-end for launching rhythm games and arcade software on a dedicated cabinet or a regular PC. It wraps the Pegasus frontend, launches games from TOML configuration, drives a secondary marquee display, and handles kiosk-mode concerns. Python 3.12, with PowerShell reserved for low-level Windows work.
 
-## What YOU (the main session) do
+`PLAN.MD` holds project direction and phasing. This file holds how the work gets done.
 
-You are NOT any of the agents listed below. You are the user's interface.
-Your only job is to:
+## Product Intent
 
-1. Receive the user's request
-2. Invoke the engineering-manager agent via the Agent tool
-3. Relay the engineering-manager's output — including its routing instructions — verbatim to the user
+The bar is **plug-and-play, not plug-and-tinker**. A user turns the cabinet on and it works - no desktop, no taskbar, no config file, no manual step they have to remember. When a change introduces something the user must do by hand, that is a cost to be justified rather than a neutral trade-off.
 
-Do NOT roleplay as the engineering-manager. Do NOT directly invoke
-product-manager, principal-engineer, software-developer, or any other
-agent. Always go through engineering-manager.
+This is the standard the installer and any post-install configuration flow are held to.
 
-If you catch yourself coordinating the pipeline, reading state files,
-or delegating to specialist agents directly — STOP. Invoke the EM instead.
+## Core Working Principles
 
-## Agent architecture
+Lean mode: a single agent owns the whole lifecycle, with no role hand-offs. Two pillars are non-negotiable.
 
-The engineering-manager is an **advisor and state manager**, not a delegator.
-It writes the specialist prompt to `.state/inbox/<agent-name>.md` and tells the
-user which VS Code task to run. The user launches each specialist via
-**Terminal → Run Task…** in VS Code, which spawns a fresh Claude Code session
-that reads the inbox file automatically. This keeps every agent's output directly
-visible to the user — no intermediary summaries, no copy-paste.
+1. **The two-reviewer gate.** Non-trivial work does not merge without passing both codified reviewers in `.claude/agents/` - the QA seat, then the adversarial seat. Both must return APPROVE.
+2. **Ruthless honesty.** Report failures verbatim, including the actual error text. Never downplay a regression. State plainly what was verified and what was not - "not launch-tested on the cabinet" is a complete and acceptable sentence.
 
-### Agents (`.claude/agents/`)
+## Reviewer Structure
 
-| Agent | What it does | How to run it |
-|-------|-------------|---------------|
-| `engineering-manager` | Tracks feature state, routes work to specialists, manages stage transitions | Invoked automatically by `/commands` |
-| `product-manager` | Gathers requirements + acceptance criteria (Discovery), validates delivered work (Acceptance) | VS Code task **"Run Product Manager"** |
-| `principal-engineer` | Reads requirements and codebase, produces technical design with approach, risks, alternatives | VS Code task **"Run Principal Engineer"** |
-| `software-developer` | Implements ONE task at a time — writes code, tests, runs quality checks | VS Code task **"Run Software Developer"** |
-| `build-specialist` | Runs build + test + lint + format checks, reports pass/fail (never fixes code) | VS Code task **"Run Build Specialist"** |
-| `quality-assurance` | Reviews code for correctness, security, performance, standards compliance (never fixes code) | VS Code task **"Run Quality Assurance"** |
+| Seat | Agent | Focus |
+|------|-------|-------|
+| QA | `quality-assurance` | Correctness, regressions, security, standards, comment accuracy |
+| Adversarial | `adversarial-reviewer` | Assumes the implementer *and* QA both missed something; breaks claims by measurement |
 
-### Commands (`.claude/commands/`)
+CRITICAL findings block the merge. WARNINGs block unless explicitly declared safe to ship and disclosed in the summary. Trivial changes - typo fixes, documentation wording - may skip the gate, but say so when you skip it rather than letting it pass silently.
 
-Each command moves the feature one stage forward. Run them in order.
+Agent definitions are read when the session starts, so one added or edited mid-session is not selectable until Claude Code is restarted. If a seat cannot be invoked by name, that is why. As a fallback, a general-purpose agent told to read the definition file and adopt it produces the same review.
 
-| Command | What it does | Then you do |
-|---------|-------------|-------------|
-| **`/kickoff`** | Initializes state, reads project context, summarizes starting point | Review summary → **`/discover`** |
-| **`/discover`** | Routes to PM to gather requirements and write exec plan | Run task **"Run Product Manager"** → **`/design`** |
-| **`/design`** | Routes to PE to produce technical design in exec plan | Run task **"Run Principal Engineer"** → **`/tasks`** |
-| **`/tasks`** | EM breaks design into small, testable tasks with definitions of done | Review tasks → **`/implement`** |
-| **`/implement`** | Routes ONE task to SDE for implementation | Run task **"Run Software Developer"** → repeat or **`/verify`** |
-| **`/verify`** | Routes to build specialist to run all quality gates | Run task **"Run Build Specialist"** → **`/accept`** |
-| **`/review`** | Routes to QA for code review (optional, recommended for non-trivial changes) | Run task **"Run Quality Assurance"** → fix or proceed |
-| **`/accept`** | Routes to PM to validate every acceptance criterion | Run task **"Run Product Manager"** → **`/done`** |
-| **`/done`** | Archives plan, commits, pushes, creates PR, offers release tagging | Merge PR → **`/kickoff`** for next feature |
-| **`/commit-only`** | Stages and commits (no push) | — |
-| **`/commit-and-push`** | Stages, commits, pushes | — |
+Run both seats against the full merge surface - `git diff origin/main...HEAD`, not just the most recent commit. **Diff against `origin/main`, not `main`.** A local `main` goes stale silently, and a stale one is wrong in **both** directions: it hides files that are in the real surface, and it shows files that are not - deletions that already merged upstream reappear as if this branch made them. This file previously said `main...HEAD`, and while the local branch sat behind, following it literally hid the entire harness reconciliation from both seats, which was the highest-risk part of the change.
 
-### VS Code tasks (`.vscode/tasks.json`)
+Do not try to reason about the size of that gap from the two file counts. Both earlier attempts to state it as a number in this paragraph were wrong, because subtracting the totals gives a net figure - hidden files minus spuriously shown ones - not the number hidden. Fetch, then diff against the remote, and the question does not arise.
 
-Each specialist agent has a corresponding VS Code task that spawns a fresh
-Claude Code session reading from `.state/inbox/<agent-name>.md`. Run via
-**Terminal → Run Task…** in VS Code.
+The first run of this gate found three CRITICALs in work that had already been described as verified, two of which were destroying config on reconfigure.
 
-### Shared state
+## Testing and Verification
 
-`.state/feature-state.json` tracks the current feature lifecycle. The
-engineering-manager reads and updates it at every stage transition.
+Run the suite with `python -m pytest`. Tooling is in `requirements-dev.txt`. Enable the hooks once per clone with `git config core.hooksPath hooks`.
 
-`.state/inbox/` holds ephemeral prompt files written by the EM for specialist
-agents. These are `.gitignore`d — only `.gitkeep` is tracked.
+**There is no CI.** Nothing runs these tests except you and the pre-push hook.
 
-### Workflow
+The suite is a **characterization baseline** and it is still thin. Five files: config loading, the installer's TOML writer, what a reconfigure preserves and what it discards, the install-location page's cleanup path, and the launch-argument contract. Large parts of the codebase have no coverage at all - notably `start_frontend_apps.py`, including the boot-to-game path, which has none. Do not read a green run as "this change is safe." Read it as "the behavior these tests pin did not move."
 
-```text
-/kickoff → /discover → /design → /tasks → /implement → /verify → /accept → /done
-                                              ↑            |
-                                              └── (next) ──┘
+When adding to it:
 
-Optional at any point: /review (code review)
+- Assert observed behavior, not intended behavior. The point is to pin the current contract before it moves. Mark such tests `@pytest.mark.characterization`.
+- If you find a bug while writing a baseline test, **report it and encode the buggy behavior as-is**. Fixing it in the same change destroys the baseline's value as a before/after reference.
+- **Never assert config values.** Every file under `config/` carries skip-worktree, so a fresh clone sees near-empty defaults where a real install sees personal content. Assert structure, or the suite passes for you and fails for everyone else.
+- Prefer tests that need no cabinet hardware.
+
+Beyond the suite:
+
+- **Python changes:** `python -m py_compile <file>` at minimum; the pre-commit hook does this for staged files.
+- **Any TOML edit:** parse it back with `tomllib`. A malformed `installed_games.toml` takes down *every* game, not one.
+- **Launch-path changes:** prove argument and quoting behavior with a dry run that echoes rather than launches, when a real launch is not possible.
+- **Cabinet behavior:** only claimable if actually run. Otherwise say it was not.
+
+### Linting
+
+`python -m pylint src/arcade_station install/installer`, configured in `.pylintrc`. **Run it from the repository root** - the `init-hook` resolves paths relative to the working directory, and running it from elsewhere reports spurious import errors in `tests/`.
+
+The tree reports **2,128 messages** and scores **5.69/10**. It is dominated by `trailing-whitespace` (1,422) and `line-too-long` (64). Nothing is globally disabled, because silencing the backlog forgives it rather than paying it down. The pre-commit hook gates on **errors only**, and only on staged files, so the debt does not block unrelated work.
+
+Re-measure before quoting these numbers. They were wrong by a factor of three in an earlier revision of this file, and a reader calibrating "did my change make this worse" needs a baseline that is actually true.
+
+Four errors are outstanding, all predating this file:
+
+| Location | Error | Note |
+|---|---|---|
+| `manage_icloud.py:237` | `possibly-used-before-assignment` | `ctypes`, conditionally imported |
+| `monitor_itgmania.py:75,99` | `possibly-used-before-assignment` | `win32gui`, `win32con` |
+| `app.py:260` | `import-error` | imports `tomli`, which is absent from `requirements.txt` and not installed |
+
+The `app.py` one **blocks commits to that file** through the pre-commit hook. It is a real missing dependency rather than a false positive, so it is left visible instead of suppressed. Use `--no-verify` if you have to touch that file before it is fixed, and say so.
+
+## Repository Constraints
+
+These are non-obvious and have caused real problems. Read before touching configuration.
+
+### Personalized files carry skip-worktree
+
+Twelve tracked files are flagged `skip-worktree` so that personal values are never committed:
+
+```
+config/*.toml                                    (all 9)
+src/pegasus-fe/config/metafiles/metadata.pegasus.txt
+src/pegasus-fe/config/settings.txt
+src/pegasus-fe/config/stats.db
 ```
 
-Every stage transition requires explicit user approval. No auto-progression.
-The user runs each command manually. The engineering-manager runs ONE stage
-per invocation and stops.
+Consequences that matter:
 
-## Reference docs
+- **Edits to these files never appear in `git status` or `git diff`.** That is intended. Do not try to "fix" it.
+- **An empty `git diff` does not prove you restored the tree.** If you mutate a config file while testing, restore it explicitly and verify by reading the file back. This is the single easiest way to silently destroy someone's game list.
+- To change what a *fresh clone* receives, change the installer, not the file. See below.
+- Never run `git update-index --no-skip-worktree` on these without asking first.
 
-Read these before touching any code:
+### The installer owns config schema
 
-1. `docs/index.md` — knowledge map
-2. `docs/ARCHITECTURE.md` — system design, repo layout
-3. `docs/RELIABILITY.md` — performance budgets (non-negotiable)
-4. `docs/CONTRIBUTING.md` — design principles and coding standards
+`install/installer/config/installation.py` regenerates configuration on every run. **Any setting it does not know about is silently dropped when a user reconfigures.** When adding a config key, add it to the installer too, or the feature quietly dies at the next install.
 
-For active work: `docs/exec-plans/active/`
-For tech debt: `docs/exec-plans/tech-debt-tracker.md`
+### Config format
 
-## Non-negotiables
+TOML, parsed with `tomllib`. Use literal strings - single quotes - for values that contain double quotes. Validate after writing.
 
-- Performance budgets in `docs/RELIABILITY.md` — flag regressions before proceeding
-- Python 3.12.9 required; no other Python version supported
-- Runtime dependencies limited to: PyQt5, keyboard, psutil, tomli_w, Pillow
-- No hardcoded paths or credentials — all paths come from TOML config files in `config/`
-- Platform-specific code must live in `src/arcade_station/core/{windows,linux,macos}/`
+## Project Specifics
 
-## Coding standards
+- **Language:** Python 3.12.9. PowerShell only for low-level Windows work (`core_functions.psm1`, `*.ps1`).
+- **Dependencies:** `venv` plus `requirements.txt`. `pyproject.toml` is a deliberate non-choice - do not introduce it.
+- **Frontend:** Pegasus (`src/pegasus-fe`), Micro theme written in QML.
+- **Entry points:** `launch_arcade_station.bat`, `install_arcade_station.bat`, `kill_arcade_station.bat`.
+- **Logging:** `log_message(message, prefix)` from `core_functions`. Match the existing prefix vocabulary - `GAME_LAUNCH`, `PS`, `STARTUP`.
+- **Docstrings:** Google style, per `PLAN.MD`.
+- **Platforms:** Windows is the working target. Linux and macOS are Phase 2 intent - do not claim cross-platform support that has not been run.
+- **Reuse before inventing.** When you hit a problem this codebase already solves, use the existing solution rather than writing a second one alongside it. `core_functions.py` is the first place to look. Parallel implementations of the same idea are how this project accumulates drift, and a new helper that duplicates an old one is a defect even when it works.
 
-See `docs/CONTRIBUTING.md` for design principles, coding standards, and the three-pillar code quality framework.
+## Git Norms
 
-## Quality gates
+- Branch, gate, then merge. Do not commit to `main` directly.
+- **Commit messages are plain sentence case**, not Conventional Commits. Match the existing log: "Logic for a default game launching on system boot".
+- Stage explicitly by path. Never `git add -A` or `git add .` - untracked personal assets live in this tree.
+- Confirm a commit landed by inspecting `git log`, not by assuming.
+- Push only when asked.
 
-- `pre-commit`: `black --check src/ install/` && `flake8 src/ install/` && `npx markdownlint-cli2 '**/*.md'`
-- `pre-push`: `python -m pytest`
-- Never use `--no-verify`. Fix the root cause.
-
-## Commands
-
-```text
-black --check src/ install/
-flake8 src/ install/
-mypy src/ install/
-python -m pytest
-npx markdownlint-cli2 '**/*.md'
-```
-
-## Active work
-
-Active exec plans: (none)
-Completed plans: (none yet)
+Hooks live in `hooks/` and are enabled per clone with `git config core.hooksPath hooks`. `pre-commit` blocks staged personalized config, Python that will not compile, malformed TOML, and pylint errors. `pre-push` runs the test suite. Both can be bypassed with `--no-verify`, which is occasionally correct and should be said out loud when used.

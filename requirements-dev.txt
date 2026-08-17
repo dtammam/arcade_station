@@ -1,0 +1,13 @@
+# Development and test dependencies for arcade_station.
+#
+# Kept separate from requirements.txt so an end-user install does not pull in
+# test tooling. Install both when working on the project:
+#
+#     pip install -r requirements.txt -r requirements-dev.txt
+#
+# Then enable the git hooks once per clone:
+#
+#     git config core.hooksPath hooks
+
+pytest>=9.1.0   # Test runner; configured in pytest.ini
+pylint>=4.0.0   # Linting; configured in .pylintrc

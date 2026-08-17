@@ -30,6 +30,7 @@ from arcade_station.core.common.core_functions import (
     load_toml_config,
     kill_process_by_identifier,
     log_message,
+    redact_urls_for_log,
     start_process_with_powershell,
     run_powershell_script
 )
@@ -213,7 +214,11 @@ def launch_game(game_name):
             game_path = game_config.get('path', '') if isinstance(game_config, dict) else game_config
             game_args = game_config.get('args', '') if isinstance(game_config, dict) else ''
             if game_path and os.path.exists(game_path):
-                log_message(f"Launching binary game: {game_path} {game_args}".strip(), "GAME_LAUNCH")
+                # Redacted only for the log lines below; game_args itself is
+                # handed to the launcher unchanged. A URL query string here is
+                # where a token would sit, and the log outlives the launch.
+                logged_args = redact_urls_for_log(game_args)
+                log_message(f"Launching binary game: {game_path} {logged_args}".strip(), "GAME_LAUNCH")
                 try:
                     # Change the working directory to the directory of the executable
                     game_dir = os.path.dirname(game_path)
@@ -221,7 +226,7 @@ def launch_game(game_name):
                     # Check if we're on Windows and use PowerShell if so
                     if platform.system() == "Windows":
                         # Log detailed info about game launch
-                        log_message(f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}, Args: {game_args}", "GAME_LAUNCH")
+                        log_message(f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}, Args: {logged_args}", "GAME_LAUNCH")
 
                         # Use PowerShell to start the process
                         success = start_process_with_powershell(

@@ -16,13 +16,13 @@ Pillow>=9.0.0  # For image processing in the installer
 # Optional dependencies
 # Uncomment as needed for your specific setup
 
-# For testing
-# pytest>=7.0.0
+# For testing and development
+# See requirements-dev.txt - pytest and pylint live there so that an end-user
+# install does not pull in test tooling.
 
-# For development
+# Not currently used
 # black>=23.0.0  # Code formatting
-# flake8>=6.0.0  # Linting
-# mypy>=1.0.0  # Type checking 
+# mypy>=1.0.0  # Type checking
 
 # For building executables
 # pyinstaller>=5.6.2  # For creating standalone executables 

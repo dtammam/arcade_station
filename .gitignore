@@ -23,6 +23,3 @@ Thumbs.db
 
 # Claude Code worktrees
 .claude/worktrees/
-
-# Agent routing inbox files (ephemeral, not committed)
-.state/inbox/*.md

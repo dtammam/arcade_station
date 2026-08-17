@@ -1,0 +1,7 @@
+# Git hooks are executed by sh. On Windows a CRLF line ending breaks the
+# shebang line, so the hook fails with a "bad interpreter" error rather than
+# running. Pin them to LF regardless of core.autocrlf.
+#
+# Deliberately scoped to hooks/ only: a repository-wide "* text=auto" would
+# renormalize every tracked file and produce an enormous unrelated diff.
+hooks/* text eol=lf

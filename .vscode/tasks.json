@@ -4,12 +4,38 @@
     {
       "label": "Activate .venv",
       "type": "shell",
-      "command": "cd C:\\Repositories\\arcade_station && .venv\\Scripts\\activate",
+      "command": "cd '${workspaceFolder}'; .venv\\Scripts\\activate",
       "presentation": {
         "reveal": "always",
         "panel": "shared"
       },
       "detail": "Switches to the project directory and activates the virtual environment"
+    },
+    {
+      "label": "Run Tests",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe -m pytest",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Runs the pytest suite (configured in pytest.ini)",
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe -m pylint src/arcade_station install/installer",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Runs pylint across the source tree (configured in .pylintrc)",
+      "problemMatcher": []
     },
     {
       "label": "Kill Python Processes",
@@ -21,41 +47,6 @@
       },
       "detail": "Force kills all running Python processes",
       "problemMatcher": []
-    },
-    {
-      "label": "Run Product Manager",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent product-manager @.state/inbox/product-manager.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Principal Engineer",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent principal-engineer @.state/inbox/principal-engineer.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Software Developer",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent software-developer @.state/inbox/software-developer.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Build Specialist",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent build-specialist @.state/inbox/build-specialist.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
-    },
-    {
-      "label": "Run Quality Assurance",
-      "type": "shell",
-      "command": "claude --dangerously-skip-permissions --agent quality-assurance @.state/inbox/quality-assurance.md",
-      "group": "none",
-      "presentation": { "reveal": "always", "panel": "new" }
     }
   ]
 }
