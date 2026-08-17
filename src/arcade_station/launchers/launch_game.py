@@ -12,6 +12,7 @@ frontend during game launches.
 
 import sys
 import os
+import shlex
 import subprocess
 import logging
 import time
@@ -210,8 +211,9 @@ def launch_game(game_name):
         else:
             # Binary game logic
             game_path = game_config.get('path', '') if isinstance(game_config, dict) else game_config
+            game_args = game_config.get('args', '') if isinstance(game_config, dict) else ''
             if game_path and os.path.exists(game_path):
-                log_message(f"Launching binary game: {game_path}", "GAME_LAUNCH")
+                log_message(f"Launching binary game: {game_path} {game_args}".strip(), "GAME_LAUNCH")
                 try:
                     # Change the working directory to the directory of the executable
                     game_dir = os.path.dirname(game_path)
@@ -219,12 +221,13 @@ def launch_game(game_name):
                     # Check if we're on Windows and use PowerShell if so
                     if platform.system() == "Windows":
                         # Log detailed info about game launch
-                        log_message(f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}", "GAME_LAUNCH")
-                        
+                        log_message(f"Launching via PowerShell - Path: {game_path}, Dir: {game_dir}, Args: {game_args}", "GAME_LAUNCH")
+
                         # Use PowerShell to start the process
                         success = start_process_with_powershell(
                             file_path=game_path,
-                            working_dir=game_dir
+                            working_dir=game_dir,
+                            arguments=game_args
                         )
                         
                         if not success:
@@ -236,7 +239,8 @@ def launch_game(game_name):
                         # For non-Windows platforms, use the original approach
                         log_message(f"Launching via subprocess on non-Windows platform", "GAME_LAUNCH")
                         os.chdir(game_dir)
-                        process = subprocess.Popen(game_path)
+                        command = [game_path] + (shlex.split(game_args) if game_args else [])
+                        process = subprocess.Popen(command)
                         # Set priority
                         set_process_priority(process.pid, "high")
                         log_message(f"Successfully launched game via subprocess: {game_path}", "GAME_LAUNCH")
