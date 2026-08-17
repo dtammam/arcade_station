@@ -58,7 +58,7 @@ Beyond the suite:
 
 `python -m pylint src/arcade_station install/installer`, configured in `.pylintrc`. **Run it from the repository root** - the `init-hook` resolves paths relative to the working directory, and running it from elsewhere reports spurious import errors in `tests/`.
 
-The tree reports **2,129 messages** and scores **5.68/10**. It is dominated by `trailing-whitespace` (1,423) and `line-too-long` (64). Nothing is globally disabled, because silencing the backlog forgives it rather than paying it down. The pre-commit hook gates on **errors only**, and only on staged files, so the debt does not block unrelated work.
+The tree reports **2,128 messages** and scores **5.69/10**. It is dominated by `trailing-whitespace` (1,422) and `line-too-long` (64). Nothing is globally disabled, because silencing the backlog forgives it rather than paying it down. The pre-commit hook gates on **errors only**, and only on staged files, so the debt does not block unrelated work.
 
 Re-measure before quoting these numbers. They were wrong by a factor of three in an earlier revision of this file, and a reader calibrating "did my change make this worse" needs a baseline that is actually true.
 
