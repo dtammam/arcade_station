@@ -1,6 +1,7 @@
 # Architecture
 
-The principal-engineer agent owns this file and updates it during Design.
+How the repository is laid out and how its pieces fit together. Maintained by
+hand - when the layout moves, move this with it.
 
 ## High-level design
 
@@ -40,9 +41,9 @@ arcade_station/
 │   └── ...
 ├── assets/                   # Game icons, logos, images
 ├── examples/                 # Setup walkthroughs (DDR, laptop)
-├── docs/                     # Project documentation and exec plans
-├── .claude/                  # Agent definitions, commands, hooks
-├── .state/                   # Feature lifecycle state
+├── tests/                    # pytest characterization baseline
+├── docs/                     # Architecture and reliability notes
+├── .claude/agents/           # The two reviewer seats (QA, adversarial)
 └── hooks/                    # Git hooks (pre-commit, pre-push)
 ```
 
@@ -65,10 +66,15 @@ arcade_station/
 
 ## CI/CD
 
-No automated CI/CD pipeline yet. Quality gates are enforced locally via git hooks:
+**There is no CI.** Nothing runs these checks except a developer and the git
+hooks, which are enabled per clone with `git config core.hooksPath hooks`:
 
-- `pre-commit`: black, flake8, markdownlint
-- `pre-push`: pytest
+- `pre-commit`: blocks staged personalized config, Python that will not
+  compile, malformed TOML, and pylint errors on staged files
+- `pre-push`: runs the pytest suite
+
+Linting is `pylint`, configured in `.pylintrc`. `black`, `flake8` and `mypy`
+are not used here - see the "Not currently used" block in `requirements.txt`.
 
 ## Key protocols / APIs
 
