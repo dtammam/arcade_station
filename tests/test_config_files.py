@@ -8,6 +8,13 @@ sees personalized content. Anything asserted here has to hold for both.
 The motivating failure: a single malformed entry in installed_games.toml makes
 tomllib reject the whole file, so load_game_config raises and *every* game stops
 launching, not just the broken one.
+
+Because the committed installed_games.toml ships an empty games table, the tests
+that walk game entries have nothing to walk on a fresh clone. They skip in that
+case rather than looping zero times and reporting a pass, so the gap is visible
+instead of being mistaken for coverage. Note that none of them guard the 'args'
+feature itself - that is test_launch_arguments.py, which drives launch_game
+directly.
 """
 import tomllib
 
@@ -66,7 +73,10 @@ def test_every_game_entry_is_rom_or_path_based():
     A dict entry with neither key reaches the binary branch with an empty path
     and is logged as invalid rather than launched.
     """
-    for name, entry in load_game_config().get("games", {}).items():
+    games = load_game_config().get("games", {})
+    if not games:
+        pytest.skip("no games configured in this checkout - nothing to characterize")
+    for name, entry in games.items():
         if not isinstance(entry, dict):
             continue
         assert "rom" in entry or "path" in entry, f"{name} declares neither 'rom' nor 'path'"
@@ -75,6 +85,12 @@ def test_every_game_entry_is_rom_or_path_based():
 @pytest.mark.characterization
 def test_launch_arguments_are_strings_when_present():
     """'args' is handed to PowerShell and shlex as a single string, never a list."""
-    for name, entry in load_game_config().get("games", {}).items():
-        if isinstance(entry, dict) and "args" in entry:
-            assert isinstance(entry["args"], str), f"{name} declares non-string 'args'"
+    with_args = {
+        name: entry
+        for name, entry in load_game_config().get("games", {}).items()
+        if isinstance(entry, dict) and "args" in entry
+    }
+    if not with_args:
+        pytest.skip("no game declares 'args' in this checkout - nothing to characterize")
+    for name, entry in with_args.items():
+        assert isinstance(entry["args"], str), f"{name} declares non-string 'args'"
