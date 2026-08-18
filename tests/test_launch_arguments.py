@@ -103,6 +103,13 @@ def fixture_captured_ps_command(monkeypatch):
 
     monkeypatch.setattr(core_functions.subprocess, "Popen", fake_popen)
     monkeypatch.setattr(core_functions, "log_message", lambda *a, **k: None)
+    # CREATE_NO_WINDOW exists only on Windows, and the real function reads it
+    # while building the Popen call - before the stub above can fire. Supplying
+    # it keeps these tests live off-Windows; the stubbed Popen never consumes
+    # the value, so Windows behavior is untouched.
+    monkeypatch.setattr(
+        core_functions.subprocess, "CREATE_NO_WINDOW", 0x08000000, raising=False
+    )
 
     def run(arguments=None):
         captured.clear()
