@@ -3,9 +3,9 @@ plan: land-harness-v2
 harness: v2 · lean
 branch: chore/land-harness-v2
 anchor: outcome
-status: Building
-next: Re-gate at the new sha (argv guard folded in); slim seat per .harness/scrutiny.toml.
-gate: pending
+status: Shipped 2026-09-21
+next: Shipped to main. Swing B (test foundation) cuts from the post-merge main.
+gate: APPROVED
 ---
 
 # Land the v2 harness
