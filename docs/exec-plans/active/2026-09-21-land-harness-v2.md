@@ -81,3 +81,5 @@ this branch. Swing B (the test-foundation branch) now cuts from the post-merge
   does not read a narrative sentence as a live approval marker — an r2 finding.)
 
 Gate: CHANGES r2 @06645f6 — adversary (see findings)
+
+Gate: APPROVED r3 @73ca402 — adversary
