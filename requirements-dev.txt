@@ -9,5 +9,6 @@
 #
 #     git config core.hooksPath hooks
 
-pytest>=9.1.0   # Test runner; configured in pytest.ini
-pylint>=4.0.0   # Linting; configured in .pylintrc
+pytest>=9.1.0       # Test runner; configured in pytest.ini
+pytest-cov>=7.1.0   # Coverage measurement (pulls in coverage); invoked from CI, not pytest.ini
+pylint>=4.0.0       # Linting; configured in .pylintrc

@@ -12,6 +12,12 @@ __pycache__/
 # Test cache
 .pytest_cache/
 
+# Coverage — written fresh on every run, never committed
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
 # Build files
 *.egg-info/
 dist/
