@@ -1,0 +1,71 @@
+# scrutiny.toml — the review gate sizes itself from this table, not from the
+# builder's judgment. Evaluated against `git diff --name-only` (+ change class).
+# The builder may ESCALATE a row's seats; it may never de-escalate.
+#
+# seats: any of ["adversary", "qa", "security-brief"].
+#   - adversary is the floor: every rule includes it, implicitly.
+#   - security-brief is applied as a section by adversary+qa on every review;
+#     naming it here spawns the DEDICATED security pass in addition.
+# gate: "slim" = adversary only | "full" = all applicable seats.
+#
+# Rows are matched top to bottom; the FIRST matching non-floor rule sets the
+# baseline, then every `force = true` rule that also matches is unioned in.
+# A project may add rows in the [[project]] section with a `sunset` date.
+
+[floor]
+# Always, for every change. Never removed.
+seats = ["adversary"]
+
+# ---- Non-overridable rules (force: cannot be dialed down by anyone) ----
+
+[[rule]]
+name = "data-loss"
+match = ["**/migrations/**", "**/*migration*", "**/schema*", "**/*.sql"]
+change_class = ["deletes-data", "alters-schema"]
+gate = "full"
+seats = ["adversary", "qa", "security-brief"]
+force = true
+
+[[rule]]
+name = "auth-and-secrets"
+match = ["**/auth/**", "**/*secret*", "**/*credential*", "**/*token*", "**/.env*"]
+gate = "full"
+seats = ["adversary", "qa", "security-brief"]
+force = true
+
+[[rule]]
+name = "network-boundary-and-deps"
+match = ["**/package*.json", "**/Cargo.toml", "**/requirements*.txt", "**/go.mod", "**/*fetch*", "**/*client*"]
+gate = "full"
+seats = ["adversary", "qa", "security-brief"]
+force = true
+
+# ---- Baseline rules (set the default seat set by surface) ----
+
+[[rule]]
+name = "core-logic"
+match = ["src/**", "lib/**", "app/**"]
+gate = "full"
+seats = ["adversary", "qa"]
+
+[[rule]]
+name = "docs-and-content"
+match = ["docs/**", "**/*.md", "content/**"]
+gate = "slim"
+seats = ["adversary"]              # brief: claims-vs-tree, no tests to mutate
+
+[[rule]]
+name = "harness-and-config"
+match = [".claude/**", ".harness/**", "*.toml", "*.json", "hooks/**"]
+gate = "slim"
+seats = ["adversary"]
+
+# ---- Project rows: add below. Each MUST carry a sunset condition so a
+#      temporary dial-down doesn't become permanent lore. Example:
+#
+# [[project]]
+# name = "phase-0-iteration"
+# match = ["src/ui/**"]
+# gate = "slim"
+# seats = ["adversary"]
+# sunset = "when the game is live with real users"   # required

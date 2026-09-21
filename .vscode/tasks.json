@@ -47,6 +47,19 @@
       },
       "detail": "Force kills all running Python processes",
       "problemMatcher": []
+    },
+    {
+      "label": "Claude session",
+      "type": "shell",
+      "command": "$HOME/.claude/bin/claude-here.sh",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "showReuseMessage": false
+      },
+      "runOptions": { "runOn": "folderOpen" },
+      "problemMatcher": []
     }
   ]
 }
