@@ -73,7 +73,11 @@ this branch. Swing B (the test-foundation branch) now cuts from the post-merge
   blocked the push from this Linux box (2 argv failures without the stub), and
   `--no-verify` is prohibited. Surfaced to the user; decision = **fold guard into
   Swing A**. Cherry-picked as `ba6519e` (Dean's authorship preserved), suite now
-  46 passed / 3 skipped. This changed the reviewed surface, so the earlier
-  `APPROVED @81adf51` was voided and the piece re-gated at the new sha; the two
-  premature bookkeeping commits (verdict + close) were reset off (unpushed) so
-  history carries a single valid approval bound to the final sha.
+  46 passed / 3 skipped. This changed the reviewed surface, so the earlier r1
+  verdict (bound to sha 81adf51) was voided and the piece re-gated at the new sha;
+  the two premature bookkeeping commits (verdict + close) were reset off
+  (unpushed) so history carries a single valid sign-off bound to the final sha.
+  (Prose here deliberately avoids the `<VERB> @<sha>` shape so `check-markers.sh`
+  does not read a narrative sentence as a live approval marker — an r2 finding.)
+
+Gate: CHANGES r2 @06645f6 — adversary (see findings)
