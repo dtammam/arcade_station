@@ -3,9 +3,10 @@ plan: test-foundation
 harness: v2 · lean
 branch: feature/test-foundation
 anchor: spec
-status: Building
-next: Build complete and green locally (65 passed / 3 skipped; start_frontend_apps.py 0%→88%). Commit by name, push to trigger CI, run the full gate (adversary + qa + security-brief), then close via /release.
-gate: pending
+status: Shipped 2026-09-21
+next: Shipped to main. Foundation landed (CI + coverage baseline + boot-path characterization); the coverage ratchet and module-by-module iteration are future roadmap work, gated behind this.
+design: Approved 2026-09-21 @c281d44
+gate: APPROVED
 ---
 
 # Test foundation (Swing B)
@@ -210,4 +211,21 @@ advisories. All findings were folded into the r2 fix:
   security-brief's LOW in one step.
 - Plan's uncovered-line enumeration corrected to the exact line numbers.
 
+**Round 2 (@c281d44).** All three findings folded in and re-verified by the same
+seat instances against the fix commit: the adversary re-ran the surviving mutant
+(and a bonus `sleep(5)→sleep(3)` mutant) and confirmed both now fail; qa
+confirmed the sleep pin is a real characterization assertion (not a tautology)
+and its lint-step WARNING resolved; security-brief confirmed its LOW closed by the
+`--` guard. Suite green at 65 passed / 3 skipped.
+
+**Acceptance #1 verified (not asserted).** GitHub Actions run 35557861933 on
+`c281d44` is green: Ubuntu / Python 3.12.9, Tk runtime installed, the lint step
+scoped to the one changed `.py` and passed, `65 passed, 3 skipped`,
+`start_frontend_apps.py` at 88%, TOTAL 27%, `coverage-xml` artifact uploaded. Two
+non-blocking runner annotations (Node-20 action-runtime deprecation; the
+`ubuntu-latest`→Ubuntu-26 migration notice) — advisory, tracked with
+security-brief's action-pinning INFO.
+
 Gate: CHANGES r1 @c874b69 — adversary (see round 1 above)
+
+Gate: APPROVED r2 @c281d44 — adversary, qa, security-brief
