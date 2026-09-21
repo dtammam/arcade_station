@@ -52,11 +52,16 @@ jobs:
         # run from the repository root (it does).
         run: |
           git fetch origin main
-          changed=$(git diff --name-only origin/main...HEAD -- '*.py' || true)
+          # --diff-filter=ACMR mirrors hooks/pre-commit (ACM) and adds renames,
+          # while excluding deletions/typechanges: a PR that DELETES a .py must
+          # not feed a nonexistent path to pylint and fail the job on a valid
+          # deletion. The trailing `--` ends pylint's option parsing so a file
+          # whose name begins with a dash can never be read as a flag.
+          changed=$(git diff --name-only --diff-filter=ACMR origin/main...HEAD -- '*.py' || true)
           if [ -n "$changed" ]; then
             echo "Linting changed Python files:"
             echo "$changed"
-            echo "$changed" | tr '\n' '\0' | xargs -0 python -m pylint --errors-only
+            echo "$changed" | tr '\n' '\0' | xargs -0 python -m pylint --errors-only --
           else
             echo "No changed Python files vs origin/main; nothing to lint."
           fi

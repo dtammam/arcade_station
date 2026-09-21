@@ -205,21 +205,36 @@ def test_conditional_swallows_config_errors(monkeypatch):
 # ---------------------------------------------------------------------------
 @pytest.fixture(name="main_env")
 def fixture_main_env(monkeypatch):
-    """Stub every seam main() touches; capture the launch sequence and game launch."""
-    calls = {"launched": [], "game": None, "conditional": 0, "image": 0}
+    """Stub every seam main() touches; capture the launch sequence, sleeps, and game launch.
+
+    `events` records the order of the observable calls (launches, sleeps, game
+    launch) so a test can pin not just *that* something happened but *when* —
+    e.g. that the fixed Pegasus warm-up sleep precedes the default-game launch.
+    """
+    calls = {"launched": [], "game": None, "conditional": 0, "image": 0, "events": []}
+
+    def fake_launch_script(script, identifier=None):  # pylint: disable=unused-argument
+        calls["launched"].append(identifier)
+        calls["events"].append(("launch", identifier))
+        return _Proc()
+
+    def fake_sleep(seconds):
+        calls["events"].append(("sleep", seconds))
+
+    def fake_launch_game(name):
+        calls["game"] = name
+        calls["events"].append(("game", name))
 
     monkeypatch.setattr(sfa.sys, "argv", ["start_frontend_apps.py"])
     monkeypatch.setattr(sfa, "setup_virtual_environment", lambda: True)
     monkeypatch.setattr(sfa, "prepare_system", lambda: True)
     monkeypatch.setattr(sfa, "display_image_from_config",
                         lambda **k: calls.__setitem__("image", calls["image"] + 1))
-    monkeypatch.setattr(sfa, "launch_script",
-                        lambda script, identifier=None: (calls["launched"].append(identifier), _Proc())[1])
+    monkeypatch.setattr(sfa, "launch_script", fake_launch_script)
     monkeypatch.setattr(sfa, "start_conditional_scripts",
                         lambda: calls.__setitem__("conditional", calls["conditional"] + 1))
-    monkeypatch.setattr(sfa.time, "sleep", lambda _s: None)
-    monkeypatch.setattr(launch_game_module, "launch_game",
-                        lambda name: calls.__setitem__("game", name))
+    monkeypatch.setattr(sfa.time, "sleep", fake_sleep)
+    monkeypatch.setattr(launch_game_module, "launch_game", fake_launch_game)
 
     def set_default_config(cfg):
         monkeypatch.setattr(sfa, "load_toml_config", lambda name: cfg)
@@ -241,12 +256,23 @@ def test_main_startup_sequence_without_default_game(main_env):
 
 
 def test_main_launches_default_game_when_configured(main_env):
-    """default_game_start + a named game launches that game after the boot sequence."""
+    """default_game_start + a named game launches that game, and only after the
+    fixed 5-second Pegasus warm-up sleep.
+
+    The warm-up is a quirk (a fixed delay, not a readiness check —
+    start_frontend_apps.py:267-273). It is pinned here deliberately: a refactor
+    that drops or changes the delay must fail this test rather than ship silently.
+    """
     main_env["set_default_config"]({
         "default_game": {"default_game_start": True, "default_game": "pump"}
     })
     sfa.main()
     assert main_env["game"] == "pump"
+
+    events = main_env["events"]
+    assert ("sleep", 5) in events, "the fixed 5s Pegasus warm-up sleep was not called"
+    assert events.index(("sleep", 5)) < events.index(("game", "pump")), \
+        "the warm-up sleep must precede the default-game launch"
 
 
 def test_main_skips_launch_when_default_game_unset(main_env):

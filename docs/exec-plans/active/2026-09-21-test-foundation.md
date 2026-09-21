@@ -117,8 +117,9 @@ after the D6 tests, cited from the `pytest --cov` runs:
 - **Pre-existing baseline:** `src/arcade_station` at **20%** (909 statements
   measured; the boot path and two other scripts at 0%).
 - **`start_frontend_apps.py`:** **0% → 88%** (139 stmts; the 15 uncovered lines
-  are edge branches — the Python-version-mismatch warning, the Windows
-  activate-missing branch, three exception-log lines, and `__main__`).
+  are edge branches — the Python-version-mismatch warning (32-34), the Windows
+  activate-missing branch (84-85), several exception/failure log lines (170,
+  194-196, 234, 239, 281-283), and `__main__` (298)).
 - **Whole-package figure after:** **27%**. The denominator grows to 1043 stmts
   because covering the boot path pulls `launch_binary.py` (134 stmts) into the
   imported-and-measured set for the first time — so the headline 20→27 understates
@@ -183,3 +184,30 @@ Each step names the observable Demo available once it is done.
   `tests/test_start_frontend_apps.py`.
   *Demo:* `pytest --cov` shows `start_frontend_apps.py` at 88% and the suite at
   65 passed / 3 skipped; `pylint --errors-only` on the file is clean.
+
+## Gate
+
+Full gate (adversary + qa + security-brief), sized by `scrutiny.toml`: the
+`requirements-dev.txt` edit trips the non-overridable `network-boundary-and-deps`
+rule. Seats ran fresh in independent context; the Architect transcribed verdicts
+to avoid a concurrent write-race on this file.
+
+**Round 1 (@c874b69).** The adversary returned CHANGES on one measurably-false
+claim: mutation testing showed that no-op'ing the `time.sleep(5)` Pegasus warm-up
+(`start_frontend_apps.py:273`) left the suite fully green, yet both the test
+docstring and this plan's Design claimed that exact quirk was pinned "so a
+refactor fails here." 9 of 10 other mutants were killed — the pin was otherwise
+strong. qa and security-brief raised no blocking findings: qa flagged one
+disclosed-safe WARNING (the CI lint step didn't exclude deletions, unlike the
+hook it mirrors) plus a loose doc enumeration; security-brief flagged one LOW
+(leading-dash filenames could be read as pylint flags in the lint step) plus INFO
+advisories. All findings were folded into the r2 fix:
+
+- Test now records call order and asserts the 5s warm-up sleep occurs *before*
+  the default-game launch — the surviving mutant (MUT4) now fails.
+- CI lint step: `--diff-filter=ACMR` (excludes deletions; matches the hook) and a
+  trailing `--` (ends pylint option parsing) — closes qa's WARNING and
+  security-brief's LOW in one step.
+- Plan's uncovered-line enumeration corrected to the exact line numbers.
+
+Gate: CHANGES r1 @c874b69 — adversary (see round 1 above)
