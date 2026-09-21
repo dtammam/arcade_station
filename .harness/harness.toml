@@ -1,0 +1,17 @@
+# .harness/harness.toml — install stamp. Managed by the installer; safe to read.
+# The one human-facing metadata file. History comes from `git log` on this file;
+# the footprint is in the sibling manifest.lock.
+name      = "handoff-harness"
+flavor    = "lean"          # lean | standard
+version   = "v2.3.0"
+commit    = "e225775"
+installed = "2026-09-21"
+source    = "github.com/dtammam/handoff-harness"
+targets   = ["claude"]         # tool integrations to keep in sync, e.g. "claude", "cursor"
+
+[defaults]
+anchor      = "outcome"        # outcome | spec | tdd
+involvement = "interactive"   # interactive | auto
+
+[cleanup]
+delete_merged_branch = true       # /release deletes the merged branch (local + remote) on close

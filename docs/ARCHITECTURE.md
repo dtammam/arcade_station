@@ -1,87 +1,125 @@
+<!-- harness:region:start id=doc -->
 # Architecture
 
-How the repository is laid out and how its pieces fit together. Maintained by
-hand - when the layout moves, move this with it.
+*Schema template, seeded 2026-09-21. `/seed` fills the placeholder tokens by
+scanning the codebase; every `## ` heading is fixed — a section may read
+"N/A — none" but is never renamed or reordered. The `keep` region at the bottom
+is yours and survives every harness update.*
 
-## High-level design
+What kind of system this is and how it's shaped. Referenced from `AGENTS.md` for
+"what kind of system this is and how it's shaped." Read it before touching a part
+you don't own end-to-end.
 
-arcade_station is a Python-based frontend interface for managing and playing arcade and rhythm games (ITGMania, DDR, MAME) on dedicated arcade cabinets. It uses Pegasus Frontend as its display layer, with Python orchestrating game launching, process management, input listening, image display, and peripheral control (litboard lights, streaming, screenshots).
+## System purpose
 
-The system is designed for kiosk-mode operation — it starts automatically, manages the full lifecycle of game sessions, and recovers gracefully from crashes.
+*What this system is for, in one or two sentences — the problem it exists to
+solve, not how.*
 
-## Repo layout
+A Python front-end for launching rhythm games and arcade software (ITGMania,
+DDR, MAME) on a dedicated cabinet or a regular PC. It wraps the Pegasus
+frontend, launches games from TOML configuration, drives a secondary marquee
+display, and handles kiosk-mode concerns — the cabinet turns on and works with
+no desktop, taskbar, or manual step.
 
-```text
-arcade_station/
-├── src/arcade_station/
-│   ├── core/
-│   │   ├── common/           # Cross-platform utilities (process mgmt, display, launch, screenshots)
-│   │   ├── windows/          # Windows-specific implementations
-│   │   ├── linux/            # Linux-specific implementations
-│   │   └── macos/            # macOS-specific implementations
-│   ├── launchers/            # Game-specific launch logic
-│   ├── listeners/            # Keyboard/event listeners
-│   ├── start_frontend_apps.py  # Main entry point
-│   └── debug_pegasus_launch.py
-├── install/
-│   ├── main.py               # Installer entry point
-│   ├── installer/
-│   │   ├── config/           # Installation configuration
-│   │   ├── ui/               # Tkinter installer pages
-│   │   └── resources/        # Installation assets
-│   └── logs/
-├── bin/
-│   ├── windows/              # Windows batch/PowerShell scripts
-│   └── unix/                 # Unix shell scripts
-├── config/                   # TOML configuration files
-│   ├── default_config.toml
-│   ├── installed_games.toml
-│   ├── key_listener.toml
-│   ├── mame_config.toml
-│   └── ...
-├── assets/                   # Game icons, logos, images
-├── examples/                 # Setup walkthroughs (DDR, laptop)
-├── tests/                    # pytest characterization baseline
-├── docs/                     # Architecture and reliability notes
-├── .claude/agents/           # The two reviewer seats (QA, adversarial)
-└── hooks/                    # Git hooks (pre-commit, pre-push)
-```
+## Shape / topology
 
-## Component relationships
+*The overall form: monolith, service set, CLI, library, batch job — and how the
+pieces are deployed and talk to each other.*
 
-- **Pegasus Frontend** is the user-facing display — arcade_station launches it and manages its lifecycle
-- **Core common** provides shared utilities consumed by launchers, listeners, and the installer
-- **Launchers** use core functions to start specific games (ITGMania, MAME, etc.) and manage their processes
-- **Listeners** monitor keyboard events (via `keyboard` library) and trigger actions (screenshots, game launches, kills)
-- **Config** (TOML files) drives all runtime behavior — paths, key bindings, game lists, display settings
-- **Installer** (Tkinter UI) configures the system for first-time setup, writing TOML config files
+A local desktop application (monolith), not a networked service — no network
+APIs. Pegasus Frontend (`src/pegasus-fe`, QML) is the display layer; Python
+(`src/arcade_station`) orchestrates launching, process management, input
+listening, image display, and peripheral control. `start_frontend_apps.py` is
+the main entry point; the root batch files (`launch_/install_/kill_arcade_station.bat`)
+are the operator-facing entry points. A separate Tkinter installer
+(`install/`) configures the system on first run. Integration is via process
+management (`subprocess`/`psutil`), file-based TOML config, keyboard event hooks,
+and image display (PyQt5).
 
-## Data model
+## Key components
 
-- **Configuration**: TOML files parsed via `tomllib` (Python 3.11+ built-in), written via `tomli_w`
-- **Game metadata**: Defined in `installed_games.toml` — game names, paths, launch parameters
-- **Key bindings**: Defined in `key_listener.toml` — maps physical keys to actions
-- **Display config**: Controls image viewer behavior (marquees, screenshots) via `display_config.toml`
-- **Process state**: Managed at runtime via `psutil` — no persistent process state on disk
+*The parts that carry real responsibility, each with a one-line charter.*
 
-## CI/CD
+- **Pegasus Frontend** (`src/pegasus-fe`) — the user-facing display; arcade_station
+  launches it and manages its lifecycle.
+- **Core common** (`src/arcade_station/core/common`) — cross-platform utilities
+  (process management, display, launch, screenshots) consumed everywhere;
+  `core_functions.py` is the canonical home to reuse before inventing.
+- **Platform cores** (`core/windows`, `core/linux`, `core/macos`) — OS-specific
+  implementations; Windows is the working target.
+- **Launchers** (`launchers/`) — game-specific launch logic on top of core.
+- **Listeners** (`listeners/`) — background keyboard/event listeners that trigger
+  actions (screenshots, launches, kills).
+- **Installer** (`install/`) — Tkinter UI + `installer/config/installation.py`,
+  which owns and regenerates the TOML config schema on every run.
 
-**There is no CI.** Nothing runs these checks except a developer and the git
-hooks, which are enabled per clone with `git config core.hooksPath hooks`:
+## Data & state
 
-- `pre-commit`: blocks staged personalized config, Python that will not
-  compile, malformed TOML, and pylint errors on staged files
-- `pre-push`: runs the pytest suite
+*What data the system owns, where state lives, and what is authoritative vs.
+derived.*
 
-Linting is `pylint`, configured in `.pylintrc`. `black` and `mypy` are not used
-here - `requirements.txt` lists both under a "Not currently used" block.
-`flake8` is neither a dependency nor run anywhere.
+All runtime behavior is driven by TOML config under `config/` (parsed with
+`tomllib`, written with `tomli_w`): `installed_games.toml` (game names, paths,
+launch parameters), `key_listener.toml` (key→action bindings), display/marquee
+config, and others. Config is authoritative; process state is runtime-only via
+`psutil` (nothing persisted to disk). **The installer owns the config schema** —
+a setting it does not know about is silently dropped on reconfigure — and every
+tracked `config/*.toml` carries `skip-worktree` so personal values are never
+committed (a fresh clone sees near-empty defaults).
 
-## Key protocols / APIs
+## External dependencies & boundaries
 
-None. This is a local application with no network APIs. All integration is via:
+*Systems, services, and APIs this depends on, and the line where this system's
+responsibility ends and theirs begins.*
 
-- Process management (launching/killing executables via `subprocess` and `psutil`)
-- File-based configuration (TOML)
-- Keyboard event hooks (via `keyboard` library)
-- Image display (via `PyQt5`)
+No network services or remote APIs. External surfaces are the OS process table
+(launching/killing executables the user installed — ITGMania, MAME, etc.), the
+filesystem (TOML config, screenshots, assets), keyboard input (via the
+`keyboard` library), and the display (PyQt5). Third-party runtime deps:
+PyQt5, keyboard, psutil, tomli_w, Pillow (see `requirements.txt`). The launched
+games themselves are outside this system's responsibility — arcade_station owns
+starting, monitoring, and killing them, not their internals.
+
+## Invariants
+
+*Things that must always hold — the properties a change is never allowed to
+break. Violating one is a correctness bug, not a preference.*
+
+*Inherited from the pre-v2 reliability notes and not each individually
+re-verified against the code — treat as intent to uphold.*
+- TOML config files in `config/` must always be valid TOML — never write partial
+  or corrupted config. A malformed `installed_games.toml` takes down *every*
+  game, not one.
+- Platform-specific code never imports from another platform's module (no
+  `windows` imports in `linux/`).
+- `kill_all` must terminate every process it manages — a partial kill leaves the
+  system broken.
+- Key listeners must not block the main thread — they run in background threads.
+- `core_functions.open_header` must set the global environment before any script
+  runs.
+- The installer must never overwrite existing user configuration without explicit
+  confirmation.
+<!-- harness:region:end id=doc -->
+
+<!-- harness:region:start id=project keep -->
+## Architectural decisions
+
+*This region is yours. The harness never regenerates it on update. Migrated from
+the pre-v2 docs and `CLAUDE.md` (2026-09-21).*
+
+- **No `pyproject.toml`** — a deliberate non-choice (`PLAN.MD`). Dependencies are
+  `venv` + `requirements.txt` (+ `requirements-dev.txt`); pytest is configured in
+  `pytest.ini` and pylint in `.pylintrc` because there is no `pyproject.toml`.
+- **The installer owns the config schema.** `install/installer/config/installation.py`
+  regenerates configuration on every run, so a new config key must be added there
+  too or it is silently dropped on the next reconfigure.
+- **Personalized files carry `skip-worktree`** (12 files: `config/*.toml` and three
+  Pegasus files). To change what a *fresh clone* receives, change the installer,
+  not the file. An empty `git diff` does not prove the working tree is restored.
+- **Windows-first.** Linux and macOS support is Phase 2 intent (`PLAN.MD`); the
+  platform-core split (`core/{windows,linux,macos}`) exists for it but only
+  Windows is exercised.
+- **There is no CI.** Nothing runs the checks except a developer and the git hooks
+  (`pre-commit`, `pre-push`), enabled per clone with
+  `git config core.hooksPath hooks`.
+<!-- harness:region:end id=project -->
