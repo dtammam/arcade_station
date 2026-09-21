@@ -37,9 +37,16 @@ into the *diff being coherent and complete*, not into inventing anything.
 2. **No `skip-worktree` config file is touched.** The 12 personalized files named
    in `AGENTS.md` (`config/*.toml`, the three `src/pegasus-fe/config/metafiles/*`)
    show no edits; verified by reading them back, not by trusting an empty diff.
-3. **The suite still passes and the gate approves its own config.** Expected on
-   this Linux box: 46 passed / 3 skipped. The review gate runs against the
-   committed sha (seats per `.harness/scrutiny.toml`) and every required seat is
+3. **The suite does not regress vs `origin/main`, and the gate approves.** This
+   branch is cut from `origin/main`, which does **not** carry the Linux argv guard
+   (`fbd7ff4`, still on `feature/linux-test-guards` — that is Swing B). So the
+   honest bar here is *parity with the baseline*, not 46/3. Measured on this box
+   after reinstalling the tk runtime libs (`tk-dev tcl-dev`, wiped by a container
+   recreate): **HEAD == origin/main == 2 failed / 44 passed / 3 skipped.** The two
+   failures are the pre-existing `test_launch_arguments.py` argv cases Swing B
+   fixes; this docs/harness-only commit touches no `.py` and moves nothing. The
+   review gate runs against the committed sha (seats per `.harness/scrutiny.toml`;
+   this diff sizes to **slim — adversary only**) and every required seat is
    APPROVED at the final sha before merge. Never self-merge.
 
 ## Branch plan
