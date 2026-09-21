@@ -4,7 +4,7 @@ harness: v2 · lean
 branch: chore/land-harness-v2
 anchor: outcome
 status: Building
-next: Run the review gate against the committed sha; seats per .harness/scrutiny.toml.
+next: Re-gate at the new sha (argv guard folded in); slim seat per .harness/scrutiny.toml.
 gate: pending
 ---
 
@@ -37,25 +37,27 @@ into the *diff being coherent and complete*, not into inventing anything.
 2. **No `skip-worktree` config file is touched.** The 12 personalized files named
    in `AGENTS.md` (`config/*.toml`, the three `src/pegasus-fe/config/metafiles/*`)
    show no edits; verified by reading them back, not by trusting an empty diff.
-3. **The suite does not regress vs `origin/main`, and the gate approves.** This
-   branch is cut from `origin/main`, which does **not** carry the Linux argv guard
-   (`fbd7ff4`, still on `feature/linux-test-guards` — that is Swing B). So the
-   honest bar here is *parity with the baseline*, not 46/3. Measured on this box
-   after reinstalling the tk runtime libs (`tk-dev tcl-dev`, wiped by a container
-   recreate): **HEAD == origin/main == 2 failed / 44 passed / 3 skipped.** The two
-   failures are the pre-existing `test_launch_arguments.py` argv cases Swing B
-   fixes; this docs/harness-only commit touches no `.py` and moves nothing. The
+3. **The suite is green on this Linux box, and the gate approves.** The pre-push
+   hook runs the suite, and it blocked landing from Linux because two
+   `test_launch_arguments.py` argv cases fail off-Windows without the
+   `CREATE_NO_WINDOW` fixture stub. `--no-verify` is a non-negotiable-prohibited
+   escape, so the guard (`fbd7ff4`, Dean-authored, tests-only, 7 lines) was folded
+   into this branch (see Deviations). Measured after reinstalling the tk runtime
+   libs (`tk-dev tcl-dev`, wiped by a container recreate) and cherry-picking the
+   guard: **46 passed / 3 skipped** — green, matching the Windows baseline. The
    review gate runs against the committed sha (seats per `.harness/scrutiny.toml`;
-   this diff sizes to **slim — adversary only**) and every required seat is
-   APPROVED at the final sha before merge. Never self-merge.
+   this diff — docs + harness + one tests fixture — still sizes to **slim —
+   adversary only**) and the required seat is APPROVED at the final sha before
+   merge. Never self-merge.
 
 ## Branch plan
 
 The pile is uncommitted, so it moves cleanly: cut `chore/land-harness-v2` from
-`origin/main`, carrying the working-tree changes with it. The one commit already
-on `feature/linux-test-guards` (`fbd7ff4`, a 7-line off-Windows test stub) stays
-on that branch and folds naturally into the later test-foundation work — it is a
-linux test guard, same theme.
+`origin/main`, carrying the working-tree changes with it. Originally the argv
+guard (`fbd7ff4`) was to stay on `feature/linux-test-guards` for Swing B — but
+the pre-push hook forced it in here (see Deviations), so it is cherry-picked onto
+this branch. Swing B (the test-foundation branch) now cuts from the post-merge
+`main` that already carries the guard.
 
 ## Deviations
 
@@ -66,3 +68,12 @@ linux test guard, same theme.
   = **keep both** — the four project tasks are restored and the Claude session
   task is retained alongside them. (The `$HOME/.claude` path is personal and will
   not resolve on other clones; accepted knowingly.)
+- **The Linux argv guard (`fbd7ff4`) was folded into this branch.** The plan
+  originally scoped it to Swing B, but the `pre-push` hook runs the suite and
+  blocked the push from this Linux box (2 argv failures without the stub), and
+  `--no-verify` is prohibited. Surfaced to the user; decision = **fold guard into
+  Swing A**. Cherry-picked as `ba6519e` (Dean's authorship preserved), suite now
+  46 passed / 3 skipped. This changed the reviewed surface, so the earlier
+  `APPROVED @81adf51` was voided and the piece re-gated at the new sha; the two
+  premature bookkeeping commits (verdict + close) were reset off (unpushed) so
+  history carries a single valid approval bound to the final sha.
