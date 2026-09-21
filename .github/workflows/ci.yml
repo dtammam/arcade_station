@@ -1,0 +1,80 @@
+name: CI
+
+# The floor main can't fall through. Reproduces the exact conditions the suite
+# needs to be green on Linux (Tk runtime + the argv guard already on main),
+# mirrors the two remote-meaningful checks the git hooks enforce locally
+# (pylint --errors-only, and the full suite), and measures coverage without
+# gating on it.
+#
+# OS target: Ubuntu only. AGENTS.md names Windows as the working target and
+# Linux/macOS as Phase-2 intent; this workflow gates on what is actually proven
+# green today and does not claim Windows coverage that has not been run. A
+# Windows leg is a documented future addition (see the test-foundation plan).
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test suite (Ubuntu, Python 3.12.9)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # origin/main must be reachable for the diff-scoped lint
+
+      - name: Set up Python 3.12.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.9'   # matches REQUIRED_VERSION in start_frontend_apps.py
+
+      - name: Install Tk runtime
+        # display_image.py imports tkinter; without these the suite cannot import.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tk-dev tcl-dev
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Lint changed Python
+        # Mirror of hooks/pre-commit check 4 (pylint --errors-only). The hook
+        # lints STAGED files; on a remote there is no staging area, so CI lints
+        # the branch's changed .py against origin/main — the review surface
+        # AGENTS.md mandates (origin/main...HEAD, not local main). pylint's
+        # init-hook resolves src/ and install/ relative to the CWD, so this must
+        # run from the repository root (it does).
+        run: |
+          git fetch origin main
+          # --diff-filter=ACMR mirrors hooks/pre-commit (ACM) and adds renames,
+          # while excluding deletions/typechanges: a PR that DELETES a .py must
+          # not feed a nonexistent path to pylint and fail the job on a valid
+          # deletion. The trailing `--` ends pylint's option parsing so a file
+          # whose name begins with a dash can never be read as a flag.
+          changed=$(git diff --name-only --diff-filter=ACMR origin/main...HEAD -- '*.py' || true)
+          if [ -n "$changed" ]; then
+            echo "Linting changed Python files:"
+            echo "$changed"
+            echo "$changed" | tr '\n' '\0' | xargs -0 python -m pylint --errors-only --
+          else
+            echo "No changed Python files vs origin/main; nothing to lint."
+          fi
+
+      - name: Run the suite with coverage
+        # Mirror of hooks/pre-push (the full suite). --cov reads .coveragerc for
+        # scope; no fail_under is configured, so coverage is measured, not gated.
+        run: pytest --cov --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: warn

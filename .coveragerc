@@ -1,0 +1,16 @@
+# Coverage configuration for arcade_station.
+#
+# PLAN.MD deliberately avoids pyproject.toml, so coverage is configured here in
+# a dedicated file, matching the pytest.ini / .pylintrc convention.
+#
+# Measurement only: no fail_under is set. Coverage is a baseline we watch, not a
+# gate this swing (see docs/exec-plans/.../2026-09-21-test-foundation.md). It is
+# invoked explicitly from CI (`pytest --cov`) and is intentionally NOT wired into
+# pytest.ini addopts, so a bare `pytest` still runs for anyone who installed only
+# requirements.txt and does not have pytest-cov.
+[run]
+source = src/arcade_station
+branch = true
+
+[report]
+show_missing = true
