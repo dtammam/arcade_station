@@ -41,6 +41,8 @@ LIMITATION = """\
 Note: the installer remains the owner of these files. Re-running the installer's
 game setup rebuilds both from the wizard's own list, so a game added here and
 not also entered in the wizard is dropped by a later full reconfigure.
+Comments in installed_games.toml are not kept when it is rewritten (the
+installer does not keep them either); comments in the menu file are.
 
 Values starting with '-' must be attached with '=', e.g. --args=-fullscreen.
 """
@@ -129,7 +131,7 @@ def _save(games_path, config, menu_path, menu):
     games_config.write_games(games_path, config)
     try:
         pegasus_menu.write_menu(menu_path, menu)
-    except Exception as error:
+    except BaseException as error:  # Ctrl-C here must still roll back.
         try:
             if previous is None:
                 games_path.unlink()
@@ -137,9 +139,11 @@ def _save(games_path, config, menu_path, menu):
                 games_config.atomic_write_bytes(games_path, previous)
         except Exception as restore_error:
             raise games_config.GamesConfigError(
-                f"Menu update failed ({error}) and {games_path} could not be restored "
+                f"Menu update failed ({error!r}) and {games_path} could not be restored "
                 f"({restore_error}); the two files may now disagree"
             ) from error
+        if not isinstance(error, Exception):
+            raise
         raise games_config.GamesConfigError(
             f"Menu update failed ({error}); {games_path} was restored, nothing changed"
         ) from error
@@ -171,7 +175,7 @@ def cmd_list(options):
         if kind == "string":
             name, target = "", entry
         else:
-            name = entry.get("display_name", "")
+            name = str(entry.get("display_name", ""))
             target = entry.get("rom" if kind == "mame" else "path", "")
         rows.append((game_id, kind, name, str(target), "yes" if game_id in in_menu else "no"))
     widths = [max(len(row[i]) for row in rows) for i in range(4)]
@@ -251,9 +255,12 @@ def main(argv=None):
         int: 0 on success, 1 on an error (argparse exits with 2 on bad usage).
     """
     options = build_parser().parse_args(argv)
+    # Resolve symlinks up front so a rollback removes or restores the real file.
+    options.file = options.file.resolve()
+    options.menu_file = options.menu_file.resolve()
     try:
         return COMMANDS[options.command](options)
-    except (games_config.GamesConfigError, OSError) as error:
+    except (games_config.GamesConfigError, OSError, UnicodeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1
 

@@ -23,6 +23,7 @@ config location themselves; callers decide which file is edited.
 """
 
 import copy
+import math
 import os
 import stat
 import sys
@@ -155,7 +156,7 @@ def validate_entry(game_id, entry, preserved_keys=frozenset()):
     # values would start a new line there, which can inject a whole menu entry.
     # str.splitlines is the broadest definition of a line break Python has.
     for key in MENU_KEYS:
-        if key in entry and key not in preserved_keys and len(f"x{entry[key]}x".splitlines()) != 1:
+        if key in entry and len(f"x{entry[key]}x".splitlines()) != 1:
             raise ValidationError(f"'{key}' for '{game_id}' must be a single line")
 
 
@@ -271,6 +272,43 @@ def remove_game(config, game_id):
     return updated
 
 
+def _same_document(left, right):
+    """
+    Compare two parsed TOML documents, treating NaN as equal to NaN.
+
+    TOML allows 'nan', and nan != nan, so a plain == would make any file that
+    contains one permanently unwritable.
+    """
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(_same_document(left[k], right[k]) for k in left)
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(map(_same_document, left, right))
+    if isinstance(left, float) and isinstance(right, float) and math.isnan(left) and math.isnan(right):
+        return True
+    return type(left) is type(right) and left == right
+
+
+def _remove_temp(tmp_name):
+    """Delete a temporary file, clearing a read-only flag first if needed."""
+    try:
+        os.unlink(tmp_name)
+    except FileNotFoundError:
+        pass
+    except OSError:
+        try:
+            os.chmod(tmp_name, stat.S_IREAD | stat.S_IWRITE)
+            os.unlink(tmp_name)
+        except OSError:
+            pass
+
+
+def _new_file_mode():
+    """Permission bits a newly created file would get under the current umask."""
+    umask = os.umask(0)
+    os.umask(umask)
+    return 0o666 & ~umask
+
+
 def atomic_write_bytes(path, data):
     """
     Atomically replace a file with new contents.
@@ -296,18 +334,18 @@ def atomic_write_bytes(path, data):
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
-        if path.exists():
-            os.chmod(tmp_name, stat.S_IMODE(path.stat().st_mode))
+        # mkstemp creates the file 0600; give it the target's bits, or the
+        # umask default for a new file.
+        mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else _new_file_mode()
+        os.chmod(tmp_name, mode)
         os.replace(tmp_name, path)
     except BaseException as error:
-        try:
-            os.unlink(tmp_name)
-        except FileNotFoundError:
-            pass
+        # Cleanup must never replace the error that caused it.
+        _remove_temp(tmp_name)
         if isinstance(error, PermissionError):
             raise GamesConfigError(
-                f"Could not replace {path}: it may be open in another program "
-                "(close Arcade Station and try again)"
+                f"Could not replace {path}: it may be open in another program or "
+                "read-only (close Arcade Station and try again)"
             ) from error
         raise
 
@@ -337,7 +375,7 @@ def write_games(path, config):
         raise GamesConfigError(
             f"Serialized games config is not valid TOML ({error}); not written"
         ) from error
-    if round_trip != config:
+    if not _same_document(round_trip, config):
         raise GamesConfigError("Serialized games config did not parse back identically; not written")
 
     atomic_write_bytes(path, text.encode("utf-8"))

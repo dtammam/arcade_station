@@ -5,6 +5,8 @@ Pegasus menu (whether it is listed). These run the real entry point against
 copies under tmp_path, and pin that a failure writing the menu puts the games
 file back rather than leaving the two disagreeing.
 """
+import sys
+
 import pytest
 
 from arcade_station.core.common import games_config as gc
@@ -120,7 +122,10 @@ def test_rejected_commands_change_nothing(files, capsys, args):
     games, menu, run = files
     before = (games.read_bytes(), menu.read_bytes())
     assert run(*args) == 1
-    assert "Error:" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert "Error:" in err
+    if "Pokémon" in args:
+        assert "--id" in err
     assert (games.read_bytes(), menu.read_bytes()) == before
 
 
@@ -178,3 +183,56 @@ def test_failed_restore_says_the_files_may_disagree(files, monkeypatch, capsys):
     assert run("remove", "itgmania") == 1
     err = capsys.readouterr().err
     assert "could not be restored" in err and "may now disagree" in err
+
+
+def test_update_of_a_launch_only_field_leaves_the_menu_alone(files):
+    """Changing a path must not rewrite the installer's menu block."""
+    _, menu, run = files
+    before = menu.read_bytes()
+    assert run("update", "itgmania", "--path", "D:\\ITG\\itgmania.exe") == 0
+    assert menu.read_bytes() == before
+
+
+def test_clear_name_falls_back_to_derived_title(files):
+    """--clear name removes display_name and the menu shows the ID-derived title."""
+    games, menu, run = files
+    assert run("update", "itgmania", "--name", "ITG") == 0
+    assert run("update", "itgmania", "--clear", "name") == 0
+    assert "display_name" not in gc.load_games(games)["games"]["itgmania"]
+    assert b"game: Itgmania\r\n" in menu.read_bytes()
+
+
+def test_ctrl_c_during_menu_write_still_rolls_back(files, monkeypatch):
+    """KeyboardInterrupt is not a process kill: the games file is restored."""
+    games, menu, run = files
+    before = (games.read_bytes(), menu.read_bytes())
+
+    def interrupted(*_args):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(pm, "write_menu", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        run("remove", "itgmania")
+    assert (games.read_bytes(), menu.read_bytes()) == before
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="symlinks need privileges on Windows")
+def test_rollback_through_dangling_symlink_keeps_the_link(tmp_path, monkeypatch):
+    """A failed first write removes the file it created, not the symlink."""
+    link = tmp_path / "installed_games.toml"
+    target = tmp_path / "real" / "games.toml"
+    target.parent.mkdir()
+    link.symlink_to(target)
+    monkeypatch.setattr(pm, "write_menu", lambda *_a: (_ for _ in ()).throw(OSError("locked")))
+    code = games_updater.main(["--file", str(link), "--menu-file", str(tmp_path / "m.txt"),
+                               "add", "--name", "A", "--path", "x"])
+    assert code == 1
+    assert link.is_symlink() and not target.exists()
+
+
+def test_list_tolerates_non_string_hand_edited_name(tmp_path, capsys):
+    """A hand-edited display_name = 5 is shown, not a crash."""
+    games = tmp_path / "installed_games.toml"
+    games.write_text('[games.a]\npath = "x"\ndisplay_name = 5\n', encoding="utf-8")
+    assert games_updater.main(["--file", str(games), "--menu-file", str(tmp_path / "m.txt"), "list"]) == 0
+    assert "5" in capsys.readouterr().out

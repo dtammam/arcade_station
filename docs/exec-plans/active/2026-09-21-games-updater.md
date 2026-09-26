@@ -67,7 +67,7 @@ inference would under-serve them. The full gate is forced regardless (data-losin
 - **Core has no TOML *writer*.** `core_functions.py` has readers only
   (`load_toml_config` `:101`, `load_game_config` `:644`). All writing lives in the
   installer. The **safe** writer is `installation._write_toml_manually`
-  (`:1244`, escapes `\` and `"` at `:1272-1276`) or `tomli_w` (a **real**
+  (`:1233`, via `_write_toml_section` `:1244`, which escapes `\` and `"` at `:1272-1276`) or `tomli_w` (a **real**
   dependency, `requirements.txt:8`). There is a **second, unsafe** hand-rolled
   writer in `install/installer/ui/pages/base_page.py:291-292` that emits
   `f'{key} = "{value}"'` with **no escaping** — a value with a `"` or `\`
@@ -246,7 +246,8 @@ banner = "C:/mame/art/mslug.png"
 
 **Error handling.**
 - Validation failures → `ValidationError`; the CLI prints the message via
-  `log_message(msg, "GAME")` and exits non-zero. No file written.
+  stderr and exits non-zero. No file written. (Successful changes are
+  recorded with `log_message(msg, "GAME")`.)
 - `write_games` failures before `os.replace` (serialize error, round-trip
   mismatch) → temp removed, original intact, `GamesConfigError` raised.
 - **Windows-specific:** `os.replace` against a target open in another process
@@ -368,8 +369,10 @@ or an implementation detail.
   is what the ID is generated from.
 - **R3 — a game entry can be a bare string.** `launch_game.py:212` handles
   `game_config` that is not a dict as a path. The installer never writes that
-  shape, so any such entry was hand-edited. The updater preserves untouched
-  entries byte-for-byte (whole mapping round-trips), `list` shows them, and
+  shape, so any such entry was hand-edited. The updater preserves the data of
+  every untouched entry (the whole parsed mapping round-trips; comments and
+  formatting in `installed_games.toml` are not kept, exactly as with the
+  installer's own `tomli_w` write — disclosed in `--help`), `list` shows them, and
   `update` refuses them with a clear message rather than silently rewriting a
   user's hand-edit. `remove` works on them.
 - **R4 — reusing `game_id.py` from runtime code.** The repo runs in place: the
@@ -409,7 +412,7 @@ or an implementation detail.
   (verified). The module therefore also inserts `src` onto `sys.path` like every
   other runtime entry point, and its documented usage is the script form
   `python src/arcade_station/tools/games_updater.py …` from the repo root — the
-  same way `launch_arcade_station.bat:65` runs `start_frontend_apps.py`. Both
+  same way `launch_arcade_station.bat:66` runs `start_frontend_apps.py`. Both
   forms were run and work.
 - **Comment ownership in the menu file (found by a failing test).** As first
   built, a `#` comment line above a block was attributed to the block *before*
@@ -433,7 +436,8 @@ Built 2026-09-26 on this branch. Measured on this Linux box (pyenv 3.12.9,
   92 new tests: `tests/test_games_config.py` (39), `tests/test_pegasus_menu.py`
   (34, LF and CRLF parametrized), `tests/test_games_updater_cli.py` (19).
 - **Coverage of the new modules** (`pytest --cov`, new tests only):
-  `games_config.py` 94%, `pegasus_menu.py` 96%, `games_updater.py` 92%.
+  `games_config.py` 94%, `pegasus_menu.py` 96%, `games_updater.py` 92% (the
+  adversary measured 93% for the last across the full suite).
 - **`pylint --errors-only`** on all six new files: clean (exit 0).
 - **Skip-worktree read-back (acceptance 6):** sha256 of all 12 flagged files
   taken before the build and compared after the full suite — 12/12 unchanged.
@@ -442,3 +446,71 @@ Built 2026-09-26 on this branch. Measured on this Linux box (pyenv 3.12.9,
 - **Not run: Windows.** `os.replace` against a file held open by another process
   is simulated (`PermissionError` injection), not exercised on NTFS. CRLF
   handling is exercised with CRLF fixtures on Linux. The merge hold covers this.
+
+## Gate
+
+Full gate (adversary + qa + security-brief), sized by `scrutiny.toml`: `src/**`
+sets the `core-logic` baseline (adversary + qa), and the change class
+(deletes and rewrites user config) trips the non-overridable `data-loss` row,
+adding security-brief. Seats run fresh in independent context. The adversary
+runs alone because it mutates the shared tree; qa and security-brief follow in
+parallel. Each seat returns its verdict line and the Architect transcribes it
+verbatim, to avoid a concurrent write-race on this file.
+
+**Round 1 (adversary @a9e8880).** CHANGES. Counts, lint and the `-m` deviation
+confirmed. 34 mutants: 19 killed, 15 survived. Blocking findings:
+
+- **W1** — `validate_game_id` (`installer/utils/game_id.py:43`) and the menu's
+  `_GAME_ID` use `re.match(r'^…$')`; `$` matches before a trailing `\n`, so an
+  ID `"evil\n"` was accepted, split the menu's launch value across lines, and
+  left a block that `remove` could no longer find.
+- **W2** — comment ownership was still wrong: comments after the last block
+  (e.g. a commented-out game) and a comment separated from the next game by a
+  blank line were deleted with a neighbouring game.
+- **W3** — surviving mutants on headline guarantees: the opaque-block guards
+  (launcher check, ID regex) and the CLI's `changed=` wiring were unpinned.
+- **W4** — R3's "untouched entries byte-for-byte" is false for comments in
+  `installed_games.toml` (tomli_w drops them, as the installer's own write does).
+- **S1** (suspected on Windows) — a failed cleanup could leave the temp file and
+  surface a raw `PermissionError`.
+- Notes N1–N8: Ctrl-C skipping rollback; `nan` making a file unwritable; a
+  dangling-symlink rollback; `list` crashing on a non-string name; 0600 mode on
+  first create and a 0-byte menu file; a BOM hiding the first game; two dead or
+  redundant guards; four plan citations off by a line or a point.
+
+Gate: CHANGES r1 @a9e8880 — adversary
+
+**r1 fix (Architect), for re-review.** Every finding addressed; none changed a
+public interface, data model, acceptance criterion or approved behavior (each
+fix makes the code do what the plan already claimed):
+
+- **W1:** `validate_game_id` now uses `re.fullmatch` — fixed at the source in
+  `install/installer/utils/game_id.py`, which the installer's wizard pages share
+  (a pure tightening); the menu's `_GAME_ID` likewise. Pinned by an invalid-ID
+  case `"abc\n"`, a direct test of the installer rule, and a trailing-newline
+  display name.
+- **W2:** comment ownership reworked. Only comments *touching* a `game:` line
+  move with it; comments touching a block's content belong to it; anything
+  separated by a blank line (including trailing comments at EOF) is
+  free-floating and survives removal of either neighbour. Four tests.
+- **W3:** new opaque fixtures (a 4-token user launch; a launcher with an invalid
+  ID token) and a CLI test that `update --path` leaves the menu byte-identical.
+  Survivors P1/P5/P6/P12/M7/M9/M10/U4/U7 each get a test; the dead MENU_KEYS
+  guard (M14, N7) is removed. P11 (asset value with continuation lines) is not
+  pinned — neither the installer nor this tool writes one.
+- **W4:** R3 corrected above; `--help` now says comments in
+  `installed_games.toml` are not kept (menu comments are).
+- **S1:** temp cleanup retries after clearing a read-only flag and never
+  replaces the original error; the error text mentions read-only. Tested with an
+  unlink that fails once.
+- **N1** rollback now also runs on `KeyboardInterrupt` (re-raised after
+  restoring); **N2** NaN-aware round-trip compare; **N3** `--file`/`--menu-file`
+  resolved up front so a rollback removes the created file, not the symlink;
+  **N4** `list` stringifies names and main catches `UnicodeError`; **N5** new
+  files follow the umask, and an empty menu file gets the header; **N6** a BOM is
+  kept as its own preamble entry; **N7** dead guard removed, the `cmd_add` ID
+  guard kept for its `--id` hint (now tested); **N8** citations corrected above.
+
+After the fix: **181 passed, 3 skipped** (new tests 47 / 45 / 24 = 116);
+coverage on the new tests: `games_config.py` 94%, `pegasus_menu.py` 97%,
+`games_updater.py` 94%.

@@ -249,3 +249,102 @@ def test_comment_above_a_block_belongs_to_that_block(tmp_path):
     assert pm.render(without_a).decode().startswith("# B is the cabinet favourite\ngame: B")
     without_b, _ = pm.remove_game_blocks(menu, "b")
     assert "favourite" not in pm.render(without_b).decode()
+
+
+def launch(game_id):
+    """An installer-shaped launch value for a game ID."""
+    return f'launch: \n    "{PY}" \n    "{LAUNCHER}" \n    "{game_id}"\n'
+
+
+def load_text(tmp_path, text):
+    """Write text to a menu file and load it."""
+    path = tmp_path / "metadata.pegasus.txt"
+    path.write_bytes(text.encode("utf-8"))
+    return pm.load_menu(path)
+
+
+def test_three_token_user_launch_is_opaque(tmp_path):
+    """A user command whose last token looks like an ID is not ours to remove."""
+    text = 'game: Emu\nlaunch: "C:/emu.exe" "-rompath" "roms" "b"\n'
+    menu = load_text(tmp_path, text)
+    assert [b.game_id for b in menu.blocks] == [None]
+    updated, removed = pm.remove_game_blocks(menu, "b")
+    assert removed == 0 and pm.render(updated) == text.encode()
+
+
+def test_launcher_with_invalid_id_token_is_opaque(tmp_path):
+    """The last token must be a whole valid ID, or the block is left alone."""
+    menu = load_text(tmp_path, f'game: X\nlaunch: "{PY}" "{LAUNCHER}" "Bad-ID"\n')
+    assert menu.blocks[0].game_id is None
+
+
+def test_comments_at_end_of_file_survive_removing_last_game(tmp_path):
+    """A commented-out game after the last block is not the last block's."""
+    text = (f"game: A\n{launch('a')}\ngame: B\n{launch('b')}\n"
+            "# disabled for now:\n# game: Old Favourite\n# launch: old.exe\n")
+    updated, _ = pm.remove_game_blocks(load_text(tmp_path, text), "b")
+    assert pm.render(updated).decode().endswith(
+        "\n# disabled for now:\n# game: Old Favourite\n# launch: old.exe\n")
+
+
+def test_note_under_a_game_stays_with_that_game(tmp_path):
+    """A comment touching B's content belongs to B, not to the next game."""
+    text = f"game: B\n{launch('b')}# B: needs the dongle\n\ngame: C\n{launch('c')}"
+    menu = load_text(tmp_path, text)
+    without_c, _ = pm.remove_game_blocks(menu, "c")
+    assert "needs the dongle" in pm.render(without_c).decode()
+    without_b, _ = pm.remove_game_blocks(menu, "b")
+    assert "needs the dongle" not in pm.render(without_b).decode()
+
+
+def test_free_floating_comment_between_games_survives_either_removal(tmp_path):
+    """A comment with blank lines on both sides belongs to neither neighbour."""
+    text = f"game: A\n{launch('a')}\n# ---- fighting games ----\n\ngame: B\n{launch('b')}"
+    menu = load_text(tmp_path, text)
+    for game_id in ("a", "b"):
+        updated, _ = pm.remove_game_blocks(menu, game_id)
+        assert "# ---- fighting games ----" in pm.render(updated).decode()
+
+
+def test_unicode_line_separator_does_not_split_a_line(tmp_path):
+    """Only '\\n' ends a line, as Pegasus reads the file."""
+    text = f"game: A\nfile: odd\u2028game: Fake\n{launch('a')}"
+    menu = load_text(tmp_path, text)
+    assert [b.game_id for b in menu.blocks] == ["a"]
+    assert pm.render(menu) == text.encode()
+
+
+def test_remove_deletes_every_duplicate_block(tmp_path):
+    """D10: every block for the ID goes, not just the first."""
+    menu = load_text(tmp_path, f"game: A\n{launch('a')}\ngame: A again\n{launch('a')}")
+    updated, removed = pm.remove_game_blocks(menu, "a")
+    assert removed == 2 and updated.blocks == []
+
+
+def test_section_lines_are_case_insensitive(tmp_path):
+    """A 'Game:' line starts its own block, so it is not removed with the one above."""
+    menu = load_text(tmp_path, f"game: A\n{launch('a')}Game: Mine\nfile: mine.bin\n")
+    updated, _ = pm.remove_game_blocks(menu, "a")
+    assert pm.render(updated) == b"Game: Mine\nfile: mine.bin\n"
+
+
+def test_rewritten_line_keeps_its_own_line_ending(tmp_path):
+    """In a mixed file, a rewritten LF line stays LF."""
+    menu = load_text(tmp_path, f"game: A\r\nfile: x\r\n{launch('a')}".replace("game: A\r\n", "game: A\n"))
+    assert menu.newline == "\r\n"
+    updated = pm.upsert_game_block(menu, "a", {"display_name": "Renamed", "path": "x"}, changed={"display_name"})
+    assert pm.render(updated).startswith(b"game: Renamed\nfile: not")
+
+
+def test_byte_order_mark_does_not_hide_the_first_game(tmp_path):
+    """A BOM before the first 'game:' line still lets that game be found."""
+    text = f"\ufeffgame: A\n{launch('a')}"
+    menu = load_text(tmp_path, text)
+    assert [b.game_id for b in menu.blocks] == ["a"]
+    assert pm.render(menu) == text.encode()
+
+
+def test_empty_menu_file_gets_the_header(tmp_path):
+    """A 0-byte file (e.g. an interrupted install) is treated like a missing one."""
+    menu = pm.upsert_game_block(load_text(tmp_path, ""), "a", {"path": "x"})
+    assert pm.render(menu).decode().startswith("collection: arcade_station")

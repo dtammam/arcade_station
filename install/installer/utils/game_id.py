@@ -38,9 +38,10 @@ def validate_game_id(game_id: str) -> bool:
     Returns:
         bool: True if valid, False otherwise
     """
-    # Only allow lowercase letters, numbers, and underscores
-    pattern = r'^[a-z0-9_]+$'
-    return bool(re.match(pattern, game_id))
+    # Only allow lowercase letters, numbers, and underscores. fullmatch, not
+    # match with '$': '$' also matches before a trailing newline, which let an
+    # ID like "abc\n" through.
+    return bool(re.fullmatch(r'[a-z0-9_]+', game_id))
 
 def get_display_name(game_id: str) -> str:
     """Convert a game ID to a display name.

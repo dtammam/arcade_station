@@ -122,6 +122,7 @@ def test_operations_do_not_modify_their_input(games_file):
     [
         ("Bad-ID", {"path": "x"}, "Invalid game ID"),
         ("", {"path": "x"}, "Invalid game ID"),
+        ("abc\n", {"path": "x"}, "Invalid game ID"),
         ("ok", {"display_name": "No target"}, "'path' .* must not be empty"),
         ("ok", {"path": "   "}, "'path' .* must not be empty"),
         ("ok", {"rom": ""}, "'rom' .* must not be empty"),
@@ -133,6 +134,7 @@ def test_operations_do_not_modify_their_input(games_file):
         ("ok", {"path": "x", "display_name": "A\ngame: Injected"}, "single line"),
         ("ok", {"path": "x", "display_name": "A\rB"}, "single line"),
         ("ok", {"path": "x", "display_name": "A\u2028B"}, "single line"),
+        ("ok", {"path": "x", "display_name": "Trailing\n"}, "single line"),
         ("ok", {"path": "x", "banner": "C:\\a.png\ngame: X"}, "single line"),
     ],
 )
@@ -293,3 +295,67 @@ def test_write_through_symlink_keeps_the_link(tmp_path, games_file):
     gc.write_games(link, gc.remove_game(gc.load_games(link), "mslug"))
     assert link.is_symlink()
     assert "mslug" not in gc.load_games(games_file)["games"]
+
+
+def test_installer_game_id_rule_rejects_trailing_newline():
+    """'$' matches before a final newline; the shared rule must not."""
+    from installer.utils.game_id import validate_game_id  # pylint: disable=import-outside-toplevel
+    assert validate_game_id("abc")
+    assert not validate_game_id("abc\n")
+
+
+def test_update_tolerates_non_string_hand_edited_key(tmp_path):
+    """A preserved hand-edited key is not type-checked or rejected."""
+    path = tmp_path / "installed_games.toml"
+    path.write_text('[games.a]\npath = "x"\npriority = 5\n', encoding="utf-8")
+    config = gc.update_game(gc.load_games(path), "a", {"display_name": "A"})
+    assert config["games"]["a"]["priority"] == 5
+
+
+def test_update_cannot_set_a_key_outside_the_schema(games_file):
+    """Only keys already present are preserved; setting one is still rejected."""
+    with pytest.raises(gc.ValidationError, match="Unsupported key"):
+        gc.update_game(gc.load_games(games_file), "not_itg", {"custom": "changed"})
+
+
+def test_nan_does_not_make_the_file_unwritable(tmp_path):
+    """TOML allows nan, and nan != nan must not fail the round-trip check."""
+    path = tmp_path / "installed_games.toml"
+    path.write_text('threshold = nan\n[games.a]\npath = "x"\n', encoding="utf-8")
+    gc.write_games(path, gc.add_game(gc.load_games(path), "b", {"path": "y"}))
+    assert set(gc.load_games(path)["games"]) == {"a", "b"}
+
+
+def test_failed_cleanup_never_hides_the_original_error(games_file, monkeypatch):
+    """If deleting the temp file fails once, it is retried and the error kept."""
+    before = games_file.read_bytes()
+    real_unlink = os.unlink
+    unlink_calls = []
+
+    def locked(*_args):
+        raise PermissionError(13, "Access is denied")
+
+    def unlink_fails_once(name):
+        unlink_calls.append(name)
+        if len(unlink_calls) == 1:
+            raise PermissionError(13, "Access is denied")
+        real_unlink(name)
+
+    monkeypatch.setattr(gc.os, "replace", locked)
+    monkeypatch.setattr(gc.os, "unlink", unlink_fails_once)
+    with pytest.raises(gc.GamesConfigError, match="open in another program or read-only"):
+        gc.write_games(games_file, gc.load_games(games_file))
+    assert games_file.read_bytes() == before
+    assert temp_files(games_file.parent) == []
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX permission bits")
+def test_new_file_follows_umask(tmp_path):
+    """A first-time file gets normal permissions, not mkstemp's 0600."""
+    old = os.umask(0o022)
+    try:
+        path = tmp_path / "installed_games.toml"
+        gc.write_games(path, gc.add_game(gc.load_games(path), "a", {"path": "x"}))
+    finally:
+        os.umask(old)
+    assert path.stat().st_mode & 0o777 == 0o644

@@ -50,7 +50,7 @@ _SORT_LINE = re.compile(r"(?i)sort[_-]?by\s*:\s*(.*?)\s*$")
 _LAUNCH_LINE = re.compile(r"(?i)launch\s*:(.*)$")
 _ASSET_LINE = re.compile(r"(?i)assets\.box_front\s*:")
 _QUOTED = re.compile(r'"([^"]*)"')
-_GAME_ID = re.compile(r"^[a-z0-9_]+$")
+_GAME_ID = re.compile(r"[a-z0-9_]+")
 
 
 @dataclass
@@ -96,28 +96,50 @@ def _value_lines(lines, start):
     return end
 
 
+def _is_comment(line):
+    """True for a '#' comment line."""
+    return line.lstrip().startswith("#")
+
+
 def _split_leading_comments(lines):
     """
     Split off the comment lines at the end of a block that introduce the next.
 
-    A '#' comment directly above a 'game:' line describes that game, so it
-    moves (with anything after it) to the next block. Blank lines before the
-    first such comment stay where they are, as separation.
+    Only comments that touch the next 'game:' line (no blank line between)
+    describe that game and move with it. Anything separated by a blank line
+    stays where it is.
 
     Returns:
         tuple: (lines kept in this block, lines moved to the next block).
     """
-    start = len(lines)
-    while start > 0 and (not lines[start - 1].strip() or lines[start - 1].lstrip().startswith("#")):
-        start -= 1
-    trailing = lines[start:]
-    first_comment = next(
-        (i for i, line in enumerate(trailing) if line.lstrip().startswith("#")), None
-    )
-    if first_comment is None:
-        return lines, []
-    cut = start + first_comment
+    cut = len(lines)
+    while cut > 0 and _is_comment(lines[cut - 1]):
+        cut -= 1
     return lines[:cut], lines[cut:]
+
+
+def _free_tail(lines):
+    """
+    The part of a block's end that is not about the block itself.
+
+    A block ends with a run of blank and comment lines. Comments touching the
+    block's content belong to it; from the first blank line on, comments are
+    free-floating (for example a commented-out game at the end of the file)
+    and must survive the block's removal.
+
+    Returns:
+        list: Lines to keep when the block is removed, or [] if the free part
+            holds only blank lines.
+    """
+    start = len(lines)
+    while start > 1 and (not lines[start - 1].strip() or _is_comment(lines[start - 1])):
+        start -= 1
+    run = lines[start:]
+    first_blank = next((i for i, line in enumerate(run) if not line.strip()), None)
+    if first_blank is None:
+        return []
+    free = run[first_blank:]
+    return free if any(_is_comment(line) for line in free) else []
 
 
 def _parse_block(lines):
@@ -136,7 +158,7 @@ def _parse_block(lines):
         if (
             len(tokens) >= 3
             and tokens[-2].replace("\\", "/").endswith("launchers/launch_game.py")
-            and _GAME_ID.match(tokens[-1])
+            and _GAME_ID.fullmatch(tokens[-1])
         ):
             block.game_id = tokens[-1]
             block.launch_tokens = tokens
@@ -159,17 +181,27 @@ def load_menu(path):
         GamesConfigError: If the file is not valid UTF-8.
     """
     path = Path(path)
+    text = ""
     if path.exists():
         try:
             text = path.read_bytes().decode("utf-8")
         except UnicodeDecodeError as error:
             raise GamesConfigError(f"{path} is not valid UTF-8; refusing to modify it") from error
+
+    # A byte order mark is kept as its own preamble entry so it cannot hide a
+    # 'game:' line on the first line from the parser.
+    preamble = []
+    if text.startswith("\ufeff"):
+        preamble.append("\ufeff")
+        text = text[1:]
+    if text.strip():
         newline = "\r\n" if "\r\n" in text else "\n"
     else:
+        # Missing, empty or whitespace-only: start from the installer's header.
         newline = os.linesep
         text = MENU_HEADER.replace("\n", newline)
 
-    preamble, blocks, current = [], [], None
+    blocks, current = [], None
     for line in _split_lines(text):
         if _SECTION_START.match(line):
             leading = []
@@ -352,6 +384,9 @@ def remove_game_blocks(menu, game_id):
     """
     Return a copy of the menu without any block for a game.
 
+    Comments that belong to the removed block go with it; free-floating
+    comments at its end (separated by a blank line) are kept in place.
+
     Args:
         menu: The parsed menu.
         game_id: ID of the game.
@@ -360,6 +395,13 @@ def remove_game_blocks(menu, game_id):
         tuple: (MenuDocument, int) — the updated menu and how many blocks were
             removed. The input is not modified.
     """
-    kept = [copy.deepcopy(block) for block in menu.blocks if block.game_id != game_id]
-    removed = len(menu.blocks) - len(kept)
-    return MenuDocument(preamble=list(menu.preamble), blocks=kept, newline=menu.newline), removed
+    preamble, kept, removed = list(menu.preamble), [], 0
+    for block in menu.blocks:
+        if block.game_id != game_id:
+            kept.append(copy.deepcopy(block))
+            continue
+        removed += 1
+        survivors = _free_tail(block.lines)
+        if survivors:
+            (kept[-1].lines if kept else preamble).extend(survivors)
+    return MenuDocument(preamble=preamble, blocks=kept, newline=menu.newline), removed
