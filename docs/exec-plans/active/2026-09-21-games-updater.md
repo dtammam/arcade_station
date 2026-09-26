@@ -3,9 +3,10 @@ plan: games-updater
 harness: v2 · lean
 branch: feature/games-updater
 anchor: spec
-status: Building
-next: Re-engage the same three seat instances for delta review of the r2 fix commit — adversary ALONE first, then qa + security-brief in parallel — until all three approve one sha. MERGE HOLD — stays on this branch until validated on Windows (see Merge hold).
-gate: pending
+status: Gate:APPROVED r3 @c39fca7
+next: MERGE HOLD — gate closed (all three seats approved c39fca7), branch pushed for CI. Awaiting the user's Windows validation (see Windows validation checklist). Do NOT open or merge a PR to main until the user confirms it.
+design: Approved 2026-09-26 @c39fca7
+gate: APPROVED
 ---
 
 # Standalone games updater
@@ -516,15 +517,18 @@ coverage on the new tests: `games_config.py` 94%, `pegasus_menu.py` 97%,
 `games_updater.py` 94%.
 
 **Round 2.** The adversary re-reviewed the r1 fix and **approved round 2 at
-9b27816** (53 mutants, 47 killed; the 6 survivors equivalent or accepted, with
-reasons, including P11). qa and security-brief then reviewed 9b27816 in parallel.
+9b27816** (53 mutants, 47 killed; of the 6 survivors, P11 was accepted, P3',
+N2 and N10 were equivalent or harmless, and two — N6, the umask restore, and
+U11, the `UnicodeError` catch — were correct code that no test pinned). qa and security-brief then reviewed 9b27816 in parallel.
 **security-brief approved round 1 at 9b27816**: no LOW-or-above findings, five
 INFO notes; it had no shell, so its conclusions are reasoned from the code, not
 demonstrated — the measured side is the adversary's and qa's. *Those two
 approvals are recorded here in prose, without the `@` binding, because the fix
 below supersedes them: the checker treats any bound approval line as live, and a
-superseded one would read as stale. Their exact returned lines were the
-standard adversary/security-brief verdict lines for 9b27816.* qa returned:
+superseded one would read as stale. The returned verdicts were adversary —
+approved, round 2, commit 9b27816; and security-brief — approved, round 1,
+commit 9b27816. (Even a quoted verdict line reads as a live marker to the
+checker, so they are paraphrased here.)* qa returned:
 
 - **W1** — a MAME `state` could be cleared (`--clear state`) or set empty
   (`--state ""`); the installer never writes that and `start_mame.ps1:182` would
@@ -587,4 +591,78 @@ coverage on the new tests: `games_config.py` 92%, `pegasus_menu.py` 97%,
   but a long-running process reusing the spine (items 2/3) should import
   `game_id` without shadowing a PyPI `installer` package.
 - `tomli_w>=1.0.0` is unpinned (pre-existing).
+
+**Round 3 — closed.** The same three seat instances re-reviewed the r2 fix
+commit c39fca7 (adversary alone first, then qa and security-brief in parallel):
+
+- **adversary r3** — every r1 guarantee re-measured on the rebuilt temp-file
+  path, failing `os.open`, `fdopen`, `fchmod`, `fsync` and `os.replace` in turn
+  (original byte-identical, no temp left each time); a symlink planted at the
+  first temp name left its victim untouched and the write retried under a new
+  name; umask never read. 69 mutants, 58 killed; survivors equivalent, accepted
+  (P11) or correct-but-untested (U11, and the collision-retry and Windows-chmod
+  branches, A1/A2/A3/A5/A8). The MAME `state` tightening judged not a
+  regression: a hand-edited entry without `state` was already broken at launch,
+  and `update … --state o` repairs it.
+- **qa r2** — both blockers fixed as prescribed and measured; acceptance 1 and
+  4 now met; all nine criteria met. 196 passed, 3 skipped; coverage 92/97/93.
+- **security-brief r2** — INFO-2 and INFO-3 closed (O_EXCL random-name temp,
+  `fchmod` on the handle, umask never called); INFO-1's fix re-assessed against
+  command injection and found clear (copied launch tokens come only from the
+  already-trusted menu file and cannot contain a `"`). Reasoned from the code;
+  no shell.
+
+Gate: APPROVED r3 @c39fca7 — adversary
+
+Gate: APPROVED r2 @c39fca7 — qa
+
+Gate: APPROVED r2 @c39fca7 — security-brief
+
+### Non-blocking follow-ups (from the closing round; not in this branch)
+
+- `_create_temp` runs before the `try`: if `os.fdopen` itself failed, one fd
+  would leak (and on Windows could block deleting the temp). Wrap `fdopen`.
+- Pin the O_EXCL collision/retry loop and the Windows `chmod` branch with tests
+  (adversary A1/A2/A3/A5/A8), and the `UnicodeError` catch in `main` (U11).
+- A permission error creating the temp file surfaces as a bare
+  `PermissionError` (still exit 1 with a clean message), not `GamesConfigError`.
+- The "must not be empty" error for a MAME entry missing `state` should say how
+  to fix it ("pass --state o").
+- `list` column widths are computed before `backslashreplace` escaping, so
+  columns drift on a console that cannot show a name. Cosmetic.
+- **Open decision for the user (qa N2):** `update` re-adds a missing menu block
+  (approved D10), which can list a game twice when its only block is opaque.
+
+## Windows validation checklist (the merge hold)
+
+Run on a real Windows cabinet (or a Windows box with this repo cloned) from the
+repo root, with the Arcade Station venv. **Back up both files first** — they are
+the real, `skip-worktree` config:
+`config\installed_games.toml` and
+`src\pegasus-fe\config\metafiles\metadata.pegasus.txt`.
+
+1. `.venv\Scripts\python.exe src\arcade_station\tools\games_updater.py list`
+   — every configured game appears, MENU `yes` for installer-added games.
+2. `add --name "Updater Test" --path "C:\Windows\System32\notepad.exe"` —
+   then check `metadata.pegasus.txt` is still CRLF throughout (e.g. open in
+   Notepad++ with line endings shown) and the new block's `launch:` lines match
+   the existing blocks'.
+3. Restart Arcade Station: "Updater Test" appears at the end of the menu and
+   launches Notepad from it.
+4. `update updater_test --name "Updater Test 2" --banner "<a real .png>"`, restart:
+   the title and marquee change.
+5. With Arcade Station **running** (so the files may be held open), run an
+   `update` — expect either success or the "may be open in another program or
+   read-only" error, and in the error case both files unchanged and no
+   `.installed_games.toml.*.tmp` / `.metadata.pegasus.txt.*.tmp` left behind.
+6. `add --name "MAME Test" --rom <a ROM you have>`, restart, launch it — MAME
+   starts with save state `o`.
+7. `remove updater_test` and `remove mame_test`, restart: both gone from the
+   menu, every other game still present and launching.
+8. Compare both files against the backups: only the intended blocks/entries
+   differ (comments in `installed_games.toml` are expected to be dropped — see
+   R3).
+
+When this passes, the user lifts the merge hold; then the PR is opened and
+merged and `/release` closes the plan.
 
