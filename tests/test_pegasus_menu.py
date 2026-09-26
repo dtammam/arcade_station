@@ -263,7 +263,7 @@ def load_text(tmp_path, text):
     return pm.load_menu(path)
 
 
-def test_three_token_user_launch_is_opaque(tmp_path):
+def test_four_token_user_launch_is_opaque(tmp_path):
     """A user command whose last token looks like an ID is not ours to remove."""
     text = 'game: Emu\nlaunch: "C:/emu.exe" "-rompath" "roms" "b"\n'
     menu = load_text(tmp_path, text)
@@ -348,3 +348,18 @@ def test_empty_menu_file_gets_the_header(tmp_path):
     """A 0-byte file (e.g. an interrupted install) is treated like a missing one."""
     menu = pm.upsert_game_block(load_text(tmp_path, ""), "a", {"path": "x"})
     assert pm.render(menu).decode().startswith("collection: arcade_station")
+
+
+def test_new_block_copies_the_whole_launch_prefix(tmp_path):
+    """Interpreter options added by hand are carried over, not mangled."""
+    text = f'game: A\nlaunch: \n    "{PY}" \n    "-X" \n    "utf8" \n    "{LAUNCHER}" \n    "a"\n'
+    menu = pm.upsert_game_block(load_text(tmp_path, text), "b", {"path": "x"})
+    new = next(b for b in menu.blocks if b.game_id == "b")
+    assert new.launch_tokens == [PY, "-X", "utf8", LAUNCHER, "b"]
+
+
+def test_rename_replaces_a_multi_line_title(tmp_path):
+    """A title continued onto a second line is replaced whole."""
+    menu = load_text(tmp_path, f"game: Long\n  Title\n{launch('a')}")
+    updated = pm.upsert_game_block(menu, "a", {"display_name": "New", "path": "x"}, changed={"display_name"})
+    assert pm.render(updated).decode().startswith("game: New\nlaunch:")

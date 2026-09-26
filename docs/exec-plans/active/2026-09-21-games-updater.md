@@ -4,7 +4,7 @@ harness: v2 · lean
 branch: feature/games-updater
 anchor: spec
 status: Building
-next: Run the full gate on the build commit — adversary ALONE first (it mutates the tree), then qa + security-brief in parallel. MERGE HOLD — stays on this branch until validated on Windows (see Merge hold).
+next: Re-engage the same three seat instances for delta review of the r2 fix commit — adversary ALONE first, then qa + security-brief in parallel — until all three approve one sha. MERGE HOLD — stays on this branch until validated on Windows (see Merge hold).
 gate: pending
 ---
 
@@ -367,7 +367,7 @@ or an implementation detail.
   `display_name` cannot be a required key in validation: required is `path`
   (binary) or `rom` (MAME). The CLI still requires a name on `add`, because that
   is what the ID is generated from.
-- **R3 — a game entry can be a bare string.** `launch_game.py:212` handles
+- **R3 — a game entry can be a bare string.** `launch_game.py:214` handles
   `game_config` that is not a dict as a path. The installer never writes that
   shape, so any such entry was hand-edited. The updater preserves the data of
   every untouched entry (the whole parsed mapping round-trips; comments and
@@ -514,3 +514,77 @@ fix makes the code do what the plan already claimed):
 After the fix: **181 passed, 3 skipped** (new tests 47 / 45 / 24 = 116);
 coverage on the new tests: `games_config.py` 94%, `pegasus_menu.py` 97%,
 `games_updater.py` 94%.
+
+**Round 2.** The adversary re-reviewed the r1 fix and **approved round 2 at
+9b27816** (53 mutants, 47 killed; the 6 survivors equivalent or accepted, with
+reasons, including P11). qa and security-brief then reviewed 9b27816 in parallel.
+**security-brief approved round 1 at 9b27816**: no LOW-or-above findings, five
+INFO notes; it had no shell, so its conclusions are reasoned from the code, not
+demonstrated — the measured side is the adversary's and qa's. *Those two
+approvals are recorded here in prose, without the `@` binding, because the fix
+below supersedes them: the checker treats any bound approval line as live, and a
+superseded one would read as stale. Their exact returned lines were the
+standard adversary/security-brief verdict lines for 9b27816.* qa returned:
+
+- **W1** — a MAME `state` could be cleared (`--clear state`) or set empty
+  (`--state ""`); the installer never writes that and `start_mame.ps1:182` would
+  get a bare `-state`, so the game would not launch. Acceptance 4 was false.
+- **W2** — acceptance 1's MAME update, CLI remove and `list` row were untested
+  (the code worked when qa ran it by hand; the tests did not prove it).
+- Notes: N1 new blocks copied the wrong interpreter from a launch with extra
+  tokens (also security INFO-1); N2 `update` can append a duplicate menu item
+  when a game's only block is opaque; N3 a multi-line title kept its second
+  line on rename; N4 `sortBy` past `z` (same as the installer); N5 `list` on a
+  Windows cp1252 console; N6 a test named "three-token" used four; N7 one
+  citation off by two; N8 the umask item — judged tech debt, not blocking.
+
+Gate: CHANGES r1 @9b27816 — qa
+
+**r2 fix (Architect), for re-review by all three seats.**
+
+- **qa W1:** MAME entries must carry a non-empty `state` (`validate_entry`);
+  `state` is no longer optional and `--clear` no longer offers it (help text
+  says to change it with `--state`). Tests: empty and blank `state` rejected,
+  clearing rejected in the spine, `--clear state` refused by argparse, and
+  `add --state ""` leaves both files byte-identical.
+- **qa W2:** CLI tests for a MAME `update` (rename, state, banner, checked in
+  both files including the menu block's title and asset lines), a MAME `remove`,
+  `list` showing a `mame` row, `list` with no games, and a bare-string row.
+- **umask (adversary note, security INFO-3, qa N8):** fixed now rather than
+  deferred, since every seat re-reviews this commit anyway. The temp file is
+  created with `os.open(O_CREAT|O_EXCL, 0o666)` under a random name, so the
+  kernel applies the umask and the process umask is never read or changed. A
+  test replaces `os.umask` with one that raises — it fails against 9b27816 and
+  passes now (verified by stashing the fix).
+- **security INFO-2:** a replaced file's permission bits are set with
+  `os.fchmod` on the open handle before close, not by name (by name only on
+  Windows, where `fchmod` does not exist and chmod carries only the read-only
+  flag).
+- **qa N1 / security INFO-1:** a new block copies the whole launch prefix
+  (every token before the ID), so hand-added interpreter options survive.
+- **qa N3:** a rename replaces the whole title value, continuation lines
+  included. **N5:** under `__main__`, stdout/stderr use
+  `errors="backslashreplace"`. **N6** test renamed; **N7** citation corrected.
+- **Adversary r2 note:** the default-game warning reads `default_config.toml`
+  beside the `--file` path as given, not beside a symlink's target (tested).
+- **Not changed, by design:** qa N2 — `update` re-adding a missing menu block is
+  the approved D10 behaviour; if the game's only block is opaque this can list it
+  twice. `list` shows such a game as MENU `no`, which is the tell. Changing it is
+  a user-visible behaviour change, so it is left for the user to decide. qa N4 —
+  `sortBy` past `z` matches the installer's own scheme.
+
+After the fix: **196 passed, 3 skipped** (new tests 52 / 47 / 32 = 131);
+coverage on the new tests: `games_config.py` 92%, `pegasus_menu.py` 97%,
+`games_updater.py` 93%.
+
+### Tech debt recorded by the gate (outside this diff)
+
+- The installer writes wizard `display_name` and `banner` into
+  `metadata.pegasus.txt` (`installation.py:846-951`) with no line-break check —
+  the same injection surface D13 closes here. Item 2 should route its menu
+  writes through `pegasus_menu` / `validate_entry`.
+- `games_config` puts `<repo>/install` first on `sys.path`; harmless for the CLI,
+  but a long-running process reusing the spine (items 2/3) should import
+  `game_id` without shadowing a PyPI `installer` package.
+- `tomli_w>=1.0.0` is unpinned (pre-existing).
+

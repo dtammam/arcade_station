@@ -261,15 +261,21 @@ def _asset_value(entry):
     return banner
 
 
-def _launch_paths(menu, repo_root):
-    """Python and launcher strings: copied from an existing block if possible."""
+def _launch_prefix(menu, repo_root):
+    """
+    The quoted launch tokens that come before the game ID.
+
+    Copied whole from an existing block when there is one, so interpreter
+    options someone added by hand (e.g. "-X" "utf8") are carried over intact.
+    Otherwise the installer's python and launcher paths under repo_root.
+    """
     for block in menu.blocks:
         if block.game_id is not None:
-            return block.launch_tokens[-3], block.launch_tokens[-2]
+            return block.launch_tokens[:-1]
     python = os.path.join(repo_root, ".venv", "Scripts", "pythonw.exe") if os.name == "nt" \
         else os.path.join(repo_root, ".venv", "bin", "python")
     launcher = os.path.join(repo_root, "src", "arcade_station", "launchers", "launch_game.py")
-    return python, launcher
+    return [python, launcher]
 
 
 def _next_sort_key(menu):
@@ -286,16 +292,14 @@ def _next_sort_key(menu):
 def _new_block_lines(menu, game_id, entry, repo_root):
     """Lines for a new block, in the installer's format and the file's newline."""
     title = _title(game_id, entry)
-    python, launcher = _launch_paths(menu, repo_root)
     asset = _asset_value(entry)
     text = (
         f"game: {title}\n"
         f"file: {FILE_PREFIX}{title}\n"
         f"sortBy: {_next_sort_key(menu)}\n"
         "launch: \n"
-        f'    "{python}" \n'
-        f'    "{launcher}" \n'
-        f'    "{game_id}"\n'
+        + "".join(f'    "{token}" \n' for token in _launch_prefix(menu, repo_root))
+        + f'    "{game_id}"\n'
     )
     # The installer ends a binary block with an optional asset line and a blank
     # line pair, and a MAME block with an asset line and one blank line.
@@ -320,11 +324,23 @@ def _rewrite_block(block, game_id, entry, changed, newline):
     lines = list(block.lines)
     if "display_name" in changed:
         title = _title(game_id, entry)
-        for index, line in enumerate(lines):
-            if _GAME_LINE.match(line):
-                lines[index] = f"game: {title}{_ending(line, newline)}"
-            elif _FILE_LINE.match(line):
-                lines[index] = f"file: {FILE_PREFIX}{title}{_ending(line, newline)}"
+        rebuilt, index = [], 0
+        while index < len(lines):
+            line = lines[index]
+            if _GAME_LINE.match(line) or _FILE_LINE.match(line):
+                # Replace the whole value, continuation lines included, or a
+                # multi-line title would keep its old second line.
+                end = _value_lines(lines, index)
+                ending = _ending(lines[end - 1], newline)
+                if _GAME_LINE.match(line):
+                    rebuilt.append(f"game: {title}{ending}")
+                else:
+                    rebuilt.append(f"file: {FILE_PREFIX}{title}{ending}")
+                index = end
+            else:
+                rebuilt.append(line)
+                index += 1
+        lines = rebuilt
     if "banner" in changed:
         asset = _asset_value(entry)
         asset_index = next((i for i, line in enumerate(lines) if _ASSET_LINE.match(line)), None)

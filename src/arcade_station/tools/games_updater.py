@@ -102,8 +102,9 @@ def build_parser():
     update.add_argument("--args", dest="launch_args", help="new launch arguments")
     update.add_argument("--state", help="new MAME save state")
     update.add_argument("--clear", action="append", default=[],
-                        choices=["name", "banner", "args", "state"],
-                        help="remove an optional field (repeatable)")
+                        choices=["name", "banner", "args"],
+                        help="remove an optional field (repeatable); a MAME save state "
+                             "cannot be cleared, only changed with --state")
 
     remove = commands.add_parser("remove", help="remove a game")
     remove.add_argument("game_id", help="ID of the game to remove")
@@ -149,9 +150,9 @@ def _save(games_path, config, menu_path, menu):
         ) from error
 
 
-def _warn_if_default_game(games_path, game_id):
+def _warn_if_default_game(config_dir, game_id):
     """Warn when removing the game Arcade Station launches at startup."""
-    default_config = games_path.parent / "default_config.toml"
+    default_config = config_dir / "default_config.toml"
     try:
         with default_config.open("rb") as handle:
             default_game = tomllib.load(handle).get("default_game", {}).get("default_game")
@@ -237,7 +238,7 @@ def cmd_remove(options):
     print(f"Removed '{options.game_id}'. Restart Arcade Station to update the menu.")
     if not removed:
         print(f"Note: '{options.game_id}' had no menu entry.", file=sys.stderr)
-    _warn_if_default_game(options.file, options.game_id)
+    _warn_if_default_game(options.config_dir, options.game_id)
     return 0
 
 
@@ -255,6 +256,9 @@ def main(argv=None):
         int: 0 on success, 1 on an error (argparse exits with 2 on bad usage).
     """
     options = build_parser().parse_args(argv)
+    # default_config.toml is looked for beside the path as given, even when
+    # that path is a symlink into another directory.
+    options.config_dir = options.file.absolute().parent
     # Resolve symlinks up front so a rollback removes or restores the real file.
     options.file = options.file.resolve()
     options.menu_file = options.menu_file.resolve()
@@ -266,4 +270,11 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # A Windows console or redirected output may use a code page that cannot
+    # show every game name; substitute rather than fail half-way through list.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="backslashreplace")
+        except (AttributeError, ValueError):
+            pass
     sys.exit(main())

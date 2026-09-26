@@ -115,6 +115,7 @@ def test_list_shows_games_and_menu_status(files, capsys):
         ("update", "itgmania"),
         ("update", "itgmania", "--args=-x", "--clear", "args"),
         ("remove", "ghost"),
+        ("add", "--name", "KOF", "--rom", "kof98", "--state", ""),
     ],
 )
 def test_rejected_commands_change_nothing(files, capsys, args):
@@ -236,3 +237,77 @@ def test_list_tolerates_non_string_hand_edited_name(tmp_path, capsys):
     games.write_text('[games.a]\npath = "x"\ndisplay_name = 5\n', encoding="utf-8")
     assert games_updater.main(["--file", str(games), "--menu-file", str(tmp_path / "m.txt"), "list"]) == 0
     assert "5" in capsys.readouterr().out
+
+
+def test_mame_game_update_rename_and_banner_reach_both_files(files):
+    """Acceptance 1: a MAME game is updated through the CLI in both files."""
+    games, menu, run = files
+    assert run("add", "--name", "Metal Slug", "--rom", "mslug") == 0
+    assert run("update", "metal_slug", "--name", "Metal Slug X", "--state", "2",
+               "--banner", "C:\\art\\mslugx.png") == 0
+    assert gc.load_games(games)["games"]["metal_slug"] == {
+        "display_name": "Metal Slug X", "rom": "mslug", "state": "2", "banner": "C:\\art\\mslugx.png",
+    }
+    block = next(b for b in pm.load_menu(menu).blocks if b.game_id == "metal_slug")
+    text = "".join(block.lines)
+    assert text.startswith("game: Metal Slug X\r\n")
+    assert "assets.box_front: C:/art/mslugx.png\r\n" in text
+
+
+def test_mame_game_remove_through_cli(files):
+    """Acceptance 1: a MAME game is removed from both files."""
+    games, menu, run = files
+    assert run("add", "--name", "Metal Slug", "--rom", "mslug") == 0
+    assert run("remove", "metal_slug") == 0
+    assert "metal_slug" not in gc.load_games(games)["games"]
+    assert "metal_slug" not in {b.game_id for b in pm.load_menu(menu).blocks}
+
+
+def test_list_shows_a_mame_row(files, capsys):
+    """Acceptance 1: list shows MAME games with their ROM."""
+    _, _, run = files
+    assert run("add", "--name", "Metal Slug", "--rom", "mslug") == 0
+    capsys.readouterr()
+    assert run("list") == 0
+    row = next(line for line in capsys.readouterr().out.splitlines() if line.startswith("metal_slug"))
+    assert row.split() == ["metal_slug", "mame", "Metal", "Slug", "mslug", "yes"]
+
+
+def test_list_with_no_games(tmp_path, capsys):
+    """An empty games table says so."""
+    code = games_updater.main(["--file", str(tmp_path / "g.toml"), "--menu-file", str(tmp_path / "m.txt"), "list"])
+    assert code == 0 and capsys.readouterr().out.strip() == "No games configured."
+
+
+def test_list_shows_bare_string_entry(tmp_path, capsys):
+    """A hand-edited string entry is listed with its path."""
+    games = tmp_path / "g.toml"
+    games.write_text('[games]\nlegacy = "C:\\\\legacy.exe"\n', encoding="utf-8")
+    assert games_updater.main(["--file", str(games), "--menu-file", str(tmp_path / "m.txt"), "list"]) == 0
+    row = capsys.readouterr().out.splitlines()[1].split()
+    assert row == ["legacy", "string", "C:\\legacy.exe", "no"]
+
+
+def test_mame_state_cannot_be_cleared_from_cli(files):
+    """--clear state is not offered: argparse rejects it."""
+    _, _, run = files
+    with pytest.raises(SystemExit) as exited:
+        run("update", "itgmania", "--clear", "state")
+    assert exited.value.code == 2
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="symlinks need privileges on Windows")
+def test_default_game_warning_looks_beside_the_given_path(tmp_path, capsys):
+    """With installed_games.toml symlinked elsewhere, default_config.toml is read beside the link."""
+    config_dir, elsewhere = tmp_path / "config", tmp_path / "elsewhere"
+    config_dir.mkdir()
+    elsewhere.mkdir()
+    (elsewhere / "games.toml").write_text(GAMES, encoding="utf-8")
+    (config_dir / "installed_games.toml").symlink_to(elsewhere / "games.toml")
+    (config_dir / "default_config.toml").write_text(
+        '[default_game]\ndefault_game = "itgmania"\n', encoding="utf-8")
+    menu = tmp_path / "m.txt"
+    menu.write_bytes(MENU.encode())
+    assert games_updater.main(["--file", str(config_dir / "installed_games.toml"),
+                               "--menu-file", str(menu), "remove", "itgmania"]) == 0
+    assert "default game launched at startup" in capsys.readouterr().err

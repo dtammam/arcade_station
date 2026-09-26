@@ -126,6 +126,8 @@ def test_operations_do_not_modify_their_input(games_file):
         ("ok", {"display_name": "No target"}, "'path' .* must not be empty"),
         ("ok", {"path": "   "}, "'path' .* must not be empty"),
         ("ok", {"rom": ""}, "'rom' .* must not be empty"),
+        ("ok", {"rom": "r", "state": ""}, "'state' .* must not be empty"),
+        ("ok", {"rom": "r", "state": "  "}, "'state' .* must not be empty"),
         ("ok", {"path": "x", "args": ["-a", "-b"]}, "'args' .* must be a string"),
         ("ok", {"path": "x", "state": "o"}, "Unsupported key"),
         ("ok", {"rom": "r", "path": "x"}, "Unsupported key"),
@@ -359,3 +361,35 @@ def test_new_file_follows_umask(tmp_path):
     finally:
         os.umask(old)
     assert path.stat().st_mode & 0o777 == 0o644
+
+
+def test_mame_state_cannot_be_cleared(games_file):
+    """start_mame.ps1 passes -state <value>; an entry without one will not launch."""
+    with pytest.raises(gc.ValidationError, match="required"):
+        gc.update_game(gc.load_games(games_file), "mslug", {"state": None})
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX umask")
+def test_writing_never_changes_the_process_umask(tmp_path):
+    """Other threads may be creating files; the umask must stay as it was."""
+    old = os.umask(0o027)
+    try:
+        path = tmp_path / "installed_games.toml"
+        gc.write_games(path, gc.add_game(gc.load_games(path), "a", {"path": "x"}))
+        gc.write_games(path, gc.add_game(gc.load_games(path), "b", {"path": "y"}))
+    finally:
+        during = os.umask(old)
+    assert during == 0o027
+    assert path.stat().st_mode & 0o777 == 0o640
+
+
+def test_write_path_never_touches_the_umask(tmp_path, monkeypatch):
+    """Changing the umask is process-wide; the write path must not call it at all."""
+    def forbidden(*_args):
+        raise AssertionError("os.umask called")
+
+    monkeypatch.setattr(gc.os, "umask", forbidden)
+    path = tmp_path / "installed_games.toml"
+    gc.write_games(path, gc.add_game(gc.load_games(path), "a", {"path": "x"}))
+    gc.write_games(path, gc.add_game(gc.load_games(path), "b", {"path": "y"}))
+    assert set(gc.load_games(path)["games"]) == {"a", "b"}

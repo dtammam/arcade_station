@@ -25,9 +25,9 @@ config location themselves; callers decide which file is edited.
 import copy
 import math
 import os
+import secrets
 import stat
 import sys
-import tempfile
 import tomllib
 from pathlib import Path
 
@@ -43,7 +43,9 @@ from installer.utils.game_id import generate_game_id, validate_game_id  # pylint
 
 BINARY_KEYS = frozenset({"display_name", "path", "banner", "args"})
 MAME_KEYS = frozenset({"display_name", "rom", "state", "banner"})
-OPTIONAL_KEYS = frozenset({"display_name", "banner", "args", "state"})
+# state is required for MAME: the installer always writes one and start_mame.ps1
+# passes "-state <value>", so an empty value breaks the launch.
+OPTIONAL_KEYS = frozenset({"display_name", "banner", "args"})
 # Keys whose values are also written into the line-based Pegasus menu file.
 MENU_KEYS = ("display_name", "banner")
 DEFAULT_MAME_STATE = "o"
@@ -146,9 +148,10 @@ def validate_entry(game_id, entry, preserved_keys=frozenset()):
                 f"'{key}' for '{game_id}' must be a string, got {type(value).__name__}"
             )
 
-    required = "rom" if kind == "mame" else "path"
-    if not entry.get(required, "").strip():
-        raise ValidationError(f"'{required}' for '{game_id}' must not be empty")
+    required = ("rom", "state") if kind == "mame" else ("path",)
+    for key in required:
+        if not entry.get(key, "").strip():
+            raise ValidationError(f"'{key}' for '{game_id}' must not be empty")
     if "display_name" in entry and not entry["display_name"].strip():
         raise ValidationError(f"'display_name' for '{game_id}' must not be empty")
 
@@ -302,11 +305,29 @@ def _remove_temp(tmp_name):
             pass
 
 
-def _new_file_mode():
-    """Permission bits a newly created file would get under the current umask."""
-    umask = os.umask(0)
-    os.umask(umask)
-    return 0o666 & ~umask
+def _create_temp(path, mode):
+    """
+    Create a new, empty temporary file next to path.
+
+    Opened with O_EXCL under a random name, so it can never be an existing file
+    or a planted symlink.
+
+    Args:
+        path: The file the temporary file will replace.
+        mode: Permission bits requested at creation; the kernel applies the
+            process umask to them, as for any other new file.
+
+    Returns:
+        tuple: (file descriptor, temporary file name).
+    """
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0)
+    for _ in range(100):
+        name = str(path.parent / f".{path.name}.{secrets.token_hex(8)}.tmp")
+        try:
+            return os.open(name, flags, mode), name
+        except FileExistsError:
+            continue
+    raise FileExistsError(f"Could not create a temporary file next to {path}")
 
 
 def atomic_write_bytes(path, data):
@@ -328,16 +349,21 @@ def atomic_write_bytes(path, data):
             because another process has it open).
     """
     path = Path(path).resolve()
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    existing_mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else None
+    # A new file gets the normal umask-filtered permissions without the
+    # process umask ever being changed (other threads may be creating files).
+    # A replacement starts private and then takes the original's bits.
+    fd, tmp_name = _create_temp(path, 0o666 if existing_mode is None else 0o600)
     try:
         with os.fdopen(fd, "wb") as handle:
             handle.write(data)
             handle.flush()
+            if existing_mode is not None and hasattr(os, "fchmod"):
+                os.fchmod(handle.fileno(), existing_mode)
             os.fsync(handle.fileno())
-        # mkstemp creates the file 0600; give it the target's bits, or the
-        # umask default for a new file.
-        mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else _new_file_mode()
-        os.chmod(tmp_name, mode)
+        if existing_mode is not None and not hasattr(os, "fchmod"):
+            # Windows: chmod only carries the read-only flag, set by name.
+            os.chmod(tmp_name, existing_mode)
         os.replace(tmp_name, path)
     except BaseException as error:
         # Cleanup must never replace the error that caused it.
